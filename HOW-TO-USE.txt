@@ -1,0 +1,225 @@
+HOW TO USE FLIGHTSLEUTH
+=======================
+
+Flightsleuth finds cheap flights. You tell it where you want to fly and
+roughly when, and it shows you the cheapest days and flights.
+
+It is a normal window with boxes to fill in and a Search button.
+
+Take your time. You cannot break the computer by clicking the wrong thing.
+If something goes wrong, a small message box tells you what, and you can
+try again.
+
+
+PART 1: GET YOUR FREE KEY (you only do this once)
+=================================================
+
+The flight prices come from a service called SerpApi. It needs to know who
+you are, so it gives you a "key", which is a long jumble of letters and
+numbers that works like a password.
+
+  1. Open your web browser (the program you use to look at websites).
+  2. Go to:  serpapi.com
+  3. Click "Register" and make a free account. You will need an email
+     address. The free account gives you 250 searches every month.
+  4. Once you are signed in, go to:  serpapi.com/manage-api-key
+  5. You will see your key. Click the copy button next to it.
+
+Keep this key private. Do not share it with anyone.
+
+
+PART 2: OPEN FLIGHTSLEUTH
+=========================
+
+  1. On the keyboard, hold down the Windows key (it has the little window
+     symbol, bottom left) and press the E key. A window called
+     File Explorer opens. This is where you look at your files.
+  2. Near the top of that window there is a long bar. Click once on an
+     empty part of it, so the text in it turns blue.
+  3. Type this exactly and press the Enter key:
+
+         C:\claude-code\flightsleuth-app
+
+  4. Find the file named "Start Flightsleuth" and double-click it
+     (click it twice, quickly).
+
+A window with the title "Flightsleuth" opens. That is the app.
+
+The very first time you press Search, a small box asks for your key.
+Click inside the box, hold the Ctrl key and press V to paste the key you
+copied in Part 1, then click OK. It remembers the key from then on.
+(If it never asks, the key was already saved for you.)
+
+
+PART 3: SEARCHING FOR FLIGHTS
+=============================
+
+Fill in the window from top to bottom, then click the Search button.
+
+
+From and To
+-----------
+Every airport has a three-letter code. You type the code, not the city
+name. Some examples:
+
+    JFK = New York (Kennedy)      LAX = Los Angeles
+    ORD = Chicago (O'Hare)        MIA = Miami
+    LHR = London (Heathrow)       CDG = Paris
+
+To find any other code, search the web for the airport's name plus the
+words "airport code".
+
+If a city has several airports, you can list them with commas between,
+like this:  JFK,EWR,LGA   This costs nothing extra and often finds a
+cheaper flight.
+
+
+Round trip or One way
+---------------------
+Click "Round trip" if you are going there and coming back.
+Click "One way" if you are only going there.
+
+
+Leave on, Come back on
+----------------------
+Each date has three little boxes: the month, the day, and the year.
+Click a box and pick from the list that drops down.
+
+"Come back on" turns grey when you choose One way, because it is not needed.
+
+
+Also check ... days earlier and later (the most useful trick)
+-------------------------------------------------------------
+Flying a day or two earlier or later is often much cheaper. Put 2 in this
+box and Flightsleuth checks 2 days before and 2 days after your dates too.
+
+A bigger number checks more days, but uses up more of your 250 monthly
+searches. 2 or 3 is a good choice. Leave it at 0 to check only your exact
+dates.
+
+
+Stops, Cabin, Adults
+--------------------
+Stops    "Nonstop only" leaves out flights where you change planes.
+Cabin    Economy is the normal, cheapest seat.
+Adults   How many people are flying.
+
+You can leave all three alone.
+
+
+Also check whether two one-way tickets are cheaper
+--------------------------------------------------
+Sometimes buying a ticket there and a separate ticket back costs less
+than one round-trip ticket. Tick this box to check. It uses about three
+times as many searches, so only tick it when you are close to booking.
+
+
+Search
+------
+Click Search. Next to the button it says "Searching... 2 of 5" while it
+works. This takes a few seconds for each search. When it says "Done",
+your results are below.
+
+
+PART 4: READING THE RESULTS
+===========================
+
+The big bold line is the answer, for example:
+
+    Cheapest: $455 round trip, Mon 11 Mar - Mon 18 Mar
+
+Under it, a line may say what Google thinks of that price, such as
+"low" (a good deal) or "high" (more than usual for those dates).
+
+
+Cheapest price for each date
+----------------------------
+The first list shows the lowest price for each pair of days. The row
+shaded green is the cheapest.
+
+
+Cheapest flights
+----------------
+The second list shows the actual flights, cheapest first.
+
+    Price     the total cost. For a round trip this covers going AND
+              coming back.
+    Route     which airports
+    Outbound  the day and times of the flight going there. Times use the
+              24-hour clock, so 18:30 means 6:30 in the evening.
+              "+1" means it lands the next day.
+    Return    the day you come back
+    Stops     "nonstop" means no changing planes
+    Time      how long the trip there takes
+    Airline   who flies it
+
+
+Booking the flight
+------------------
+Flightsleuth only FINDS flights. It does not buy them.
+
+To book, click the "Check and book" button under the bold line. Your web
+browser opens on a page showing the same flights, where you can choose
+your return flight and buy the ticket.
+
+Always check the price on that page before you pay. Prices change often,
+and the one Flightsleuth showed may be a few hours old.
+
+
+PART 5: IF SOMETHING GOES WRONG
+===============================
+
+A message box appears when there is a problem. Click OK, fix the problem,
+and press Search again.
+
+"... is not an airport list like JFK"
+    You typed a city name or misspelled a code. Use the three-letter code.
+
+"Fill in both the From and To airports"
+    One of the two boxes at the top is empty.
+
+"... is not a real date"
+    You picked a day that month does not have, like February 31.
+
+"The departure date is in the past"
+    The Leave on date has already happened. Check the year.
+
+"The return date is before the departure date"
+    Come back on must be the same day as Leave on, or later.
+
+"That would use ... searches at once, and the limit is 25"
+    You asked it to check too much in one go. Use a smaller number of
+    days earlier and later, or untick the one-way tickets box.
+
+"... only ... are left this month"
+    You have used up your free searches. They refill next month.
+
+"Invalid API key"
+    The key was not pasted correctly. Click the "SerpApi key..." button
+    next to Search, paste the key again, and click OK.
+
+"Network error"
+    The computer is not connected to the internet. Check your connection
+    and try again.
+
+"No fares found"
+    No flights matched. Try different days, or set Stops back to
+    "Any number of stops".
+
+Nothing opens when you double-click "Start Flightsleuth", or Windows asks
+which program to open it with
+    The computer is missing a free program called Python that Flightsleuth
+    needs. Ask the person who gave you this app to install it for you.
+
+
+QUICK REMINDER CARD
+===================
+
+  1. Windows key + E. Click the bar at the top, type
+     C:\claude-code\flightsleuth-app  and press Enter
+  2. Double-click "Start Flightsleuth"
+  3. Type the airport codes, pick the dates, click Search
+  4. Click "Check and book" to buy the flight in your web browser
+
+(There is also a way to run searches by typing commands. It is described
+in the file named README, for people comfortable with that.)

@@ -1,0 +1,77 @@
+{
+  "search_metadata": {
+    "id": "example",
+    "status": "Success",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&curr=USD&tfs=EXAMPLE"
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "departure_id": "JFK,EWR",
+    "arrival_id": "LHR",
+    "outbound_date": "2030-03-12",
+    "return_date": "2030-03-19"
+  },
+  "best_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {"name": "Newark Liberty International Airport", "id": "EWR", "time": "2030-03-12 18:30"},
+          "arrival_airport": {"name": "Heathrow Airport", "id": "LHR", "time": "2030-03-13 06:40"},
+          "duration": 430,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "travel_class": "Economy",
+          "flight_number": "UA 14"
+        }
+      ],
+      "total_duration": 430,
+      "price": 512,
+      "type": "Round trip",
+      "departure_token": "token-1"
+    }
+  ],
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {"name": "John F. Kennedy International Airport", "id": "JFK", "time": "2030-03-12 20:35"},
+          "arrival_airport": {"name": "Keflavik International Airport", "id": "KEF", "time": "2030-03-13 06:15"},
+          "duration": 340,
+          "airline": "Icelandair",
+          "flight_number": "FI 614"
+        },
+        {
+          "departure_airport": {"name": "Keflavik International Airport", "id": "KEF", "time": "2030-03-13 07:50"},
+          "arrival_airport": {"name": "Heathrow Airport", "id": "LHR", "time": "2030-03-13 11:45"},
+          "duration": 175,
+          "airline": "Icelandair",
+          "flight_number": "FI 450"
+        }
+      ],
+      "layovers": [{"duration": 95, "name": "Keflavik International Airport", "id": "KEF"}],
+      "total_duration": 610,
+      "price": 438,
+      "type": "Round trip",
+      "departure_token": "token-2"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {"name": "John F. Kennedy International Airport", "id": "JFK", "time": "2030-03-12 22:00"},
+          "arrival_airport": {"name": "Heathrow Airport", "id": "LHR", "time": "2030-03-13 10:05"},
+          "duration": 425,
+          "airline": "Virgin Atlantic",
+          "flight_number": "VS 4"
+        }
+      ],
+      "total_duration": 425,
+      "type": "Round trip"
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 438,
+    "price_level": "low",
+    "typical_price_range": [520, 760],
+    "price_history": [[1893456000, 610], [1893542400, 438]]
+  }
+}
