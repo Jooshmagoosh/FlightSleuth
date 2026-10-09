@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from enum import Enum
 
-from ..models import Query, SearchResult
+from ..models import Destination, Explore, Query, SearchResult
 
 
 class Capability(Enum):
@@ -17,6 +17,7 @@ class Capability(Enum):
     RETURN_FLIGHTS = "return_flights"  # the return legs that go with a chosen outbound
     BOOKING_OPTIONS = "booking_options"  # who sells an itinerary, and for how much
     DEEP_LINK = "deep_link"  # a link that opens the same search on the source's own site
+    MARKETS = "markets"  # the same search priced as another country's customers see it
 
 
 class DataClass(Enum):
@@ -35,13 +36,19 @@ class Provider:
     cost_per_call: float  # in the source's own credits; 0 for a free source
     data_class: DataClass
 
-    def cache_key(self, query: Query) -> str:
+    def cache_key(self, query: Query | Explore) -> str:
         """Stable id for one search at this source. Never includes a secret."""
-        blob = json.dumps([self.name, dataclasses.astuple(query)], default=str)
+        blob = json.dumps([self.name, type(query).__name__, dataclasses.astuple(query)], default=str)
         return hashlib.sha256(blob.encode()).hexdigest()
 
-    def search(self, query: Query) -> dict:
-        """Fetch the raw reply for one search. Needed for LIVE_SEARCH."""
+    def search(self, query: Query | Explore) -> dict:
+        """Fetch the raw reply for one call. Needed for LIVE_SEARCH.
+
+        A query carrying a `departure_token` asks for return flights (RETURN_FLIGHTS), one carrying
+        a `booking_token` for sellers (BOOKING_OPTIONS), one naming a `market` for that country's
+        prices (MARKETS), and an `Explore` for destinations (EXPLORE). scan only sends a source
+        what its capabilities cover.
+        """
         raise NotImplementedError
 
     def parse(self, query: Query, raw: dict) -> SearchResult:
@@ -49,6 +56,10 @@ class Provider:
 
         Leave `source`, `fetched_at` and `verified_live` alone: scan stamps them on every offer.
         """
+        raise NotImplementedError
+
+    def destinations(self, trip: Explore, raw: dict) -> tuple[Destination, ...]:
+        """Turn an explore reply into destinations. Needed for EXPLORE. scan stamps these too."""
         raise NotImplementedError
 
     def fetched_at(self, raw: dict) -> datetime | None:

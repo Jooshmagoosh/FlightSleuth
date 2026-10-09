@@ -1,0 +1,45 @@
+{
+  "search_metadata": {
+    "status": "Success",
+    "processed_at": "2026-02-01 10:00:00 UTC"
+  },
+  "search_parameters": {
+    "engine": "google_travel_explore",
+    "departure_id": "EDI"
+  },
+  "destinations": [
+    {
+      "destination_id": "/m/05qtj",
+      "name": "Paris",
+      "country": "France",
+      "destination_airport": {
+        "code": "CDG"
+      },
+      "start_date": "2026-03-05",
+      "end_date": "2026-03-12",
+      "flight_price": 58,
+      "flight_duration": 115,
+      "number_of_stops": 0,
+      "airline": "easyJet",
+      "airline_code": "U2"
+    },
+    {
+      "destination_id": "/m/04jpl",
+      "name": "London",
+      "country": "United Kingdom",
+      "gps_coordinates": {
+        "latitude": 51.5072178,
+        "longitude": -0.1275862
+      },
+      "destination_airport": {
+        "code": "LGW"
+      },
+      "start_date": "2026-03-03",
+      "flight_price": 36,
+      "flight_duration": 70,
+      "number_of_stops": 0,
+      "airline": "easyJet",
+      "airline_code": "U2"
+    }
+  ]
+}

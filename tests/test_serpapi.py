@@ -3,11 +3,22 @@ import json
 import unittest
 import urllib.error
 import urllib.parse
+from dataclasses import replace
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from flightsleuth.models import Query
-from flightsleuth.serpapi import RateLimited, SerpApi, SerpApiError, cache_key, fetched_at, parse, search_params
+from flightsleuth.models import Explore, Query
+from flightsleuth.serpapi import (
+    RateLimited,
+    SerpApi,
+    SerpApiError,
+    cache_key,
+    destinations,
+    explore_params,
+    fetched_at,
+    parse,
+    search_params,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -25,6 +36,9 @@ FIXTURE = recorded("synthetic_roundtrip.json")
 TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
 REAL_TRIP = Query("JFK,EWR", "LHR", date(2026, 12, 8), date(2026, 12, 15))
 REAL_ONE_WAY = Query("LAX", "JFK", date(2026, 12, 8))
+# Hand-written too: the first entry is the example in SerpApi's documentation, the second adds an
+# `end_date`, which the documentation does not show. No real explore reply has been recorded.
+EXPLORE_REPLY = recorded("synthetic_explore.json")
 
 
 class FakeOpener:
@@ -319,6 +333,153 @@ class HttpTest(unittest.TestCase):
         with self.assertRaises(SerpApiError):
             api.search(TRIP)
         self.assertEqual(api.search(TRIP), empty)
+
+    def test_an_explore_search_goes_to_the_explore_engine(self):
+        api, opener, _ = client(EXPLORE_REPLY)
+        self.assertEqual(api.search(Explore("MCO,SFB", area="/m/02j9z", month=3)), EXPLORE_REPLY)
+        sent = urllib.parse.parse_qs(urllib.parse.urlsplit(opener.urls[0]).query)
+        self.assertEqual(sent["engine"], ["google_travel_explore"])
+        self.assertEqual(sent["arrival_area_id"], ["/m/02j9z"])
+
+
+class FollowUpParamsTest(unittest.TestCase):
+    """The extra parameters, each checked against a real request where one was recorded."""
+
+    def test_an_ordinary_search_sends_exactly_what_it_always_did(self):
+        # Saved replies are found by a hash of these, so a new name here would orphan the cache.
+        self.assertEqual(
+            sorted(search_params(TRIP)),
+            sorted(
+                ["engine", "departure_id", "arrival_id", "outbound_date", "return_date", "type", "travel_class"]
+                + ["stops", "adults", "currency", "hl", "sort_by", "show_hidden"]
+            ),
+        )
+
+    def test_return_flights_repeat_the_search_and_add_the_departure_token(self):
+        sent = recorded("roundtrip_return.json")["search_parameters"]
+        params = search_params(REAL_TRIP.follow(departure_token=sent["departure_token"]))
+        self.assertEqual(set(params), set(sent) - {"gl"})
+        for name, value in params.items():
+            self.assertEqual(str(sent[name]).lower(), value.lower(), name)
+
+    def test_booking_options_repeat_the_search_and_add_the_booking_token(self):
+        sent = recorded("roundtrip_booking.json")["search_parameters"]
+        params = search_params(REAL_TRIP.follow(booking_token=sent["booking_token"]))
+        self.assertEqual(set(params), set(sent) - {"gl"})
+        self.assertNotIn("departure_token", params)
+
+    def test_googles_own_order_is_asked_for_by_leaving_sort_by_out(self):
+        sent = recorded("roundtrip_outbound_unsorted.json")["search_parameters"]
+        params = search_params(replace(REAL_TRIP, by_price=False))
+        self.assertNotIn("sort_by", sent)
+        self.assertEqual(set(params), set(sent) - {"gl"})
+
+    def test_serpapi_prices_for_the_united_states_unless_told_otherwise(self):
+        # The code sent no `gl`, and SerpApi reported the one it used.
+        self.assertEqual(recorded("roundtrip_outbound.json")["search_parameters"]["gl"], "us")
+        self.assertNotIn("gl", search_params(REAL_TRIP))
+
+    def test_market_and_bags_are_sent_when_set(self):
+        params = search_params(replace(TRIP, market="gb", bags=1))
+        self.assertEqual((params["gl"], params["bags"]), ("gb", "1"))
+
+    def test_each_follow_up_is_saved_under_its_own_key(self):
+        keys = {
+            cache_key(query)
+            for query in (
+                TRIP,
+                TRIP.follow(departure_token="a"),
+                TRIP.follow(departure_token="b"),
+                TRIP.follow(booking_token="a"),
+                replace(TRIP, market="gb"),
+                replace(TRIP, bags=1),
+                replace(TRIP, by_price=False),
+            )
+        }
+        self.assertEqual(len(keys), 7)
+
+    def test_explore_params(self):
+        params = explore_params(Explore("MCO,SFB", destination="WAW", month=4, duration="two weeks", market="pl"))
+        self.assertEqual(
+            params,
+            {
+                "engine": "google_travel_explore",
+                "departure_id": "MCO,SFB",
+                "arrival_id": "WAW",
+                "month": "4",
+                "travel_duration": "3",
+                "travel_class": "1",
+                "stops": "0",
+                "adults": "1",
+                "currency": "USD",
+                "hl": "en",
+                "gl": "pl",
+            },
+        )
+        self.assertNotEqual(cache_key(Explore("MCO", month=4)), cache_key(Explore("MCO", month=5)))
+
+
+class FollowUpParseTest(unittest.TestCase):
+    """The return flights and the sellers, read out of the real replies."""
+
+    def test_outbound_offers_keep_the_token_that_leads_to_their_return_flights(self):
+        result = parse(REAL_TRIP, recorded("roundtrip_outbound.json"))
+        self.assertTrue(all(offer.departure_token and not offer.booking_token for offer in result.offers))
+        self.assertEqual(len({offer.departure_token for offer in result.offers}), 90)
+
+    def test_the_reply_names_the_countries_at_each_end(self):
+        result = parse(REAL_TRIP, recorded("roundtrip_outbound.json"))
+        self.assertEqual((result.origin_country, result.destination_country), ("US", "GB"))
+
+    def test_return_flights_parse_as_offers_priced_for_the_whole_trip(self):
+        result = parse(REAL_TRIP, recorded("roundtrip_return.json"))
+        self.assertEqual(len(result.offers), 54)
+        cheapest = result.cheapest
+        self.assertEqual(cheapest.price, 695)
+        self.assertEqual((cheapest.origin, cheapest.destination), ("LHR", "EWR"))
+        self.assertEqual([segment.flight_number for segment in cheapest.segments], ["LX 345", "LX 18"])
+        self.assertTrue(cheapest.booking_token)
+        self.assertEqual(cheapest.longest_layover_min, 515)  # 08:40 to 17:15 in Zurich
+
+    def test_booking_options_parse_into_sellers_cheapest_first(self):
+        result = parse(REAL_TRIP, recorded("roundtrip_booking.json"))
+        self.assertEqual(result.offers, ())
+        self.assertEqual(len(result.sellers), 12)
+        cheapest = result.sellers[0]
+        self.assertEqual((cheapest.name, cheapest.price, cheapest.separate_tickets), ("United, SWISS", 694, True))
+        self.assertEqual(cheapest.parts, (("United", 295), ("SWISS", 399)))
+        one_ticket = next(seller for seller in result.sellers if not seller.separate_tickets)
+        self.assertEqual((one_ticket.name, one_ticket.price, one_ticket.airline, one_ticket.parts), ("United", 797, True, ()))
+        agencies = [seller.name for seller in result.sellers if not seller.airline]
+        self.assertEqual(len(agencies), 8)
+        self.assertIn("Booking.com", agencies)
+
+    def test_the_booking_reply_brings_the_price_rating_the_sorted_search_left_out(self):
+        insights = parse(REAL_TRIP, recorded("roundtrip_booking.json")).insights
+        self.assertEqual((insights.lowest_price, insights.level, insights.typical_range), (694, "typical", (540, 1850)))
+
+    def test_one_way_offers_keep_their_booking_token(self):
+        result = parse(REAL_ONE_WAY, recorded("oneway.json"))
+        self.assertTrue(all(offer.booking_token and not offer.departure_token for offer in result.offers))
+
+    def test_documented_explore_reply_parses_into_destinations(self):
+        (london, paris) = destinations(Explore("EDI"), EXPLORE_REPLY)
+        self.assertEqual((london.name, london.country, london.airport), ("London", "United Kingdom", "LGW"))
+        self.assertEqual((london.price, london.start, london.end), (36, date(2026, 3, 3), None))
+        self.assertEqual((london.airline, london.stops, london.duration_min), ("easyJet", 0, 70))
+        self.assertEqual((paris.price, paris.end), (58, date(2026, 3, 12)))
+
+    def test_an_explore_reply_with_only_dates_still_gives_them(self):
+        raw = {"start_date": "2027-04-06", "end_date": "2027-04-20", "best_flights": [{"price": 512}, {"price": 498}]}
+        (place,) = destinations(Explore("MCO", destination="WAW"), raw)
+        self.assertEqual((place.airport, place.price, place.start, place.end), ("WAW", 498, date(2027, 4, 6), date(2027, 4, 20)))
+
+    def test_an_empty_explore_reply_is_no_destinations(self):
+        self.assertEqual(destinations(Explore("MCO"), {"search_metadata": {"status": "Success"}}), ())
+
+    def test_an_unfamiliar_explore_reply_is_reported_not_crashed_on(self):
+        with self.assertRaises(SerpApiError):
+            destinations(Explore("MCO"), {"destinations": [{"start_date": "next week"}]})
 
 
 if __name__ == "__main__":
