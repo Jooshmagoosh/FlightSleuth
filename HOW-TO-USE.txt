@@ -34,13 +34,11 @@ PART 2: OPEN FLIGHTSLEUTH
   1. On the keyboard, hold down the Windows key (it has the little window
      symbol, bottom left) and press the E key. A window called
      File Explorer opens. This is where you look at your files.
-  2. Near the top of that window there is a long bar. Click once on an
-     empty part of it, so the text in it turns blue.
-  3. Type this exactly and press the Enter key:
-
-         C:\claude-code\flightsleuth-app
-
-  4. Find the file named "Start Flightsleuth" and double-click it
+  2. Find the Flightsleuth folder you were given and double-click it to
+     open it. It is often under "Downloads" or "Documents" in the list on
+     the left. If you cannot find it, ask the person who gave it to you
+     where they put it.
+  3. Find the file named "Start Flightsleuth" and double-click it
      (click it twice, quickly).
 
 A window with the title "Flightsleuth" opens. That is the app.
@@ -215,8 +213,7 @@ which program to open it with
 QUICK REMINDER CARD
 ===================
 
-  1. Windows key + E. Click the bar at the top, type
-     C:\claude-code\flightsleuth-app  and press Enter
+  1. Windows key + E, then open the Flightsleuth folder you were given
   2. Double-click "Start Flightsleuth"
   3. Type the airport codes, pick the dates, click Search
   4. Click "Check and book" to buy the flight in your web browser

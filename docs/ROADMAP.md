@@ -2,22 +2,54 @@
 
 One phase per session, one branch per phase. The full brief is [BUILD_PROMPT.md](BUILD_PROMPT.md).
 
-## Phase 1, seams: in progress (branch `phase-1-seams`)
+## Phase 1, seams: built, awaiting review (branch `phase-1-seams`)
 
 Gate: all 65 original tests pass, a fake second provider plugs in through the registry in a new
 test, the mode test passes, and the suite runs clean on a machine without tkinter. Nothing the
 window or the command line shows may change.
 
-- [ ] `CLAUDE.md` and this roadmap
-- [ ] Real SerpApi replies recorded as fixtures; the hand-written one labelled synthetic
-- [ ] `tests/test_gui.py` skips cleanly without tkinter
-- [ ] The per-run cap enforced inside `scan`
-- [ ] `flightsleuth/providers/`: interface, registry, SerpApi adapter; fakes plug in through it
-- [ ] `FLIGHTSLEUTH_MODE`: `hosted` refuses `personal_only` providers
-- [ ] Richer `Offer`: segments, itinerary key, source, fetch time, flags
-- [ ] `history.db`: append-only `price_points` and `provider_calls`
-- [ ] `pyproject.toml` with a `flightsleuth` command and no dependencies
-- [ ] `README.md` and `HOW-TO-USE.txt` brought up to date
+- [x] `CLAUDE.md` and this roadmap
+- [x] Real SerpApi replies recorded as fixtures; the hand-written one labelled synthetic
+- [x] `tests/test_gui.py` skips cleanly without tkinter
+- [x] The per-run cap enforced inside `scan`
+- [x] `flightsleuth/providers/`: interface, registry, SerpApi adapter; fakes plug in through it
+- [x] `FLIGHTSLEUTH_MODE`: `hosted` refuses `personal_only` providers
+- [x] Richer `Offer`: segments, itinerary key, source, fetch time, flags
+- [x] `history.db`: append-only `price_points` and `provider_calls`
+- [x] `pyproject.toml` with a `flightsleuth` command and no dependencies
+- [x] `README.md` and `HOW-TO-USE.txt` brought up to date
+
+Not done in this phase:
+
+- A one-way reply was not recorded. One of the four approved searches went on a `departure_token`
+  that returned no flights, and the chain to the booking options took priority.
+- `pip install -e .` was not run; it would download setuptools. The tests check the file instead.
+
+## Found while recording, for Phase 2 to act on
+
+These come from the real replies in `tests/fixtures`; its README has the detail.
+
+- **The sellers of one round trip cost three billed requests in all**: the search, the return
+  flights, the booking options. That is the two extra the brief assumed. An empty reply is billed too.
+- **A `departure_token` can return no flights.** It happened for the cheapest outbound, so the
+  cross-check step must budget for a wasted call or pick its outbound with care.
+- **The headline round-trip price can be two separate tickets.** The $694 fare was `separate_tickets`;
+  the same flights on one ticket were $797. The catch is only visible in the booking options.
+- **`sort_by=2` replies carry no `price_insights` and no `best_flights`.** So the "Google rates this
+  price" line never appears on a real search today. The booking-options reply did carry
+  `price_insights`, without `price_history`.
+- **No reply marked basic economy or self-transfer.** Those flags need a source that states them.
+- **`price_history` has not been seen in a real reply.** It is parsed and kept on `Insights`, from
+  the documentation's shape only.
+- **`cache.db` never drops expired replies.** They are ignored after six hours but stay on disk,
+  and a real reply is about 200 KB. The owner's file had reached 12 MB by the end of Phase 1.
+
+## Open questions for the owner
+
+- Should Google's `price_history` be written into `history.db`? It was held back because those
+  points carry Google's dates rather than a fetch time of ours, and repeat on every fetch.
+- Should `sort_by=2` stay? It finds the cheapest fares but costs the price rating.
+- Spend one more search on a one-way fixture?
 
 ## Phase 2, smarter search and measurement: not started
 
