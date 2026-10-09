@@ -35,6 +35,7 @@ class Provider:
     capabilities: frozenset[Capability]
     cost_per_call: float  # in the source's own credits; 0 for a free source
     data_class: DataClass
+    default_market = ""  # the country it prices for when a query names none, if that is known
 
     def cache_key(self, query: Query | Explore) -> str:
         """Stable id for one search at this source. Never includes a secret."""

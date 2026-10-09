@@ -175,6 +175,7 @@ class Alternative:
     price: float
     offers: tuple[Offer, ...]  # one itinerary, or the two one-ways of a split
     same_flights: bool | None  # None when there is no confirmed fare to compare with
+    parts: tuple[tuple[str, float], ...] = ()  # (seller, price) of each ticket, when a seller splits them
 
 
 @dataclass(frozen=True)

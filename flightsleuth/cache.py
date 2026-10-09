@@ -40,9 +40,25 @@ class Cache:
     def count(self) -> int:
         return self._db.execute("SELECT COUNT(*) FROM responses").fetchone()[0]
 
+    def prune(self, max_age_s: float, *, now: float | None = None) -> int:
+        """Drop replies too old to be reused, and hand the space back. Returns how many went."""
+        now = time.time() if now is None else now
+        with self._db:
+            removed = self._db.execute("DELETE FROM responses WHERE fetched_at < ?", (now - max_age_s,)).rowcount
+        if removed:
+            self._shrink()
+        return removed
+
     def clear(self) -> int:
         with self._db:
-            return self._db.execute("DELETE FROM responses").rowcount
+            removed = self._db.execute("DELETE FROM responses").rowcount
+        if removed:
+            self._shrink()
+        return removed
+
+    def _shrink(self) -> None:
+        # Deleting rows only marks their pages free, and one reply is 120 to 220 KB.
+        self._db.execute("VACUUM")
 
     def close(self) -> None:
         self._db.close()

@@ -22,6 +22,7 @@ class SerpApiProvider(Provider):
     )
     cost_per_call = 1  # one search credit per request, even when no flights come back
     data_class = DataClass.VENDOR
+    default_market = "us"  # every recorded reply reports `gl: us` for a request that sent none
     client_class = serpapi.SerpApi
 
     def __init__(self):

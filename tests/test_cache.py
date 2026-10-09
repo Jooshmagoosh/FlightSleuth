@@ -39,6 +39,21 @@ class CacheTest(unittest.TestCase):
         self.assertEqual(self.cache.clear(), 2)
         self.assertEqual(self.cache.count(), 0)
 
+    def test_prune_drops_only_what_is_too_old_to_reuse(self):
+        self.cache.put("old", {"price": 1}, now=1000)
+        self.cache.put("new", {"price": 2}, now=5000)
+        self.assertEqual(self.cache.prune(max_age_s=3600, now=5100), 1)
+        self.assertEqual(self.cache.count(), 1)
+        self.assertEqual(self.cache.get("new", max_age_s=3600, now=5100), {"price": 2})
+        self.assertEqual(self.cache.prune(max_age_s=3600, now=5100), 0)
+
+    def test_pruning_gives_the_disk_space_back(self):
+        for index in range(40):
+            self.cache.put(f"k{index}", {"body": "x" * 50_000}, now=1000)
+        before = self.cache.path.stat().st_size
+        self.assertEqual(self.cache.prune(max_age_s=60, now=2000), 40)
+        self.assertLess(self.cache.path.stat().st_size, before / 10)
+
 
 if __name__ == "__main__":
     unittest.main()
