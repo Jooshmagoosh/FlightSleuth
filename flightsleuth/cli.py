@@ -8,7 +8,7 @@ import webbrowser
 from datetime import date
 from pathlib import Path
 
-from . import bakeoff, config, providers, scan
+from . import bakeoff, config, providers, scan, typed
 from .cache import Cache
 from .errors import UserError
 from .models import Explore
@@ -162,6 +162,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     search.add_argument("--top", type=_count, default=10, metavar="N", help="itineraries to list (default: 10)")
     search.add_argument(
+        "--no-record",
+        action="store_true",
+        help="after a round trip, do not ask what price the site to check first showed",
+    )
+    search.add_argument(
         "--max-searches",
         type=_count,
         default=None,
@@ -244,6 +249,17 @@ def plan_line(plan: scan.Plan) -> str:
     return f"Up to {_searches(plan.total)} needed: {', '.join(stages)}. {plan.saved} saved, up to {plan.live} live."
 
 
+def _at_keyboard() -> bool:
+    return sys.stdin is not None and sys.stdin.isatty()
+
+
+def _answer(prompt: str) -> str:
+    try:
+        return input(prompt)
+    except EOFError:  # the keyboard went away: skip, as an empty answer does
+        return ""
+
+
 def _progress():
     """A callback that prints a dot per live search, and a function that ends the line."""
     dots = []
@@ -304,6 +320,7 @@ def cmd_search(args: argparse.Namespace) -> int:
     finally:
         finish()
 
+    step = None
     if not outcome.trips:
         print(NO_FARES)
     else:
@@ -311,8 +328,12 @@ def cmd_search(args: argparse.Namespace) -> int:
             outcome.trips, outcome.results, split=outcome.split, top=args.top, checks=outcome.checks, notes=outcome.notes
         )
         print(render_text(summary, hint="Add --check to look them up, for up to 6 more searches."))
+        step = summary.next_step
     if outcome.searches_left is not None:
         print(f"\nAbout {outcome.searches_left} SerpApi searches left this month.")
+    if step and not args.no_record and _at_keyboard():
+        print()
+        typed.ask_and_record(step, _answer, print)
     return 0
 
 
@@ -374,19 +395,13 @@ def cmd_bakeoff(args: argparse.Namespace) -> int:
     if args.dry_run:
         return 0
 
-    interactive = sys.stdin is not None and sys.stdin.isatty()
+    interactive = _at_keyboard()
     if most and not args.yes:
         if not interactive:
             raise UserError(f"add --yes to spend up to {_searches(most, 'live')}, or --dry-run to see the plan")
         if input(f"Spend up to {_searches(most, 'live')}? Type yes to go on: ").strip().lower() != "yes":
             raise UserError("nothing was spent")
-    def typed(prompt: str) -> str:
-        try:
-            return input(prompt)
-        except EOFError:  # the keyboard went away: skip, as an empty answer does
-            return ""
-
-    ask = typed if interactive and not args.no_manual else None
+    ask = _answer if interactive and not args.no_manual else None
     run = bakeoff.new_run()
     left = None
     stopped = None

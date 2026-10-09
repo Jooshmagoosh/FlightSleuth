@@ -406,6 +406,22 @@ def _next_step(best: DateRow | None, checks: list[Check]) -> NextStep | None:
     )
 
 
+def recorded(step: NextStep, price: float, seller: str, typed_at: datetime) -> str:
+    """What was just kept about a price read on the step's site, and how it compares with the fare of ours."""
+    currency = step.trip.currency
+    there = f"{step.site}: {money(price, currency)}" + (f" from {seller}" if seller else "")
+    gap = round(step.fare.price - price, 2)
+    if gap:
+        versus = f"{money(abs(gap), currency)} {'less' if gap > 0 else 'more'} than"
+    else:
+        versus = "the same as"
+    ours = (
+        f"the {money(step.fare.price, currency)} {'confirmed' if step.confirmed else 'listed'} fare "
+        f"fetched {fetched(step.fare.fetched_at, step.fare.verified_live)}"
+    )
+    return f"Saved. {there}, typed {fetched(typed_at, True)}. That is {versus} {ours}."
+
+
 def summarise(
     trips: list[Query],
     results: dict[Query, SearchResult],

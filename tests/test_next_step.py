@@ -5,7 +5,7 @@ import unittest
 from datetime import date, datetime, timedelta, timezone
 from unittest import mock
 
-from flightsleuth import cli, config, links, scan
+from flightsleuth import cli, config, links, scan, typed
 from flightsleuth.history import History
 from flightsleuth.models import Query
 from flightsleuth.render import UNCONFIRMED, summarise
@@ -20,6 +20,7 @@ ROUND_TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
 FIXED = ("search", "JFK", "LHR", "--depart", "2030-03-12", "--return", "2030-03-19")
 MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
 EMPTY = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+STAMP = r"\d\d \w{3} \d\d:\d\d"  # a time, such as "08 Oct 14:02"
 
 
 class FirstSiteTest(unittest.TestCase):
@@ -268,3 +269,119 @@ class SitePriceTableTest(unittest.TestCase):
         history = History(config.history_path())
         self.addCleanup(history.close)
         self.assertEqual(len(history.price_points()), 1)
+
+
+def at_keyboard(test, *answers):
+    """Sit somebody at the keyboard who types these answers, one to a question. Returns the questions asked."""
+    tty = mock.Mock()
+    tty.isatty.return_value = True
+    test.enterContext(mock.patch("sys.stdin", tty))
+    return test.enterContext(mock.patch("builtins.input", side_effect=list(answers)))
+
+
+class TypedPriceTest(unittest.TestCase):
+    def test_a_price_may_be_typed_with_a_dollar_sign_and_commas(self):
+        for text, amount in (("412", 412), (" $1,234.50 ", 1234.5), ("", None), ("   ", None)):
+            self.assertEqual(typed.price(text), amount, text)
+
+    def test_anything_else_is_not_a_price(self):
+        for text in ("abc", "0", "-5", "nan", "inf", "$", "12 dollars"):
+            with self.assertRaises(ValueError, msg=text):
+                typed.price(text)
+
+    def test_only_y_and_n_are_answers(self):
+        answers = [typed.yes_no(text) for text in ("y", " Yes ", "N", "no", "", "maybe")]
+        self.assertEqual(answers, [True, True, False, False, None, None])
+
+
+class RecordAtTheKeyboardTest(unittest.TestCase):
+    """At the end of a round-trip search the command line asks what Momondo showed, and keeps the answer."""
+
+    setUp = NextStepTest.setUp
+    run_cli = NextStepTest.run_cli
+
+    def test_the_price_the_seller_and_both_answers_are_kept(self):
+        asked = at_keyboard(self, "abc", "$1,234.50", " Mytrip ", "y", "n")
+        out = self.run_cli(*FIXED, "--check")
+        (row,) = site_prices()
+        self.assertEqual(
+            (row["site"], row["price"], row["seller"], row["same_flights"], row["held"]), ("Momondo", 1234.5, "Mytrip", 1, 0)
+        )
+        self.assertEqual((row["our_price"], row["our_confirmed"]), (520, 1))
+        self.assertEqual(
+            [call.args[0] for call in asked.call_args_list],
+            [
+                "USD price you found on Momondo for this fare (Enter to skip): ",
+                "USD price you found on Momondo for this fare (Enter to skip): ",
+                "Who sells it at that price (Enter to skip): ",
+                "Is that the same flights? y, n, or Enter if unsure: ",
+                "Did the seller's payment page show that price? y, n, or Enter if you did not get that far: ",
+            ],
+        )
+        self.assertIn("'abc' is not a price. Type a number such as 412, or press Enter to skip.\n", out)
+        self.assertRegex(
+            out,
+            rf"Saved\. Momondo: \$1,234\.50 from Mytrip, typed {STAMP}\. "
+            rf"That is \$714\.50 more than the \$520 confirmed fare fetched {STAMP}\.\n$",
+        )
+
+    def test_a_price_found_for_a_fare_nobody_confirmed_is_kept_as_that(self):
+        at_keyboard(self, "480", "", "", "")
+        out = self.run_cli(*FIXED)
+        (row,) = site_prices()
+        self.assertEqual(
+            (row["price"], row["seller"], row["same_flights"], row["held"], row["our_confirmed"]), (480, "", None, None, 0)
+        )
+        self.assertRegex(
+            out, rf"Saved\. Momondo: \$480, typed {STAMP}\. That is \$40 less than the \$520 listed fare fetched {STAMP}\.\n$"
+        )
+
+    def test_a_matching_price_is_said_to_be_the_same(self):
+        at_keyboard(self, "520", "", "", "")
+        self.assertRegex(self.run_cli(*FIXED), rf"That is the same as the \$520 listed fare fetched {STAMP}\.\n$")
+
+    def test_a_fare_replayed_from_saved_results_is_said_to_be_saved(self):
+        self.run_cli(*FIXED)
+        at_keyboard(self, "480", "", "", "")
+        self.assertRegex(self.run_cli(*FIXED), rf"the \$520 listed fare fetched {STAMP} \(saved\)\.\n$")
+
+    def test_pressing_enter_skips_it_after_one_question(self):
+        asked = at_keyboard(self, "")
+        out = self.run_cli(*FIXED)
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(site_prices(), [])
+        self.assertNotIn("Saved", out)
+
+    def test_a_keyboard_that_goes_away_is_an_empty_answer(self):
+        asked = at_keyboard(self)
+        asked.side_effect = EOFError
+        self.run_cli(*FIXED)
+        self.assertEqual(asked.call_count, 1)
+        self.assertEqual(site_prices(), [])
+
+    def test_nobody_is_asked_when_no_one_is_at_the_keyboard(self):
+        with mock.patch("builtins.input") as asked:
+            self.run_cli(*FIXED)
+        asked.assert_not_called()
+        self.assertEqual(site_prices(), [])
+
+    def test_no_record_turns_the_question_off(self):
+        asked = at_keyboard(self)
+        self.run_cli(*FIXED, "--no-record")
+        asked.assert_not_called()
+
+    def test_a_one_way_a_dry_run_and_an_empty_result_ask_nothing(self):
+        asked = at_keyboard(self)
+        self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
+        self.run_cli(*FIXED, "--dry-run")
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
+            self.run_cli(*FIXED)
+        asked.assert_not_called()
+
+    def test_recording_sends_no_search_and_logs_no_call(self):
+        at_keyboard(self, "480", "Mytrip", "y", "y")
+        self.run_cli(*FIXED)
+        self.assertEqual(len(FakeSerpApi.searches), 1)
+        history = History(config.history_path())
+        self.addCleanup(history.close)
+        self.assertEqual((len(history.calls()), len(history.price_points()), len(history.site_prices())), (1, 1, 1))
