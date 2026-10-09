@@ -370,14 +370,14 @@ The owner's rulings on the plan, also 2026-10-09:
 
 ### Where the gate stands
 
-- **Met: all existing tests pass.** The suite is 637 tests, 238 of them new. One existing test
+- **Met: all existing tests pass.** The suite is 644 tests, 245 of them new. One existing test
   was changed, with the owner's say-so: `GateTest` now allows `notify.py` beside `serpapi.py`.
 - **Met: the watch logic is tested with a fake clock and fake replies.** `tests/test_watch.py`
   (rules, news, standing, budget), `tests/test_watch_run.py` (the run, on a clock handed to it,
   with a fake ntfy), `tests/test_watch_cli.py` and `WatchWindowTest` in `tests/test_gui.py`. One
   class runs a check over the real unsorted reply in `tests/fixtures`.
 - **Not yet: the test alert reaches the owner's phone.** The owner runs `watch setup` and
-  `watch test-alert`; nobody else sees the topic. Nothing has been sent to ntfy so far.
+  `watch test-alert`; nobody else sees the topic. What has been tried is under "Found while building".
 - **Not yet: one real check runs end to end.** It waits for the step above, because a run with
   no topic checks nothing.
 
@@ -473,6 +473,23 @@ For the owner to confirm or overturn:
 - **The alert uses none of ntfy's tags or priorities.** It is a title, a text and an address.
 - **`scan` gained three things, all off unless asked for**: `Request.look`, `Request.known_empty`
   and `plan(reserve=...)`. `Provider` gained `allowance`.
+
+### Found while building
+
+- **ntfy.sh takes the alert as the code sends it.** On 2026-10-09 the test alert was posted twice
+  to throwaway topics made for the purpose, with no search and without the owner's topic, and
+  read back from the server: title, text and `click` arrived as sent.
+- **A message is not readable the instant it is accepted.** Read back at once, the topic was
+  empty; two seconds later the message was there. This only matters to something that reads a
+  topic back, which flightsleuth does not.
+- **The real account answers as the code expects.** `watch add --dry-run` on the owner's account
+  printed 31 searches left and a reset on Sun 08 Nov, and added nothing.
+- **A one-way's confirmed fare is its listing**, which the closer look reads back from the
+  cache, so it arrived marked as saved. The check had fetched it a moment before. `watch` marks
+  it as fetched now before wording the alert; a test pins that no alert says "(saved)".
+- **The fake clock does not age the cache.** Two checks days apart on the fake clock are
+  milliseconds apart on the cache's. That is what showed that a follow-up could be replayed
+  into an alert, and why follow-ups older than five minutes are now fetched again.
 
 ### Not done
 
