@@ -55,34 +55,96 @@ These come from `tests/fixtures`; its README has the detail.
   and a real search reply takes 120 to 220 KB there. The owner's file had reached 12 MB by the end
   of Phase 1.
 
-## Phase 2, smarter search and measurement: not started
+## Phase 2, smarter search and measurement: built, awaiting review (branch `phase-2-search`)
 
 Gate: the search that costs 455 calls today (91-day window, trips of 5 to 9 nights) dry-runs at
 25 or fewer by default and about 40 with `--thorough`, and the bake-off report runs on the
 owner's route file.
 
-- [ ] Departure window on `Request`; planner strategies reported through `Plan`
-- [ ] Return flights and booking options (seller) through the token chain
-- [ ] `gl` and `bags`; ranking by total cost with the catch stated
-- [ ] `explore` command on `google_travel_explore`
-- [ ] Deep links to other sites, templates in one data file
-- [ ] `flightsleuth bakeoff`
-- [ ] Fetch time shown next to every price; the window brought up to date last
+Where the gate stands:
+
+- **Met:** the 455-pair search dry-runs at exactly 25, and at 40 with `--thorough`. `tests/test_window.py`
+  and `tests/test_commands.py` pin both.
+- **Waiting on the owner:** `bakeoff docs/routes.txt --dry-run` plans the six routes at up to 150
+  live searches, and the report runs on what a bake-off records. The bake-off itself has not been
+  run, because no credits were spent in this phase. Nothing was fetched from SerpApi at all.
+
+- [x] Departure window on `Request`; planner strategies reported through `Plan`
+- [x] Return flights and booking options (seller) through the token chain
+- [x] `gl` and `bags`; ranking by total cost with the catch stated
+- [x] `explore` command on `google_travel_explore` (built from the documentation; see "Not done")
+- [x] Deep links to other sites, templates in one data file
+- [x] `flightsleuth bakeoff`
+- [x] Fetch time shown next to every price; the window brought up to date last
 
 Requirements added after Phase 1:
 
-- [ ] Never present a fare as the cheapest until its return flights have been fetched. If the
+- [x] Never present a fare as the cheapest until its return flights have been fetched. If the
       follow-up is empty, fall through to the next fare and say so. Budget one spare call per
-      cross-check.
-- [ ] Label a fare sold as separate tickets, and show the one-ticket price beside it when the
+      cross-check. (One exception, listed under the decisions below.)
+- [x] Label a fare sold as separate tickets, and show the one-ticket price beside it when the
       booking options give one.
-- [ ] In the bake-off, measure whether `--split` ever beats the fare Google already lists.
-- [ ] Remove expired replies from `cache.db`.
-- [ ] Store `price_history` in its own table, as decided above. Real replies now contain it.
-- [ ] In the bake-off, count how often the cheapest listed fare fails its return-flight lookup,
-      and whether dropping `sort_by` would have avoided it. Decide `sort_by` from that count.
+- [x] In the bake-off, measure whether `--split` ever beats the fare Google already lists.
+- [x] Remove expired replies from `cache.db`.
+- [x] Store `price_history` in its own table, as decided above. Real replies now contain it.
+- [x] In the bake-off, count how often the cheapest listed fare fails its return-flight lookup,
+      and whether dropping `sort_by` would have avoided it.
+- [ ] Decide `sort_by` from that count. Needs the bake-off to have been run.
 - [ ] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
       Google's lowest price, its rating and 61 days of price history.
+
+### Decisions made while building, for the owner to confirm or overturn
+
+- **The closer look is on for `--window` and off for `--depart`.** Turning it on everywhere would
+  add up to six searches to every simple search and change the counts that the existing tests pin.
+  So a fixed-date round trip still prints `Cheapest: $N round trip`, as those tests require, and
+  now prints under it that this is the listed price and how to confirm it. That line is the one
+  place a fare is called the cheapest without its return flights. Making `--check` the default
+  means changing those tests.
+- **The spare return lookup goes to a different airline.** The brief says "the next fare". In the
+  recorded search the ten cheapest fares were all Scandinavian Airlines and the first had no
+  return flights, so the next fare would probably have wasted the spare. The cheaper fares that
+  were skipped are counted and reported as not looked up, and the headline then reads
+  `Cheapest confirmed`.
+- **`auto` never picks the `one-way` or `explore` strategy.** One-way needs to know the market is
+  one where two one-ways cost what a round trip does, which is what the bake-off's split measure
+  is for. Explore is unverified. Both work when asked for by name.
+- **A token is trusted for 60 minutes** (`scan.TOKEN_MINUTES`). Nothing recorded says how long one
+  lasts. An older listing is fetched again before its tokens are followed, and the dry run counts that.
+- **The other market is the destination's country**, read from the reply. A domestic route has
+  none, so its closer look is one search cheaper.
+- **`price_points` gets no row for a search priced with `--bags` or `--market`.** The table has no
+  column for either and a Phase 1 test pins its columns. Phase 4 will want to settle this.
+- **The bake-off gives each route `min(25, budget / routes)` searches and keeps one of them back**
+  for the unsorted probe, which is only made when a lookup fails. Six routes at 150 is 24 + 1 each.
+- **The window shows the closer look in a second tab.** Stacked under the price lists it needed
+  about 1,020 pixels of height.
+
+### Not done
+
+- **Nothing here has run against the live service.** Return flights, booking options and the
+  countries are tested on the recorded replies. `gl`, `bags` and both explore shapes are tested
+  only against the documentation.
+- **`explore` is unverified.** SerpApi's page documents a `destinations` list with a `start_date`
+  per place. It shows no `end_date` and no reply for a single `arrival_id`, which is what the
+  `explore` strategy sends. Two recorded replies, one of each kind, would settle it: two credits.
+- **The four site links were checked once, on 2026-10-08.** Momondo, Skiplagged and Kiwi.com
+  opened the right search. Skyscanner named the right cities and then showed a robot check, so
+  its dates were never seen. `links.json` records this per site.
+- `pip install -e .` has still not been run.
+
+### Found while building
+
+- **SerpApi accepts both `gb` and `uk` for `gl`**, so the country code from a reply can be used as it is.
+- **A `booking_token` request ignores the dates and filters sent with it**, according to the
+  documentation. The code repeats the original search with the token, as the recorded request did.
+- **The booking reply carries `price_insights`**, which the sorted search does not. A confirmed
+  fare therefore gets Google's price rating back for nothing.
+- **Kiwi.com's link is `/deep?from=&to=&departure=&return=`.** The `/search/results/JFK/LHR/...`
+  form opens an empty search.
+- **A sampled window prices about 19 of its pairs.** On a made-up fare landscape with one best
+  pair, refining reached a pair $10 from the best. That says the stages work, not how good the
+  fares it finds on real routes are; the bake-off's baseline is the first real measure of that.
 
 ## Phase 3, second sources: not started
 

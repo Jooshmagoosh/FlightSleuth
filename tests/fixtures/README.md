@@ -3,6 +3,7 @@
 | File | Real? | What it is |
 | --- | --- | --- |
 | `synthetic_roundtrip.json` | **Synthetic** | Hand-written from SerpApi's documentation. Evidence of nothing; kept for the small parser tests built on it. |
+| `synthetic_explore.json` | **Synthetic** | A `google_travel_explore` reply, hand-written. The London entry is the example on SerpApi's documentation page, checked on 2026-10-08; the Paris entry adds an `end_date`, which that page does not show. Evidence of nothing. |
 | `roundtrip_outbound.json` | Real | Round trip JFK,EWR to LHR, 2026-12-08 to 2026-12-15, exactly as `serpapi.search_params` sends it. |
 | `roundtrip_return_empty.json` | Real | Follow-up with the `departure_token` of the cheapest outbound ($646, SK 904 / SK 491 / SK 815). No flights came back. |
 | `roundtrip_return.json` | Real | Follow-up with the `departure_token` of the nonstop UA 14 ($695). |
@@ -48,6 +49,17 @@ repeated the first request's parameters and added the token.
   `overnight`, `ticket_also_sold_by`, `plane_and_crew_by` and `often_delayed_by_over_30_min`.
   Nothing in any reply marks basic economy or self-transfer.
 - **`search_metadata`** has `created_at` and `processed_at` in UTC.
+
+## What has not been recorded
+
+- **No `google_travel_explore` reply.** SerpApi's page documents a `destinations` list whose entries
+  have `start_date`, `flight_price`, `flight_duration`, `number_of_stops`, `airline` and
+  `destination_airport.code`. It shows no `end_date`, and it does not show the reply for a request
+  that names one `arrival_id`. The brief says that reply carries `start_date`, `end_date` and
+  flights; nothing checked here confirms it. The parser reads both shapes and requires neither.
+- **No reply to a request that sent `gl` or `bags`.** Both are documented parameters, and every
+  recorded reply reports `gl: us` for a request that sent none.
+- **How long a token lasts.** The follow-ups here were made within half an hour of the search.
 
 ## Redaction
 

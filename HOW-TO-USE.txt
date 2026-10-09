@@ -96,13 +96,35 @@ searches. 2 or 3 is a good choice. Leave it at 0 to check only your exact
 dates.
 
 
-Stops, Cabin, Adults
---------------------
-Stops    "Nonstop only" leaves out flights where you change planes.
-Cabin    Economy is the normal, cheapest seat.
-Adults   How many people are flying.
+Or search a whole range (when you do not mind which week you go)
+----------------------------------------------------------------
+Tick this box if any day in a long stretch would do, for example
+"some time in March or April, for about a week".
 
-You can leave all three alone.
+  - "Leave on" becomes the FIRST day you could leave.
+  - The date next to the tick box is the LAST day you could leave.
+  - "staying 5 to 9 nights" is how long you want to be away. Change the
+    two numbers to suit.
+
+"Come back on" and "days earlier and later" turn grey, because the range
+replaces them.
+
+However long the range is, this never uses more than 25 searches. It
+tries a spread of days first, then looks more closely around the cheapest
+ones. It also confirms the best fare for you (see "Confirm the best
+fare" below), so that box turns grey too.
+
+
+Stops, Cabin, Adults, Carry-on bags
+-----------------------------------
+Stops           "Nonstop only" leaves out flights where you change planes.
+Cabin           Economy is the normal, cheapest seat.
+Adults          How many people are flying.
+Carry-on bags   Put 1 here if you will bring a bag into the cabin. Every
+                price then includes the bag, so cheap tickets that charge
+                extra for it no longer look cheaper than they are.
+
+You can leave all four alone.
 
 
 Also check whether two one-way tickets are cheaper
@@ -112,11 +134,28 @@ than one round-trip ticket. Tick this box to check. It uses about three
 times as many searches, so only tick it when you are close to booking.
 
 
+Confirm the best fare
+---------------------
+The first price Flightsleuth shows for a round trip is the LISTED price.
+Now and then a listed price turns out to have no flight home at that
+price. Tick this box and Flightsleuth checks: it looks up the flight
+home, finds out who sells the ticket, and compares a few other ways of
+flying the same days.
+
+It uses up to 6 more searches, so tick it when you have found dates you
+like and are close to booking.
+
+
 Search
 ------
 Click Search. Next to the button it says "Searching... 2 of 5" while it
 works. This takes a few seconds for each search. When it says "Done",
 your results are below.
+
+For a whole range, or with "Confirm the best fare" ticked, it says
+"2 of up to 25" instead. It cannot know the exact number until the first
+prices come back, so it tells you the most it could use. It often uses
+fewer.
 
 
 PART 4: READING THE RESULTS
@@ -129,6 +168,27 @@ The big bold line is the answer, for example:
 Under it, a line may say what Google thinks of that price, such as
 "low" (a good deal) or "high" (more than usual for those dates).
 
+The bold line starts in one of three ways:
+
+    Cheapest:            the price was checked, or it is a one-way ticket
+                         and needs no checking.
+    Cheapest confirmed:  this price was checked. Cheaper ones are listed
+                         too, but nobody checked those.
+    Cheapest listed:     nobody could confirm this price. Be careful.
+
+If you did not tick "Confirm the best fare", a line says "This is the
+listed price". That is normal. It means the flight home has not been
+looked up yet. Tick the box and search again before you rely on it.
+
+
+The two tabs
+------------
+Below the buttons are two tabs, like the tabs in a web browser. Click a
+tab's name to see it.
+
+    Prices                         the two lists described next
+    Best fare, looked at closely   what "Confirm the best fare" found
+
 
 Cheapest price for each date
 ----------------------------
@@ -140,6 +200,9 @@ Cheapest flights
 ----------------
 The second list shows the actual flights, cheapest first.
 
+    Fetched   when Flightsleuth got this price. If it says "(saved)",
+              the price comes from an earlier search today and may have
+              changed since. Every list has this column.
     Price     the total cost. For a round trip this covers going AND
               coming back.
     Route     which airports
@@ -152,6 +215,32 @@ The second list shows the actual flights, cheapest first.
     Airline   who flies it
 
 
+Best fare, looked at closely
+----------------------------
+This tab fills in when you ticked "Confirm the best fare" or searched a
+whole range. At the top are the two flights, "out" and "back", with their
+times and flight numbers. If a cheaper price was listed but had no flight
+home, it says so here.
+
+Under that is a list of other ways to fly the same days:
+
+    Price     what it costs that way
+    How       "Buy from ..." is who sells the same ticket.
+              "Two one-way tickets" is a ticket there and a separate
+              ticket back.
+              "As sold in GB" (or another country) is the price shown to
+              buyers in that country.
+    Flights   "same flights" means the very same planes. "different
+              itinerary" means other flights on the same days.
+    Catch     anything to know before buying, such as:
+              "two separate tickets"  if one flight is cancelled, the
+                                      other airline owes you nothing
+              "an agency, not the airline"  a travel website sells it
+              "8h 35m layover"        a long wait between planes
+
+A lower price with a catch is not always the better buy.
+
+
 Booking the flight
 ------------------
 Flightsleuth only FINDS flights. It does not buy them.
@@ -162,6 +251,20 @@ your return flight and buy the ticket.
 
 Always check the price on that page before you pay. Prices change often,
 and the one Flightsleuth showed may be a few hours old.
+
+The buttons after "Same dates on:" open the same days on other travel
+websites, in case one of them is cheaper. Two of them carry a warning in
+their name:
+
+    "lists hidden-city fares"     tickets where you get off at a stop
+                                  and skip the last flight. Airlines
+                                  forbid this, and you cannot check a bag.
+    "lists self-transfer fares"   tickets where you change planes on your
+                                  own, collecting and re-checking your
+                                  bags. If the first flight is late,
+                                  nobody rebooks you.
+
+If you are not sure what those mean, stay with "Check and book".
 
 
 PART 5: IF SOMETHING GOES WRONG
@@ -185,9 +288,19 @@ and press Search again.
 "The return date is before the departure date"
     Come back on must be the same day as Leave on, or later.
 
+"The date window ends before it starts"
+    You ticked "search a whole range", and the last day you could leave
+    is earlier than "Leave on". Swap them, or check the year.
+
+"The most nights is fewer than the fewest nights"
+    The two "staying" numbers are the wrong way round. Put the smaller
+    one first.
+
 "That would use ... searches at once, and the limit is 25"
     You asked it to check too much in one go. Use a smaller number of
-    days earlier and later, or untick the one-way tickets box.
+    days earlier and later, or untick the one-way tickets box or the
+    "Confirm the best fare" box. Or tick "search a whole range", which
+    always stays inside the limit.
 
 "... only ... are left this month"
     You have used up your free searches. They refill next month.
