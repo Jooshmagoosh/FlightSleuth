@@ -13,6 +13,7 @@ except ImportError:
     raise unittest.SkipTest("tkinter is not installed, so the window cannot be tested") from None
 
 from flightsleuth import config, gui
+from flightsleuth.history import History
 from tests.fakes import FakeSerpApi, install
 
 
@@ -32,6 +33,10 @@ class GuiTest(unittest.TestCase):
         except tk.TclError as e:
             self.skipTest(f"no display to open a window on: {e}")
         self.root.withdraw()
+        # No test may put anything on the real clipboard: what the window copies lands in this list.
+        self.copied = []
+        self.root.clipboard_clear = self.copied.clear
+        self.root.clipboard_append = self.copied.append
         self.errors = []
         self.enterContext(
             mock.patch.object(gui.messagebox, "showerror", lambda title, message, **kw: self.errors.append(message))
@@ -321,13 +326,14 @@ class CloserLookWindowTest(unittest.TestCase):
         self.search()
         label, *buttons = self.app._more_links.winfo_children()
         self.assertEqual(label.cget("text"), "Same dates on:")
+        # Since 2026-10-09 a round trip's Momondo button leads the row above; NextStepWindowTest has it.
         self.assertEqual(
             [button.cget("text") for button in buttons],
-            ["Momondo", "Skyscanner", "Skiplagged (lists hidden-city fares)", "Kiwi.com (lists self-transfer fares)"],
+            ["Skyscanner", "Skiplagged (lists hidden-city fares)", "Kiwi.com (lists self-transfer fares)"],
         )
         with mock.patch.object(gui.webbrowser, "open") as opened:
             buttons[0].invoke()
-        opened.assert_called_once_with("https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a")
+        opened.assert_called_once_with("https://www.skyscanner.com/transport/flights/jfk/lhr/300312/300319/")
 
     def test_a_small_range_of_dates_is_priced_in_full_and_its_best_fare_confirmed(self):
         FakeSerpApi.rich = True
@@ -403,6 +409,213 @@ class CloserLookWindowTest(unittest.TestCase):
         self.assertIn("would use 49 searches at once, and the limit is 25", self.errors[0])
         self.assertIn('Unticking "Confirm the best fare" saves up to 4 too.', self.errors[0])
         self.assertEqual(FakeSerpApi.searches, [])
+
+
+MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
+WHY = (
+    "On 8 Oct 2026 Momondo listed the same flights for less on 5 of 6 test routes. "
+    "The two largest savings, $97 and $51, were on long trips."
+)
+FREE = "Checking it on Momondo is a free way to confirm it: it uses none of your searches."
+TIME = r"\d\d \w{3} \d\d:\d\d"
+
+
+def texts(frame):
+    return [widget.cget("text") for widget in frame.winfo_children()]
+
+
+def site_prices():
+    history = History(config.history_path())
+    try:
+        return history.site_prices()
+    finally:
+        history.close()
+
+
+class NextStepWindowTest(unittest.TestCase):
+    """What Phase 3 added to the window: checking the fare on Momondo comes first, and what was found is kept."""
+
+    setUp = GuiTest.setUp
+    tearDown = GuiTest.tearDown
+    search = GuiTest.search
+
+    def one_way(self):
+        self.app.round_trip.set(False)
+        self.app._trip_kind_changed()
+        self.search()
+
+    def test_a_round_trip_leads_with_the_momondo_button(self):
+        self.search()
+        self.assertEqual(
+            texts(self.app._next_buttons), ["Check this fare on Momondo", "Copy the address", "Save the price you found there..."]
+        )
+        with mock.patch.object(gui.webbrowser, "open") as opened:
+            self.app._next_buttons.winfo_children()[0].invoke()
+        opened.assert_called_once_with(MOMONDO)
+
+    def test_it_stands_ahead_of_check_and_book_and_above_the_other_sites(self):
+        self.search()
+        row = self.app._links.master
+        self.assertEqual(row.pack_slaves(), [self.app._next_buttons, self.app._links])
+        self.assertEqual(texts(self.app._links), ["Check and book"])
+        stacked = row.master.pack_slaves()
+        order = [stacked.index(widget) for widget in (row, self.app._next_label, self.app._more_links, self.app.tabs)]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual(len(self.app._more_links.winfo_children()), 4)  # the label and three sites
+
+    def test_a_fare_nobody_looked_up_is_told_that_checking_it_there_is_a_free_way_to_confirm_it(self):
+        self.search()
+        self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
+        # What was there before still says how to confirm it by searching.
+        self.assertIn('Tick "Confirm the best fare" and search again', self.app.notes.get())
+        self.assertEqual(self.app.headline.get(), "Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)")
+
+    def test_a_confirmed_fare_is_given_only_what_was_measured(self):
+        FakeSerpApi.rich = True
+        self.app.confirm.set(True)
+        self.search()
+        self.assertEqual(self.app.headline.get(), "Cheapest: $520 round trip, Tue 12 Mar - Tue 19 Mar")
+        self.assertEqual(self.app.next_text.get(), WHY)
+
+    def test_a_one_way_keeps_its_four_sites_and_gets_no_next_step(self):
+        self.one_way()
+        self.assertEqual(self.app._next_buttons.winfo_manager(), "")
+        self.assertEqual(self.app._next_label.winfo_manager(), "")
+        self.assertEqual(
+            texts(self.app._more_links)[1:],
+            ["Momondo", "Skyscanner", "Skiplagged (lists hidden-city fares)", "Kiwi.com (lists self-transfer fares)"],
+        )
+
+    def test_the_next_step_goes_away_when_the_next_result_has_none(self):
+        self.search()
+        self.assertEqual(self.app._next_buttons.winfo_manager(), "pack")
+        self.one_way()
+        self.assertEqual(self.app._next_buttons.winfo_manager(), "")
+        self.assertEqual(texts(self.app._next_buttons), [])
+        self.app.record_price()
+        self.assertIsNone(self.app._dialog)
+
+    def test_it_goes_away_when_the_next_search_finds_no_fares(self):
+        self.search()
+        self.app.depart.set(date(2030, 3, 13))
+        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: empty):
+            self.search()
+        self.assertEqual(self.app.headline.get(), gui.NO_FARES)
+        self.assertEqual(self.app._next_buttons.winfo_manager(), "")
+        self.app.record_price()
+        self.assertIsNone(self.app._dialog)
+
+    def test_the_address_can_be_copied_for_another_browser(self):
+        self.search()
+        self.copied.append("whatever was there before")
+        with mock.patch.object(gui.webbrowser, "open") as opened:
+            self.app._next_buttons.winfo_children()[1].invoke()
+        self.assertEqual(self.copied, [MOMONDO])
+        opened.assert_not_called()
+        self.assertEqual(self.app.status.get(), "Address copied. Paste it into the address bar of another browser.")
+
+    def open_dialog(self):
+        self.app._next_buttons.winfo_children()[2].invoke()
+        return self.app._dialog
+
+    def test_the_price_found_there_is_typed_into_a_small_window_that_names_the_fare(self):
+        self.search()
+        dialog = self.open_dialog()
+        self.assertEqual(dialog.title(), "The price you found on Momondo")
+        (body,) = dialog.winfo_children()
+        labels = [widget.cget("text") for widget in body.winfo_children() if isinstance(widget, gui.ttk.Label)]
+        self.assertRegex(labels[0], rf"^The fare you are checking:\nTue 12 Mar - Tue 19 Mar: \$520 listed, not confirmed, fetched {TIME}$")
+        self.assertEqual(
+            labels[1:5],
+            [
+                "Price you found on Momondo, in USD",
+                "Who sells it at that price",
+                "Is it the same flights?",
+                "Did the seller's payment page show that price?",
+            ],
+        )
+        self.assertEqual((self.app.found_same.get(), self.app.found_held.get()), ("Not sure", "I did not get that far"))
+        # Asking for it twice does not open a second one.
+        self.assertIs(self.open_dialog(), dialog)
+
+    def test_saving_keeps_the_price_the_seller_and_both_answers(self):
+        self.search()
+        self.open_dialog()
+        self.app.found_price.set(" $1,480.50 ")
+        self.app.found_seller.set(" Mytrip ")
+        self.app.found_same.set("Yes")
+        self.app.found_held.set("No")
+        self.app._save_button.invoke()
+
+        self.assertEqual(self.errors, [])
+        (row,) = site_prices()
+        self.assertEqual(
+            (row["site"], row["price"], row["seller"], row["same_flights"], row["held"]), ("Momondo", 1480.5, "Mytrip", 1, 0)
+        )
+        self.assertEqual((row["origin"], row["destination"], row["depart_date"], row["return_date"]), ("JFK", "LHR", "2030-03-12", "2030-03-19"))
+        self.assertEqual((row["our_price"], row["our_confirmed"]), (520, 0))
+        self.assertIsNone(self.app._dialog)
+        said = self.app.next_text.get().splitlines()
+        self.assertEqual(said[0], f"{FREE} {WHY}")
+        self.assertRegex(
+            said[1],
+            rf"^Saved\. Momondo: \$1,480\.50 from Mytrip, typed {TIME}\. "
+            rf"That is \$960\.50 more than the \$520 listed fare fetched {TIME}\.$",
+        )
+        self.assertEqual(len(FakeSerpApi.searches), 1)  # recording sent nothing
+
+    def test_only_the_price_is_needed_and_a_confirmed_fare_is_kept_as_confirmed(self):
+        FakeSerpApi.rich = True
+        self.app.confirm.set(True)
+        self.search()
+        self.open_dialog()
+        self.app.found_price.set("499")
+        self.app._save_button.invoke()
+        (row,) = site_prices()
+        self.assertEqual((row["price"], row["seller"], row["same_flights"], row["held"]), (499, "", None, None))
+        self.assertEqual((row["our_price"], row["our_confirmed"]), (520, 1))
+        self.assertEqual(row["itinerary_key"], "TA1@2030-03-12T18:30|TA2@2030-03-19T09:00")
+        self.assertRegex(self.app.next_text.get(), rf"That is \$21 less than the \$520 confirmed fare fetched {TIME}\.$")
+
+    def test_something_that_is_not_a_price_is_explained_and_nothing_is_saved(self):
+        self.search()
+        dialog = self.open_dialog()
+        self.app._save_button.invoke()
+        self.app.found_price.set("cheap")
+        self.app._save_button.invoke()
+        self.assertEqual(
+            self.errors,
+            ["Type the price you found first, as a number such as 412", "'cheap' is not a price. Type a number such as 412"],
+        )
+        self.assertEqual(site_prices(), [])
+        self.assertIs(self.app._dialog, dialog)  # still open, to try again
+        self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
+
+    def test_closing_the_small_window_empties_it_for_the_next_price(self):
+        self.search()
+        self.open_dialog()
+        self.app.found_price.set("499")
+        self.app.found_same.set("Yes")
+        self.app._close_dialog()
+        self.assertIsNone(self.app._dialog)
+        self.assertEqual((self.app.found_price.get(), self.app.found_same.get()), ("", "Not sure"))
+        self.assertEqual(site_prices(), [])
+
+    def test_a_new_search_closes_it_and_forgets_what_the_last_one_saved(self):
+        self.search()
+        self.open_dialog()
+        self.app.found_price.set("499")
+        self.app._save_button.invoke()
+        self.open_dialog()
+        self.app.found_price.set("450")
+        self.app.depart.set(date(2030, 3, 13))
+        self.app.back.set(date(2030, 3, 20))
+        self.search()
+        self.assertIsNone(self.app._dialog)
+        self.assertEqual(self.app.found_price.get(), "")
+        self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
+        self.assertEqual(len(site_prices()), 1)
 
 
 if __name__ == "__main__":

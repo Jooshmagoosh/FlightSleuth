@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import calendar
 import queue
+import sqlite3
 import threading
 import tkinter as tk
 import tkinter.font
@@ -10,9 +11,9 @@ import webbrowser
 from datetime import date, timedelta
 from tkinter import messagebox, simpledialog, ttk
 
-from . import config, scan
+from . import config, scan, typed
 from .errors import UserError
-from .render import ALTERNATIVE_HEADERS, NO_FARES, Summary, summarise
+from .render import ALTERNATIVE_HEADERS, NO_FARES, NextStep, Summary, summarise
 
 STOPS = {"Any number of stops": "any", "Nonstop only": "nonstop", "1 stop or fewer": "1", "2 stops or fewer": "2"}
 CABINS = {"Economy": "economy", "Premium economy": "premium", "Business": "business", "First": "first"}
@@ -27,6 +28,12 @@ NOT_LOOKED = (
 )
 KEY_PROMPT = "Paste your SerpApi key here.\nYou can copy it from serpapi.com/manage-api-key"
 BEST_ROW_COLOUR = "#d9f2d9"
+COPY_BUTTON = "Copy the address"
+COPIED = "Address copied. Paste it into the address bar of another browser."
+RECORD_BUTTON = "Save the price you found there..."
+# The two questions that go with a price found on another site, and what each answer is kept as.
+SAME_FLIGHTS = {"Not sure": None, "Yes": True, "No": False}
+HELD = {"I did not get that far": None, "Yes": True, "No": False}
 
 
 def _whole(text: str, name: str, low: int, high: int) -> int:
@@ -85,7 +92,11 @@ class App:
         root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
         # A fixed starting size, so the window does not jump wider when the first results arrive.
         width = max(root.winfo_reqwidth(), self._font.measure("0") * 130)
-        root.geometry(f"{width}x{root.winfo_reqheight()}")
+        # Two lines taller than it asks for, where the screen has the room: a round trip's next step
+        # brings a sentence with it, and the tables should not be what makes way.
+        height = root.winfo_reqheight() + 2 * self._font.metrics("linespace")
+        height = min(height, max(root.winfo_reqheight(), root.winfo_screenheight() - 80))
+        root.geometry(f"{width}x{height}")
         self._poll()
 
     def _build_form(self) -> None:
@@ -207,8 +218,22 @@ class App:
         ttk.Label(results, textvariable=self.headline, font=bold).pack(anchor="w")
         ttk.Label(results, textvariable=self.detail, justify="left").pack(anchor="w")
         ttk.Label(results, textvariable=self.notes, justify="left", wraplength=wide).pack(anchor="w")
-        self._links = ttk.Frame(results)
-        self._links.pack(anchor="w", pady=(4, 2))
+        # What to do next with the best fare. It takes its place above the links only when there is something to do.
+        self._step: NextStep | None = None
+        self._dialog: tk.Toplevel | None = None
+        self.next_text = tk.StringVar()
+        self.found_price = tk.StringVar()
+        self.found_seller = tk.StringVar()
+        self.found_same = tk.StringVar(value=next(iter(SAME_FLIGHTS)))
+        self.found_held = tk.StringVar(value=next(iter(HELD)))
+        # One row of buttons: the next step first, then the booking links. The next step's buttons and
+        # the sentence under them are only packed while a result has one, so they cost no room otherwise.
+        actions = ttk.Frame(results)
+        actions.pack(anchor="w", pady=(4, 2))
+        self._next_buttons = ttk.Frame(actions)
+        self._links = ttk.Frame(actions)
+        self._links.pack(side="left")
+        self._next_label = ttk.Label(results, textvariable=self.next_text, justify="left", wraplength=wide)
         self._more_links = ttk.Frame(results)  # the same dates on other sites
         self._more_links.pack(anchor="w", pady=(0, 8))
 
@@ -363,6 +388,7 @@ class App:
             )
         else:
             self.headline.set(NO_FARES)
+            self._show_next(None)  # the step on show was for the last result's fare
         status = f"Done. Searches used: {outcome.live}. Reused from earlier: {outcome.saved}."
         if outcome.searches_left is not None:
             status += f" About {outcome.searches_left} left this month."
@@ -391,18 +417,19 @@ class App:
             self.closer.set(NOT_LOOKED)
         self.notes.set("\n".join(notes))
 
-        for frame in (self._links, self._more_links):
+        for frame in (self._next_buttons, self._links, self._more_links):
             for old in frame.winfo_children():
                 old.destroy()
+        self._show_next(summary.next_step)
         for text, url in summary.links:
             # The address comes from the API's reply, so only ever hand the browser a web page.
             if url.startswith("https://"):
                 ttk.Button(self._links, text=text, command=lambda url=url: webbrowser.open(url)).pack(
                     side="left", padx=(0, 8)
                 )
-        if summary.more_links:
+        if summary.other_links:
             ttk.Label(self._more_links, text="Same dates on:").pack(side="left", padx=(0, 6))
-        for text, url in summary.more_links:
+        for text, url in summary.other_links:
             ttk.Button(self._more_links, text=text, command=lambda url=url: webbrowser.open(url)).pack(
                 side="left", padx=(0, 8)
             )
@@ -427,12 +454,121 @@ class App:
             fetched=[summary.offer_fetched(offer) for offer in summary.offers],
         )
 
+    def _show_next(self, step: NextStep | None) -> None:
+        """Put the next step above the links, or take it away when the result has none."""
+        self._step = step
+        self._close_dialog()  # whatever was being typed was about the last result
+        if step is None:
+            self._next_buttons.pack_forget()
+            self._next_label.pack_forget()
+            return
+        buttons = (
+            ttk.Button(self._next_buttons, text=step.label, default="active", command=lambda: webbrowser.open(step.url)),
+            ttk.Button(self._next_buttons, text=COPY_BUTTON, command=lambda: self._copy(step.url)),
+            ttk.Button(self._next_buttons, text=RECORD_BUTTON, command=self.record_price),
+        )
+        for button in buttons:
+            button.pack(side="left", padx=(0, 8))
+        self.next_text.set(" ".join(step.lines))
+        self._next_buttons.pack(side="left", before=self._links)
+        self._next_label.pack(anchor="w", pady=(0, 2), before=self._more_links)
+
+    def _copy(self, url: str) -> None:
+        """For opening the page in a browser other than the usual one."""
+        self.root.clipboard_clear()
+        self.root.clipboard_append(url)
+        self.status.set(COPIED)
+
+    def record_price(self) -> None:
+        """Open the small window where the price found on the next step's site is typed in."""
+        step = self._step
+        if step is None:
+            return
+        if self._dialog is not None:
+            self._dialog.lift()
+            return
+        self._dialog = dialog = tk.Toplevel(self.root)
+        dialog.title(f"The price you found on {step.site}")
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+        dialog.protocol("WM_DELETE_WINDOW", self._close_dialog)
+        body = ttk.Frame(dialog, padding=12)
+        body.pack(fill="both", expand=True)
+        ttk.Label(body, text=f"The fare you are checking:\n{step.against}", justify="left").grid(
+            row=0, column=0, columnspan=2, sticky="w", pady=(0, 10)
+        )
+        price = ttk.Entry(body, textvariable=self.found_price, width=12)
+        fields = (
+            (f"Price you found on {step.site}, in {step.trip.currency}", price),
+            ("Who sells it at that price", ttk.Entry(body, textvariable=self.found_seller, width=28)),
+            (
+                "Is it the same flights?",
+                ttk.Combobox(body, textvariable=self.found_same, values=list(SAME_FLIGHTS), width=25, state="readonly"),
+            ),
+            (
+                "Did the seller's payment page show that price?",
+                ttk.Combobox(body, textvariable=self.found_held, values=list(HELD), width=25, state="readonly"),
+            ),
+        )
+        for row, (text, box) in enumerate(fields, 1):
+            ttk.Label(body, text=text).grid(row=row, column=0, sticky="w", padx=(0, 10), pady=3)
+            box.grid(row=row, column=1, sticky="w", pady=3)
+        ttk.Label(body, text="Only the price is needed. Leave the rest if you are not sure.", foreground="gray40").grid(
+            row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0)
+        )
+        buttons = ttk.Frame(body)
+        buttons.grid(row=len(fields) + 2, column=0, columnspan=2, sticky="e", pady=(10, 0))
+        self._save_button = ttk.Button(buttons, text="Save", default="active", command=self.save_found)
+        self._save_button.pack(side="left", padx=(0, 8))
+        ttk.Button(buttons, text="Close", command=self._close_dialog).pack(side="left")
+        dialog.bind("<Return>", lambda event: self.save_found())
+        dialog.bind("<Escape>", lambda event: self._close_dialog())
+        price.focus_set()
+
+    def save_found(self) -> None:
+        """Keep what was typed about the next step's site, and say under the step what was kept."""
+        step = self._step
+        if step is None:
+            return
+        entered = self.found_price.get().strip()
+        try:
+            amount = typed.price(entered)
+        except ValueError:
+            self._fail(f"{entered!r} is not a price. Type a number such as 412", parent=self._dialog)
+            return
+        if amount is None:
+            self._fail("type the price you found first, as a number such as 412", parent=self._dialog)
+            return
+        try:
+            line = typed.record(
+                step,
+                amount,
+                seller=self.found_seller.get(),
+                same_flights=SAME_FLIGHTS[self.found_same.get()],
+                held=HELD[self.found_held.get()],
+            )
+        except (sqlite3.Error, OSError) as e:
+            self._fail(f"that price could not be saved: {e}", parent=self._dialog)
+            return
+        self._close_dialog()
+        self.next_text.set(" ".join(step.lines) + "\n" + line)
+
+    def _close_dialog(self) -> None:
+        """Close the price window, if it is open, and empty its boxes for the next price."""
+        if self._dialog is not None:
+            self._dialog.destroy()
+            self._dialog = None
+        self.found_price.set("")
+        self.found_seller.set("")
+        self.found_same.set(next(iter(SAME_FLIGHTS)))
+        self.found_held.set(next(iter(HELD)))
+
     def _set_busy(self, busy: bool) -> None:
         self.busy = busy
         self._search_button.configure(state="disabled" if busy else "normal")
 
-    def _fail(self, message: str) -> None:
-        messagebox.showerror("Flightsleuth", message[:1].upper() + message[1:], parent=self.root)
+    def _fail(self, message: str, parent: tk.Misc | None = None) -> None:
+        messagebox.showerror("Flightsleuth", message[:1].upper() + message[1:], parent=parent or self.root)
 
 
 def _work(request: scan.Request, post) -> None:

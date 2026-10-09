@@ -153,6 +153,13 @@ class NextStep:
     fare: Offer  # the fare a price found there is set against
     confirmed: bool  # whether that fare's return flights had been fetched
 
+    @property
+    def against(self) -> str:
+        """That fare in a line, with when it was fetched."""
+        state = "confirmed" if self.confirmed else "listed, not confirmed"
+        when = fetched(self.fare.fetched_at, self.fare.verified_live)
+        return f"{_dates(self.trip)}: {money(self.fare.price, self.trip.currency)} {state}, fetched {when}"
+
 
 @dataclass
 class Summary:
