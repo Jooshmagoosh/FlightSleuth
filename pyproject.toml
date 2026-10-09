@@ -16,3 +16,7 @@ flightsleuth = "flightsleuth.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["flightsleuth*"]
+
+[tool.setuptools.package-data]
+# links.json: the address patterns for other sites.
+flightsleuth = ["*.json"]

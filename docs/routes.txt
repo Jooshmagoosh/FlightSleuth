@@ -1,0 +1,10 @@
+# FlightSleuth measurement routes. Most important first; a short run uses the top six.
+# origin airports to destination airports | departure window | trip length
+
+
+MCO,SFB to JFK,EWR,LGA | depart between 2026-11-10 and 2026-12-20 | 2 to 4 nights
+BOS to WAW | depart between 2027-01-10 and 2027-02-28 | 7 to 14 nights
+MCO,SFB to PVG,SHA | depart between 2026-12-01 and 2027-01-20 | 10 to 16 nights
+MCO,SFB to DCA,IAD,BWI | depart between 2026-11-05 and 2026-11-30 | 2 to 4 nights
+BOS to LAX,BUR,SNA,LGB,ONT | depart between 2027-06-15 and 2027-08-15 | 4 to 7 nights
+MCO,SFB to WAW | depart between 2027-04-01 and 2027-05-15 | 7 to 14 nights

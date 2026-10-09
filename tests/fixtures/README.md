@@ -3,6 +3,9 @@
 | File | Real? | What it is |
 | --- | --- | --- |
 | `synthetic_roundtrip.json` | **Synthetic** | Hand-written from SerpApi's documentation. Evidence of nothing; kept for the small parser tests built on it. |
+| `synthetic_explore.json` | **Synthetic** | A `google_travel_explore` reply with a list of places, hand-written. The London entry is the example on SerpApi's documentation page, checked on 2026-10-08; the Paris entry adds an `end_date`, which that page does not show. Evidence of nothing. |
+| `explore_one_place_january.json` | Real | `google_travel_explore`, BOS to WAW, `month=1`, `travel_duration=2` (one week). Fetched by `py -m flightsleuth explore BOS --to WAW --month 1 --length week` and copied out of the cache. |
+| `explore_one_place_february.json` | Real | The same with `month=2`. Together these are the two calls the `explore` strategy sends for the owner's BOS to WAW route. |
 | `roundtrip_outbound.json` | Real | Round trip JFK,EWR to LHR, 2026-12-08 to 2026-12-15, exactly as `serpapi.search_params` sends it. |
 | `roundtrip_return_empty.json` | Real | Follow-up with the `departure_token` of the cheapest outbound ($646, SK 904 / SK 491 / SK 815). No flights came back. |
 | `roundtrip_return.json` | Real | Follow-up with the `departure_token` of the nonstop UA 14 ($695). |
@@ -10,7 +13,7 @@
 | `roundtrip_outbound_unsorted.json` | Real | The same round trip 29 minutes later, with `sort_by` left out. |
 | `oneway.json` | Real | One way LAX to JFK, 2026-12-08, fetched by `py -m flightsleuth search LAX JFK --depart 2026-12-08 --one-way` and copied out of the cache. The first paid search through the Phase 1 code. |
 
-The real replies were recorded on 2026-10-09 between 00:35 and 01:06 UTC, with `engine=google_flights`,
+The Google Flights replies were recorded on 2026-10-09 between 00:35 and 01:06 UTC, with `engine=google_flights`,
 `show_hidden=true`, `hl=en`, `currency=USD`, and `sort_by=2` except where noted. Each follow-up
 repeated the first request's parameters and added the token.
 
@@ -49,8 +52,43 @@ repeated the first request's parameters and added the token.
   Nothing in any reply marks basic economy or self-transfer.
 - **`search_metadata`** has `created_at` and `processed_at` in UTC.
 
+## What the explore replies showed
+
+Recorded on 2026-10-09 at 02:53 and 02:54 UTC, one search credit each (monthly searches left went
+from 168 to 166). Each request named one destination, `arrival_id=WAW`, as the `explore` strategy does.
+
+- **A request for one place gets one pair of dates, and they are usable.** The reply has
+  `start_date`, `end_date`, `flights`, `google_flights_link` and `google_flights_serpapi_link` at
+  the top level, and no `destinations` list. This is what the brief said, and what SerpApi's
+  documentation page does not show.
+- **`month` steers the dates.** `month=1` gave 2027-01-25 to 2027-02-03; `month=2` gave 2027-02-01
+  to 2027-02-10. Each start date is inside the month asked for; the two are a week apart.
+- **"One week" was nine nights both times.** `travel_duration=2` is not seven nights.
+- **`flights` is one entry per airline for those dates**, three or four of them, each with `price`,
+  `airline`, `airline_code`, `number_of_stops`, `duration` and the two airports (`name` and `id`).
+  The cheapest carries `cheapest_flight: true`. There are no flight numbers, times or tokens, so
+  an explore price cannot be matched to an itinerary or followed up; a dated search has to do that.
+- **`duration` is the flight out, in minutes**: 610 to 730 for the others. The cheapest January
+  fare, $611, has 2215, which is 36 hours 55 minutes with one stop. The cheapest price explore
+  gives can belong to a flight nobody would choose.
+- **A joint fare names both airlines** as `"Delta, KLM"` with `airline_code: "multi"`.
+- **`search_metadata` has `google_travel_explore_url`** in place of `google_flights_url`, and the
+  same `processed_at`.
+
+## What has not been recorded
+
+- **No explore reply for a region or for anywhere**, which is what `flightsleuth explore --area`
+  and a bare `flightsleuth explore` send. SerpApi's page documents a `destinations` list whose
+  entries have `start_date`, `flight_price`, `flight_duration`, `number_of_stops`, `airline` and
+  `destination_airport.code`, with no `end_date`. The parser reads that shape from the
+  documentation alone.
+- **No explore reply for several origins or for a weekend or two-week trip.**
+- **No reply to a request that sent `gl` or `bags`.** Both are documented parameters, and every
+  recorded reply reports `gl: us` for a request that sent none.
+- **How long a token lasts.** The follow-ups here were made within half an hour of the search.
+
 ## Redaction
 
 The account path in `search_metadata`'s archive links (`https://serpapi.com/searches/<path>/...`) was
 replaced with `REDACTED`. Nothing else was changed. The files were checked for the API key before
-they were committed.
+they were committed. The two explore replies were treated the same way.

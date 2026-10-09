@@ -1,4 +1,4 @@
-"""SerpApi's Google Flights engine: build the request, fetch it politely, parse the reply."""
+"""SerpApi's Google Flights and Google Travel Explore engines: build the request, fetch it politely, parse the reply."""
 from __future__ import annotations
 
 import hashlib
@@ -8,10 +8,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from .errors import UserError
-from .models import Insights, Offer, Query, SearchResult, Segment
+from .models import Destination, Explore, Insights, Offer, Query, SearchResult, Segment, Seller
 
 SEARCH_URL = "https://serpapi.com/search.json"
 ACCOUNT_URL = "https://serpapi.com/account.json"
@@ -22,6 +22,8 @@ RETRIES = 2
 CABINS = {"economy": "1", "premium": "2", "business": "3", "first": "4"}
 # User-facing names for the most stops allowed, mapped to SerpApi's codes.
 STOPS = {"any": "0", "nonstop": "1", "1": "2", "2": "3"}
+# Trip lengths the explore engine understands, mapped to its codes.
+DURATIONS = {"weekend": "1", "week": "2", "two weeks": "3"}
 
 
 class SerpApiError(UserError):
@@ -51,12 +53,51 @@ def search_params(query: Query) -> dict[str, str]:
         params["return_date"] = query.return_date.isoformat()
     if query.deep:
         params["deep_search"] = "true"
+    # Everything below is sent only when asked for, so an ordinary search keeps the cache key it always had.
+    if not query.by_price:
+        del params["sort_by"]
+    if query.market:
+        params["gl"] = query.market
+    if query.bags:
+        params["bags"] = str(query.bags)
+    # A follow-up repeats the search it came from and adds the token. SerpApi takes one token or the other.
+    if query.booking_token:
+        params["booking_token"] = query.booking_token
+    elif query.departure_token:
+        params["departure_token"] = query.departure_token
     return params
 
 
-def cache_key(query: Query) -> str:
+def explore_params(trip: Explore) -> dict[str, str]:
+    params = {
+        "engine": "google_travel_explore",
+        "departure_id": trip.origin,
+        "month": str(trip.month),
+        "travel_duration": DURATIONS[trip.duration],
+        "travel_class": CABINS[trip.cabin],
+        "stops": STOPS[trip.stops],
+        "adults": str(trip.adults),
+        "currency": trip.currency,
+        "hl": "en",
+    }
+    if trip.destination:
+        params["arrival_id"] = trip.destination
+    if trip.area:
+        params["arrival_area_id"] = trip.area
+    if trip.market:
+        params["gl"] = trip.market
+    if trip.bags:
+        params["bags"] = str(trip.bags)
+    return params
+
+
+def request_params(query: Query | Explore) -> dict[str, str]:
+    return explore_params(query) if isinstance(query, Explore) else search_params(query)
+
+
+def cache_key(query: Query | Explore) -> str:
     """Stable id for a search. Built from the request without the API key."""
-    blob = json.dumps(search_params(query), sort_keys=True)
+    blob = json.dumps(request_params(query), sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
@@ -70,8 +111,8 @@ class SerpApi:
         """Plan and usage numbers. Free: it does not count against the quota."""
         return self._get(ACCOUNT_URL, {})
 
-    def search(self, query: Query) -> dict:
-        raw = self._get(SEARCH_URL, search_params(query))
+    def search(self, query: Query | Explore) -> dict:
+        raw = self._get(SEARCH_URL, request_params(query))
         # A search that found no flights is still a success, with an "error" note; only a
         # search SerpApi could not complete has this status.
         if (raw.get("search_metadata") or {}).get("status") == "Error":
@@ -113,11 +154,18 @@ def _error_message(e: urllib.error.HTTPError) -> str:
 
 
 def parse(query: Query, raw: dict) -> SearchResult:
+    """Offers from a search, the return flights of a follow-up, or the sellers of a booking lookup.
+
+    In a return-flights reply each offer's `segments` are the return flights, and its price is
+    the total for the round trip with the outbound that was chosen.
+    """
     options = (raw.get("best_flights") or []) + (raw.get("other_flights") or [])
     try:
         offers = [_offer(query, option) for option in options if option.get("price") is not None]
         insights = _insights(raw.get("price_insights"))
-    except (KeyError, IndexError, ValueError, TypeError) as e:
+        sellers = [_seller(option) for option in raw.get("booking_options") or []]
+        countries = [_country(raw, side) for side in ("departure", "arrival")]
+    except (KeyError, IndexError, ValueError, TypeError, AttributeError) as e:
         raise SerpApiError(f"unexpected response shape from SerpApi ({e!r})") from None
     offers.sort(key=lambda o: (o.price, o.duration_min))
     return SearchResult(
@@ -125,7 +173,59 @@ def parse(query: Query, raw: dict) -> SearchResult:
         offers=tuple(offers),
         insights=insights,
         url=(raw.get("search_metadata") or {}).get("google_flights_url"),
+        sellers=tuple(sorted((seller for seller in sellers if seller), key=lambda seller: seller.price)),
+        origin_country=countries[0],
+        destination_country=countries[1],
     )
+
+
+def destinations(trip: Explore, raw: dict) -> tuple[Destination, ...]:
+    """What an explore reply suggests, cheapest first. The two kinds of request answer differently.
+
+    A request naming one place gets one pair of dates, `start_date` and `end_date`, and a
+    `flights` list with a price for each airline on those dates: one `Destination` per flight,
+    all sharing the dates. Two recorded replies show this.
+
+    A request naming a region, or nothing, is documented to get a `destinations` list, each
+    entry with its own `start_date` and no end date. No reply of that kind has been recorded.
+    """
+    try:
+        found = [
+            Destination(
+                name=place.get("name") or "",
+                country=place.get("country") or "",
+                airport=(place.get("destination_airport") or {}).get("code") or "",
+                price=place.get("flight_price"),
+                start=_day(place.get("start_date")),
+                end=_day(place.get("end_date")),
+                airline=place.get("airline") or "",
+                stops=place.get("number_of_stops"),
+                duration_min=place.get("flight_duration"),
+            )
+            for place in raw.get("destinations") or []
+        ]
+        start, end = _day(raw.get("start_date")), _day(raw.get("end_date"))
+        if not found and start:
+            # With no flight priced, the dates alone are still worth having.
+            for flight in raw.get("flights") or [{}]:
+                arrival = flight.get("arrival_airport") or {}
+                found.append(
+                    Destination(
+                        name=arrival.get("name") or trip.destination,
+                        country="",
+                        airport=arrival.get("id") or trip.destination,
+                        price=flight.get("price"),
+                        start=start,
+                        end=end,
+                        airline=flight.get("airline") or "",
+                        stops=flight.get("number_of_stops"),
+                        duration_min=flight.get("duration"),
+                        url=raw.get("google_flights_link") or "",
+                    )
+                )
+    except (KeyError, IndexError, ValueError, TypeError, AttributeError) as e:
+        raise SerpApiError(f"unexpected response shape from SerpApi ({e!r})") from None
+    return tuple(sorted(found, key=lambda place: (place.price is None, place.price or 0)))
 
 
 def fetched_at(raw: dict) -> datetime | None:
@@ -137,6 +237,10 @@ def fetched_at(raw: dict) -> datetime | None:
         return None
 
 
+def _day(text: str | None) -> date | None:
+    return date.fromisoformat(text) if text else None
+
+
 def _offer(query: Query, option: dict) -> Offer:
     flights = option["flights"]
     if not flights:
@@ -146,6 +250,8 @@ def _offer(query: Query, option: dict) -> Offer:
         price=option["price"],
         segments=tuple(_segment(flight) for flight in flights),
         duration_min=option.get("total_duration") or sum(flight.get("duration", 0) for flight in flights),
+        departure_token=option.get("departure_token") or "",
+        booking_token=option.get("booking_token") or "",
     )
 
 
@@ -158,6 +264,29 @@ def _segment(flight: dict) -> Segment:
         depart_at=datetime.fromisoformat(flight["departure_airport"]["time"]),
         arrive_at=datetime.fromisoformat(flight["arrival_airport"]["time"]),
     )
+
+
+def _seller(option: dict) -> Seller | None:
+    together = option.get("together") or {}
+    if together.get("price") is None:
+        return None
+    parts = [option[leg] for leg in ("departing", "returning") if option.get(leg)]
+    return Seller(
+        name=together["book_with"],
+        price=together["price"],
+        airline=bool(together.get("airline")),
+        separate_tickets=bool(option.get("separate_tickets")),
+        parts=tuple((part["book_with"], part["price"]) for part in parts if part.get("price") is not None),
+    )
+
+
+def _country(raw: dict, side: str) -> str:
+    """The country on one side of the outbound direction, as a two-letter code, if the reply names it."""
+    for direction in raw.get("airports") or []:
+        for airport in direction.get(side) or []:
+            if airport.get("country_code"):
+                return airport["country_code"]
+    return ""
 
 
 def _insights(raw: dict | None) -> Insights | None:

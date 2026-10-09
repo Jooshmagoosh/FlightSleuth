@@ -1,19 +1,28 @@
-"""SerpApi's Google Flights engine, as a provider."""
+"""SerpApi's Google Flights and Google Travel Explore engines, as a provider."""
 from __future__ import annotations
 
 from datetime import datetime
 
 from .. import config, serpapi
-from ..models import Query, SearchResult
+from ..models import Destination, Explore, Query, SearchResult
 from .base import Capability, DataClass, Provider
 
 
 class SerpApiProvider(Provider):
     name = "serpapi"
-    # What this adapter does today. The API can also return return flights and booking options.
-    capabilities = frozenset({Capability.LIVE_SEARCH, Capability.DEEP_LINK})
+    capabilities = frozenset(
+        {
+            Capability.LIVE_SEARCH,
+            Capability.DEEP_LINK,
+            Capability.RETURN_FLIGHTS,
+            Capability.BOOKING_OPTIONS,
+            Capability.EXPLORE,
+            Capability.MARKETS,
+        }
+    )
     cost_per_call = 1  # one search credit per request, even when no flights come back
     data_class = DataClass.VENDOR
+    default_market = "us"  # every recorded reply reports `gl: us` for a request that sent none
     client_class = serpapi.SerpApi
 
     def __init__(self):
@@ -26,14 +35,17 @@ class SerpApiProvider(Provider):
             self._client = self.client_class(config.load_api_key())
         return self._client
 
-    def cache_key(self, query: Query) -> str:
+    def cache_key(self, query: Query | Explore) -> str:
         return serpapi.cache_key(query)
 
-    def search(self, query: Query) -> dict:
+    def search(self, query: Query | Explore) -> dict:
         return self._connect().search(query)
 
     def parse(self, query: Query, raw: dict) -> SearchResult:
         return serpapi.parse(query, raw)
+
+    def destinations(self, trip: Explore, raw: dict) -> tuple[Destination, ...]:
+        return serpapi.destinations(trip, raw)
 
     def fetched_at(self, raw: dict) -> datetime | None:
         return serpapi.fetched_at(raw)

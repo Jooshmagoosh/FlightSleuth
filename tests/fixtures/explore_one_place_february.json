@@ -1,0 +1,79 @@
+{
+  "search_metadata": {
+    "id": "6ac8575d5c9301c1a5be6b8f",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac8575d5c9301c1a5be6b8f.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac8575d5c9301c1a5be6b8f.md",
+    "created_at": "2026-10-09 02:54:21 UTC",
+    "processed_at": "2026-10-09 02:54:21 UTC",
+    "google_travel_explore_url": "https://www.google.com/travel/explore?hl=en&gl=us&curr=USD&tfs=CBwQAxoVEgoyMDI3LTAyLTAxagcIARIDQk9TGhUSCjIwMjctMDItMTByBwgBEgNCT1NAAUgBcAGCAQsI____________AZgBAbIBCSoHCAESA1dBVw",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac8575d5c9301c1a5be6b8f.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac8575d5c9301c1a5be6b8f.prettify",
+    "total_time_taken": 7.68
+  },
+  "search_parameters": {
+    "engine": "google_travel_explore",
+    "hl": "en",
+    "gl": "us",
+    "departure_id": "BOS",
+    "arrival_id": "WAW",
+    "month": "2",
+    "travel_duration": 2,
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "currency": "USD"
+  },
+  "start_date": "2027-02-01",
+  "end_date": "2027-02-10",
+  "flights": [
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 730,
+      "price": 607,
+      "cheapest_flight": true,
+      "number_of_stops": 1,
+      "airline": "Tap Air Portugal",
+      "airline_code": "TP"
+    },
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 675,
+      "price": 656,
+      "number_of_stops": 1,
+      "airline": "British Airways",
+      "airline_code": "BA"
+    },
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 610,
+      "price": 675,
+      "number_of_stops": 1,
+      "airline": "Lufthansa",
+      "airline_code": "LH"
+    }
+  ],
+  "google_flights_link": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBsQAhoeEgoyMDI3LTAyLTAxagcIARIDQk9TcgcIARIDV0FXGh4SCjIwMjctMDItMTBqBwgBEgNXQVdyBwgBEgNCT1NAAUgBUgNVU0RwAXp0Q2pSSVUzWnNjRU16UjFBdE9WVkJRMUZvYlZGQ1J5MHRMUzB0TFMwdExTMXZhMlZuTkVGQlFVRkJSM0pKVmpKQlIxQk5kRTFCRWd4VVVESXhPSHhVVURFeU1EUWFDd2liMmdNUUFob0RWVk5FT0J4d205b0SYAQGyAQkqBwgBEgNXQVc",
+  "google_flights_serpapi_link": "https://serpapi.com/search.json?adults=1&arrival_id=WAW&currency=USD&deep_search=true&departure_id=BOS&engine=google_flights&gl=us&hl=en&outbound_date=2027-02-01&return_date=2027-02-10&stops=0&travel_class=1"
+}
