@@ -289,8 +289,9 @@ class OtherSitesTest(CommandTest):
     def test_the_best_dates_come_with_a_link_to_each_other_site(self):
         _, out, _ = self.run_cli("search", "jfk,ewr", "LHR,LGW", "--depart", "2030-03-12", "--return", "2030-03-19")
         self.assertIn("Check and book: https://www.google.com/travel/flights?tfs=X", out)
+        # Since 2026-10-09 a round trip's Momondo link leads the others; tests/test_next_step.py has the rest.
         self.assertIn(
-            "Same dates on Momondo: https://www.momondo.com/flight-search/JFK,EWR-LHR,LGW/2030-03-12/2030-03-19?sort=price_a",
+            "Check this fare on Momondo: https://www.momondo.com/flight-search/JFK,EWR-LHR,LGW/2030-03-12/2030-03-19?sort=price_a",
             out,
         )
         self.assertIn("Same dates on Skyscanner: https://www.skyscanner.com/transport/flights/jfk/lhr/300312/300319/", out)

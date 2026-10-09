@@ -1,16 +1,23 @@
+import contextlib
+import io
 import unittest
 from datetime import date
 from unittest import mock
 
-from flightsleuth import links
+from flightsleuth import cli, links, scan
 from flightsleuth.models import Query
-from tests.fakes import install
+from flightsleuth.render import UNCONFIRMED, summarise
+from tests.fakes import FakeSerpApi, install, rich_reply
 
+TODAY = date(2030, 1, 1)
 WHY = (
     "On 8 Oct 2026 Momondo listed the same flights for less on 5 of 6 test routes. "
     "The two largest savings, $97 and $51, were on long trips."
 )
 ROUND_TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
+FIXED = ("search", "JFK", "LHR", "--depart", "2030-03-12", "--return", "2030-03-19")
+MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
+EMPTY = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
 
 
 class FirstSiteTest(unittest.TestCase):
@@ -40,6 +47,121 @@ class FirstSiteTest(unittest.TestCase):
         unmarked = links.sites()[1:]
         with mock.patch.object(links, "sites", lambda: unmarked):
             self.assertIsNone(links.first_site(ROUND_TRIP))
+
+
+def summary(**changes):
+    """One fixed-date round trip, searched and summarised as the front ends do it."""
+    options = {"return_date": date(2030, 3, 19), **changes}
+    outcome = scan.run(scan.plan(scan.Request("JFK", "LHR", date(2030, 3, 12), **options), today=TODAY))
+    return summarise(outcome.trips, outcome.results, split=outcome.split, checks=outcome.checks, notes=outcome.notes)
+
+
+def no_returns(self, query):
+    """Every return lookup comes back empty, so the closer look confirms nothing."""
+    FakeSerpApi.searches.append(query)
+    return EMPTY if query.departure_token else rich_reply(query)
+
+
+class NextStepTest(unittest.TestCase):
+    """After a round trip, checking the fare on Momondo comes ahead of every other link."""
+
+    def setUp(self):
+        install(self)
+        FakeSerpApi.rich = True
+
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = cli.main(list(argv))
+        self.assertEqual(code, 0, err.getvalue())
+        return out.getvalue()
+
+    def test_a_confirmed_fare_is_followed_by_the_momondo_link_and_what_was_measured(self):
+        out = self.run_cli(*FIXED, "--check")
+        self.assertIn("Cheapest: $520 round trip, Tue 12 Mar - Tue 19 Mar\n", out)
+        self.assertIn(f"\nCheck this fare on Momondo: {MOMONDO}\n  {WHY}\nCheck and book: ", out)
+        self.assertNotIn("free way to confirm", out)
+
+    def test_it_comes_before_the_google_link_and_the_other_three_sites(self):
+        out = self.run_cli(*FIXED, "--check")
+        order = [out.index(text) for text in ("Check this fare on Momondo:", "Check and book:", "Same dates on Skyscanner:")]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual(out.count("Same dates on "), 3)
+        self.assertNotIn("Same dates on Momondo", out)
+        self.assertEqual(out.count(MOMONDO), 1)
+
+    def test_a_fare_nobody_looked_up_is_told_that_checking_it_there_is_a_free_way_to_confirm_it(self):
+        out = self.run_cli(*FIXED)
+        self.assertIn("Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)\n", out)
+        self.assertIn(
+            f"Check this fare on Momondo: {MOMONDO}\n"
+            f"  Checking it on Momondo is a free way to confirm it: it uses none of your searches.\n"
+            f"  {WHY}\n",
+            out,
+        )
+        self.assertNotIn("Same dates on Momondo", out)
+
+    def test_so_is_a_fare_the_closer_look_could_not_confirm(self):
+        FakeSerpApi.phantoms = 1
+        with mock.patch.object(FakeSerpApi, "search", no_returns):
+            out = self.run_cli(*FIXED, "--check")
+        self.assertIn("round trip, Tue 12 Mar - Tue 19 Mar (not confirmed)\n", out)
+        self.assertIn("  Checking it on Momondo is a free way to confirm it", out)
+
+    def test_the_headline_does_not_change_because_of_it(self):
+        # Only fetched return flights may turn "Cheapest listed" into "Cheapest".
+        self.assertEqual(summary().headline, "Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)")
+        self.assertEqual(summary().caveat, UNCONFIRMED)
+
+    def test_a_one_way_stays_as_it_was(self):
+        out = self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
+        self.assertNotIn("Check this fare", out)
+        self.assertIn("Same dates on Momondo: https://www.momondo.com/flight-search/JFK-LHR/2030-03-12?sort=price_a", out)
+        self.assertEqual(out.count("Same dates on "), 4)
+
+    def test_so_do_two_one_way_tickets_that_beat_the_round_trip(self):
+        FakeSerpApi.rich = False  # the plain fake prices a one-way at 200 and this round trip at 520
+        out = self.run_cli(*FIXED, "--split")
+        self.assertIn("Cheapest: $400 as two one-way tickets", out)
+        self.assertNotIn("Check this fare", out)
+        self.assertEqual(out.count("Same dates on "), 4)
+
+    def test_no_fares_means_no_next_step(self):
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
+            out = self.run_cli(*FIXED)
+        self.assertNotIn("Momondo", out)
+
+    def test_what_the_link_cannot_carry_is_named_so_like_is_compared_with_like(self):
+        out = self.run_cli(*FIXED, "--adults", "2", "--cabin", "business", "--stops", "1", "--bags", "1")
+        self.assertIn(
+            "  The link carries only the airports and dates. Set the page to 2 adults, business class, "
+            "1 stop or fewer, 1 carry-on bag in the price before comparing prices.\n",
+            out,
+        )
+        self.assertNotIn("The link carries only", self.run_cli(*FIXED, "--fresh"))
+
+    def test_the_step_knows_which_fare_a_price_found_there_is_set_against(self):
+        listed = summary().next_step
+        self.assertEqual((listed.site, listed.label, listed.url), ("Momondo", "Check this fare on Momondo", MOMONDO))
+        self.assertEqual((listed.fare.price, listed.fare.return_segments, listed.confirmed), (520, None, False))
+        self.assertEqual(listed.trip, Query("JFK", "LHR", date(2030, 3, 12), date(2030, 3, 19)))
+
+        held = summary(check=True).next_step
+        self.assertEqual((held.fare.price, held.confirmed), (520, True))
+        self.assertEqual([segment.flight_number for segment in held.fare.return_segments], ["TA 2"])
+
+    def test_it_is_set_against_the_fare_the_headline_names_when_a_cheaper_one_is_only_listed(self):
+        FakeSerpApi.return_surcharge = 45
+        found = summary(check=True)
+        self.assertEqual(found.headline, "Cheapest confirmed: $565 round trip, Tue 12 Mar - Tue 19 Mar")
+        self.assertEqual((found.next_step.fare.price, found.next_step.confirmed), (565, True))
+
+    def test_a_site_marked_first_keeps_its_warning_on_the_link(self):
+        risky = tuple({**site, "why_first": "measured"} if site["name"] == "Skiplagged" else site for site in links.sites()[1:])
+        with mock.patch.object(links, "sites", lambda: risky):
+            out = self.run_cli(*FIXED)
+        self.assertIn("Check this fare on Skiplagged (lists hidden-city fares): https://skiplagged.com/flights/JFK/LHR/", out)
+        self.assertNotIn("Same dates on Skiplagged", out)
 
 
 if __name__ == "__main__":

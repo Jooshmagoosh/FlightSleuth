@@ -10,6 +10,9 @@ from .planner import one_way_legs
 
 NO_FARES = "No fares found. Try other dates, more airports, or fewer filters."
 UNCONFIRMED = "This is the listed price: its return flights have not been looked up."
+NEXT_STEP = "Check this fare on {site}"
+FREE_CHECK = "Checking it on {site} is a free way to confirm it: it uses none of your searches."
+UNSENT = "The link carries only the airports and dates. Set the page to {what} before comparing prices."
 LONG_LAYOVER_MIN = 5 * 60
 SELLERS_SHOWN = 3
 ALTERNATIVE_HEADERS = ["Price", "How", "Flights", "Catch", "Fetched"]
@@ -139,6 +142,19 @@ class Closer:
 
 
 @dataclass
+class NextStep:
+    """What to do next with the best fare: look it up on the site that has most often listed it for less."""
+
+    site: str  # as it is recorded, such as "Momondo"
+    label: str  # the words on the link
+    url: str
+    lines: list[str]  # why, and what to set on the page first
+    trip: Query
+    fare: Offer  # the fare a price found there is set against
+    confirmed: bool  # whether that fare's return flights had been fetched
+
+
+@dataclass
 class Summary:
     """Everything worth showing about a scan, already worded but not yet laid out."""
 
@@ -154,6 +170,12 @@ class Summary:
     checks: list[Check] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)  # what the search decided along the way
     more_links: list[tuple[str, str]] = field(default_factory=list)  # the best dates on other sites
+    next_step: NextStep | None = None  # the one of those sites to open first, for a round trip
+
+    @property
+    def other_links(self) -> list[tuple[str, str]]:
+        """The other sites' links, less the one the next step already offers."""
+        return [link for link in self.more_links if not self.next_step or link[1] != self.next_step.url]
 
     @property
     def check(self) -> Check | None:
@@ -346,6 +368,44 @@ def _insight(insights: Insights | None, currency: str) -> str | None:
     return note + "."
 
 
+def _unsent(trip: Query) -> list[str]:
+    """What a search asked for that a link to another site does not carry."""
+    asked = []
+    if trip.adults != 1:
+        asked.append(f"{trip.adults} adults")
+    if trip.cabin != "economy":
+        asked.append("premium economy" if trip.cabin == "premium" else f"{trip.cabin} class")
+    if trip.stops != "any":
+        asked.append("nonstop only" if trip.stops == "nonstop" else f"{stops(int(trip.stops))} or fewer")
+    if trip.bags:
+        asked.append(f"{trip.bags} carry-on bag{'s' if trip.bags != 1 else ''} in the price")
+    return asked
+
+
+def _next_step(best: DateRow | None, checks: list[Check]) -> NextStep | None:
+    """Offered for a round trip sold as one ticket. A one-way's link to that site has never been checked."""
+    if best is None or best.whole is None or best.trip.return_date is None or best.split_wins:
+        return None
+    first = links.first_site(best.trip)
+    if first is None:
+        return None
+    check = next((check for check in checks if check.trip == best.trip), None)
+    confirmed = check.confirmed if check else None
+    lines = [first.why] if confirmed else [FREE_CHECK.format(site=first.name), first.why]
+    asked = _unsent(best.trip)
+    if asked:
+        lines.append(UNSENT.format(what=", ".join(asked)))
+    return NextStep(
+        site=first.name,
+        label=NEXT_STEP.format(site=first.label),
+        url=first.url,
+        lines=lines,
+        trip=best.trip,
+        fare=confirmed or best.whole,
+        confirmed=confirmed is not None,
+    )
+
+
 def summarise(
     trips: list[Query],
     results: dict[Query, SearchResult],
@@ -397,6 +457,7 @@ def summarise(
         checks=list(checks or []),
         notes=list(notes or []),
         more_links=links.other_sites(best.trip) if best else [],
+        next_step=_next_step(best, list(checks or [])),
     )
 
 
@@ -450,8 +511,11 @@ def render_text(summary: Summary, *, hint: str = "") -> str:
     if summary.notes:
         lines += ["", *summary.notes]
     lines += [""] if summary.closer or summary.notes else []
+    if summary.next_step:
+        lines += [f"{summary.next_step.label}: {summary.next_step.url}"]
+        lines += ["  " + line for line in summary.next_step.lines]
     lines += [f"{label}: {url}" for label, url in summary.links]
-    lines += [f"Same dates on {label}: {url}" for label, url in summary.more_links]
+    lines += [f"Same dates on {label}: {url}" for label, url in summary.other_links]
     return "\n".join(lines)
 
 
