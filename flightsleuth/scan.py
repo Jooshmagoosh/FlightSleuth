@@ -21,6 +21,9 @@ THOROUGH_MAX_SEARCHES = 40
 DEFAULT_MAX_AGE_HOURS = 6
 WORKERS = 3
 STRATEGIES = ("auto", "grid", "sampled", "one-way", "explore")
+# "full" confirms the best fare and sets other ways to fly beside it. "confirm" stops after the
+# return flights and the sellers, which is all a price watch needs before it alerts.
+LOOKS = ("full", "confirm")
 # A listing's tokens are only followed while it is this fresh. SerpApi serves a repeat of the
 # same search from its own cache for an hour; nothing recorded says a token lasts longer.
 TOKEN_MINUTES = 60
@@ -64,6 +67,10 @@ class Request:
     bags: int = 0  # carry-on bags every price must include
     risky: bool = False  # also list hidden-city and self-transfer fares, labelled
     by_price: bool = True  # cheapest first; False asks for the source's own order
+    look: str = "full"  # how far the closer look goes; one of LOOKS
+    # Fares already found to have no return flights, as (outbound flights, price). A closer look
+    # leaves them out without asking again, for as long as they are listed at that price.
+    known_empty: tuple[tuple[str, float], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -160,11 +167,18 @@ def plan(
     fresh: bool = False,
     today: date | None = None,
     max_searches: int | None = None,
+    reserve: int | None = None,
 ) -> Plan:
-    """Work out every call the request needs and which of them are already saved. Costs nothing."""
+    """Work out every call the request needs and which of them are already saved. Costs nothing.
+
+    `reserve` lowers the most any one source may be sent in the later stages, for a caller with
+    fewer searches to spare than those stages can use. They then do as much as that allows.
+    """
     today = today or date.today()
     if request.strategy not in STRATEGIES:
         raise UserError(f"{request.strategy!r} is not a strategy; choose one of {', '.join(STRATEGIES)}")
+    if request.look not in LOOKS:
+        raise UserError(f"{request.look!r} is not a kind of closer look; choose one of {', '.join(LOOKS)}")
     window = _window(request, today)
     if window is None:
         if request.depart < today:
@@ -197,7 +211,7 @@ def plan(
     checks = (2 if request.thorough else 1) if check else 0
 
     def closer_look(split_done: bool) -> dict[str, int]:
-        return {source.name: _check_cost(source, round_trip, split_done) for source in sources}
+        return {source.name: _check_cost(source, round_trip, split_done, request.look) for source in sources}
 
     strategy = request.strategy
     if strategy == "auto":
@@ -271,8 +285,9 @@ def plan(
         follow = checks * costs[source.name]
         if follow and source.name in old and source.capabilities & _FOLLOW_UPS:
             follow += 1
-        if refine + follow:
-            reserved[source.name] = refine + follow
+        later = refine + follow if reserve is None else min(refine + follow, reserve)
+        if later:
+            reserved[source.name] = later
     return Plan(
         trips,
         split,
@@ -338,13 +353,15 @@ def _base(request: Request) -> Query:
     )
 
 
-def _check_cost(source: Provider, round_trip: bool, split_done: bool) -> int:
+def _check_cost(source: Provider, round_trip: bool, split_done: bool, look: str = "full") -> int:
     """The most calls one closer look can send to one source."""
     cost = 0
     if round_trip and Capability.RETURN_FLIGHTS in source.capabilities:
         cost += RETURN_TRIES
     if Capability.BOOKING_OPTIONS in source.capabilities:
         cost += 1
+    if look == "confirm":
+        return cost
     if Capability.MARKETS in source.capabilities:
         cost += 1
     if round_trip and not split_done:
@@ -723,11 +740,12 @@ def _check(session: _Session, trip: Query) -> Check:
 
     alternatives = list(sellers)
     request = session.plan.request
+    full = request.look == "full"
     if lead is not None:
         source = session.sources[lead.source]
         home = (trip.market or source.default_market).lower()
         other = (request.other_market or result.destination_country).lower()
-        if home and other and other != home and Capability.MARKETS in source.capabilities:
+        if full and home and other and other != home and Capability.MARKETS in source.capabilities:
             abroad_query = replace(trip, market=other)
             session.fetch([Call(lead.source, abroad_query)])
             abroad = session.result(abroad_query)
@@ -738,7 +756,7 @@ def _check(session: _Session, trip: Query) -> Check:
             theirs = next((offer for offer in offers if offer.source == name), None)
             if theirs is not None and name != lead.source:
                 alternatives.append(Alternative("source", name, theirs.price, (theirs,), _same(theirs, confirmed)))
-    if trip.return_date is not None:
+    if full and trip.return_date is not None:
         legs = one_way_legs(trip)
         session.search(list(legs))
         out, back = (session.result(leg) for leg in legs)
@@ -779,7 +797,8 @@ def _confirm(session: _Session, trip: Query, *, live: bool):
             return True
         return bool(offer.departure_token) and session.can(offer.source, Capability.RETURN_FLIGHTS)
 
-    confirmed, failed = None, []
+    # A fare that came back empty before, at this price, counts as failed without being asked again.
+    confirmed, failed = None, known_empty(result.offers, session.plan.request.known_empty)
     for _ in range(RETURN_TRIES):
         listing = _next_to_try([offer for offer in result.offers if followable(offer)], failed)
         if listing is None:
@@ -836,6 +855,16 @@ def _next_to_try(offers: list[Offer], failed: list[Offer]) -> Offer | None:
     left = [offer for offer in offers if offer not in failed]
     dead = {frozenset(offer.airlines) for offer in failed}
     return next((offer for offer in left if frozenset(offer.airlines) not in dead), left[0] if left else None)
+
+
+def known_empty(offers: tuple[Offer, ...], pairs: tuple[tuple[str, float], ...]) -> list[Offer]:
+    """The listed fares already found, at the price they are listed at now, to have no return flights."""
+    return [offer for offer in offers if (offer.outbound_key, offer.price) in pairs]
+
+
+def first_to_try(result: SearchResult, pairs: tuple[tuple[str, float], ...] = ()) -> Offer | None:
+    """The listed fare a closer look would ask about first, given the fares already known to be empty."""
+    return _next_to_try(list(result.offers), known_empty(result.offers, pairs))
 
 
 def _same(offer: Offer, confirmed: Offer | None) -> bool | None:

@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest import mock
 
 from flightsleuth import config, providers, scan
+from flightsleuth.errors import UserError
 from flightsleuth.history import History
 from flightsleuth.models import Offer, SearchResult, Segment
 from flightsleuth.providers import Capability, DataClass, Provider
@@ -304,6 +305,87 @@ class RecordedChainTest(unittest.TestCase):
         self.assertRegex(text, r"\$694 +Buy from United, SWISS +same flights +two separate tickets \(United \$295 \+ SWISS \$399\); 8h 35m layover")
         self.assertRegex(text, r"\$797 +Buy from United +same flights +one ticket; 8h 35m layover")
         self.assertIn("Google rates $694 as typical for those dates (typical range $540 to $1,850).", text)
+
+
+PHANTOM = ("PH0@2030-03-12T18:30", 480)  # the fake's first phantom fare on the 12th: its flights and its price
+
+
+class ConfirmOnlyTest(unittest.TestCase):
+    """The lighter closer look a price watch uses: the return flights and the sellers, and nothing else."""
+
+    def setUp(self):
+        install(self)
+        FakeSerpApi.rich = True
+
+    def test_it_is_counted_as_two_return_lookups_and_the_sellers(self):
+        plan = scan.plan(request(look="confirm"), today=TODAY)
+        self.assertEqual((len(plan.calls), plan.check_calls, plan.live), (1, 3, 4))
+
+    def test_it_stops_after_the_sellers(self):
+        _, outcome, check = look(look="confirm")
+        self.assertEqual(endpoints(), ["search", "return_flights", "booking_options"])
+        self.assertEqual(outcome.live, 3)
+        self.assertEqual([s.flight_number for s in check.confirmed.return_segments], ["TA 2"])
+        self.assertEqual({found.kind for found in check.alternatives}, {"seller"})
+
+    def test_a_one_way_only_needs_its_sellers(self):
+        plan = scan.plan(scan.Request("JFK", "LHR", DEPART, check=True, look="confirm"), today=TODAY)
+        self.assertEqual((plan.check_calls, plan.live), (1, 2))
+        scan.run(plan)
+        self.assertEqual(endpoints(), ["search", "booking_options"])
+
+    def test_it_follows_a_listing_fetched_a_moment_ago_without_paying_for_it_again(self):
+        # How a watch does it: the listing first, and the closer look only if the price is worth one.
+        scan.run(scan.plan(request(check=False), today=TODAY, fresh=True))
+        plan = scan.plan(request(look="confirm"), today=TODAY)
+        self.assertEqual((plan.saved, plan.live), (1, 3))
+        outcome = scan.run(plan)
+        self.assertEqual(endpoints(), ["search", "return_flights", "booking_options"])
+        self.assertTrue(outcome.checks[0].confirmed.verified_live)
+
+    def test_an_unknown_kind_of_look_is_refused(self):
+        with self.assertRaisesRegex(UserError, "'quick' is not a kind of closer look"):
+            scan.plan(request(look="quick"), today=TODAY)
+
+    def test_a_caller_with_one_search_to_spare_gets_the_return_flights_and_no_sellers(self):
+        plan = scan.plan(request(look="confirm"), today=TODAY, reserve=1)
+        self.assertEqual((plan.check_calls, plan.live), (1, 2))
+        outcome = scan.run(plan, max_searches=2)
+        (check,) = outcome.checks
+        self.assertEqual(endpoints(), ["search", "return_flights"])
+        self.assertEqual((check.confirmed.price, check.alternatives), (520, ()))
+
+    def test_a_caller_with_none_to_spare_confirms_nothing_and_spends_nothing_more(self):
+        plan = scan.plan(request(look="confirm"), today=TODAY, reserve=0)
+        self.assertEqual((plan.reserved, plan.live), ({}, 1))
+        (check,) = scan.run(plan).checks
+        self.assertEqual((check.confirmed, check.failed, endpoints()), (None, (), ["search"]))
+
+    def test_a_reserve_larger_than_the_look_needs_changes_nothing(self):
+        self.assertEqual(scan.plan(request(look="confirm"), today=TODAY, reserve=9).check_calls, 3)
+
+    def test_a_fare_known_to_have_no_return_flights_is_not_asked_about_again(self):
+        FakeSerpApi.phantoms = 1
+        _, outcome, check = look(look="confirm", known_empty=(PHANTOM,))
+        # One return lookup, for Testair: the phantom fare's was not repeated.
+        self.assertEqual(endpoints(), ["search", "return_flights", "booking_options"])
+        self.assertEqual([query.departure_token for query in FakeSerpApi.searches[1:2]], ["dep:520:Testair"])
+        self.assertEqual([(offer.price, offer.airlines) for offer in check.failed], [(480, ("Phantom Air",))])
+        self.assertEqual(check.confirmed.airlines, ("Testair",))
+        self.assertEqual(outcome.results[check.trip].cheapest.price, 520)
+
+    def test_it_is_asked_about_again_once_its_price_changes(self):
+        FakeSerpApi.phantoms = 1
+        look(look="confirm", known_empty=((PHANTOM[0], 475),))
+        self.assertEqual(endpoints(), ["search", "return_flights", "return_flights", "booking_options"])
+
+    def test_the_fare_a_look_would_try_first_can_be_asked_for_without_looking(self):
+        FakeSerpApi.phantoms = 1
+        outcome = scan.run(scan.plan(request(check=False), today=TODAY))
+        (result,) = outcome.results.values()
+        self.assertEqual(scan.first_to_try(result).price, 480)
+        self.assertEqual(scan.first_to_try(result, (PHANTOM,)).price, 520)
+        self.assertEqual(len(FakeSerpApi.searches), 1)
 
 
 class StaleTokenTest(unittest.TestCase):
