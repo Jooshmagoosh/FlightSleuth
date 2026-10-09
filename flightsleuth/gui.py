@@ -11,9 +11,10 @@ import webbrowser
 from datetime import date, timedelta
 from tkinter import messagebox, simpledialog, ttk
 
-from . import config, scan, typed
+from . import config, notify, scan, typed, watch
 from .errors import UserError
-from .render import ALTERNATIVE_HEADERS, NO_FARES, NextStep, Summary, summarise
+from .models import Query
+from .render import ALTERNATIVE_HEADERS, NO_FARES, NextStep, Summary, budget_lines, summarise, watch_title
 
 STOPS = {"Any number of stops": "any", "Nonstop only": "nonstop", "1 stop or fewer": "1", "2 stops or fewer": "2"}
 CABINS = {"Economy": "economy", "Premium economy": "premium", "Business": "business", "First": "first"}
@@ -31,6 +32,11 @@ BEST_ROW_COLOUR = "#d9f2d9"
 COPY_BUTTON = "Copy the address"
 COPIED = "Address copied. Paste it into the address bar of another browser."
 RECORD_BUTTON = "Save the price you found there..."
+WATCH_BUTTON = "Watch this fare..."
+WATCH_NOTE = (
+    f"A check uses one search, and up to {watch.HOLD} more when the price is worth an alert. Adding a watch uses none.\n"
+    "To see or remove your watches: py -m flightsleuth watch list"
+)
 # The two questions that go with a price found on another site, and what each answer is kept as.
 SAME_FLIGHTS = {"Not sure": None, "Yes": True, "No": False}
 HELD = {"I did not get that far": None, "Yes": True, "No": False}
@@ -82,6 +88,14 @@ class App:
         # The search runs on another thread; it reports back through this queue
         # because only the main thread may touch the widgets.
         self._events: queue.Queue = queue.Queue()
+        # The fare a watch would be set on: the best date pair of the result on show, with its price in words.
+        self._watched: tuple[Query, str] | None = None
+        self._watch_dialog: tk.Toplevel | None = None
+        self.adding = False  # a watch is being set against the account's searches, off the main thread
+        self.watch_below = tk.StringVar()
+        self.watch_drop = tk.StringVar(value=f"{watch.DEFAULT_DROP:g}")
+        self.watch_typical = tk.BooleanVar(value=True)
+        self.watch_every = tk.StringVar(value="1")
         self._font = tkinter.font.nametofont("TkDefaultFont")
         root.title("Flightsleuth")
         self._build_form()
@@ -201,7 +215,10 @@ class App:
         actions = row()
         self._search_button = ttk.Button(actions, text="Search", command=self.search)
         self._search_button.pack(side="left", padx=(0, 8))
-        ttk.Button(actions, text="SerpApi key...", command=self.ask_key).pack(side="left", padx=(0, 12))
+        ttk.Button(actions, text="SerpApi key...", command=self.ask_key).pack(side="left", padx=(0, 8))
+        # Greyed out until a search has found a fare to watch.
+        self._watch_button = ttk.Button(actions, text=WATCH_BUTTON, command=self.watch_fare, state="disabled")
+        self._watch_button.pack(side="left", padx=(0, 12))
         ttk.Label(actions, textvariable=self.status).pack(side="left")
         self._trip_kind_changed()  # start with the range's own boxes greyed out
 
@@ -389,6 +406,7 @@ class App:
         else:
             self.headline.set(NO_FARES)
             self._show_next(None)  # the step on show was for the last result's fare
+            self._offer_watch(None)
         status = f"Done. Searches used: {outcome.live}. Reused from earlier: {outcome.saved}."
         if outcome.searches_left is not None:
             status += f" About {outcome.searches_left} left this month."
@@ -421,6 +439,7 @@ class App:
             for old in frame.winfo_children():
                 old.destroy()
         self._show_next(summary.next_step)
+        self._offer_watch(summary)
         for text, url in summary.links:
             # The address comes from the API's reply, so only ever hand the browser a web page.
             if url.startswith("https://"):
@@ -563,6 +582,121 @@ class App:
         self.found_same.set(next(iter(SAME_FLIGHTS)))
         self.found_held.set(next(iter(HELD)))
 
+    def _offer_watch(self, summary: Summary | None) -> None:
+        """Let the best fare on show be watched, or grey the button out when there is none."""
+        self._close_watch()  # whatever was being typed was about the last result
+        best = summary.best if summary else None
+        if best is None or best.whole is None or best.split_wins:
+            self._watched = None
+        else:
+            # The fare the headline names, with the time it was fetched beside it.
+            fare = summary.next_step.fare if summary.next_step else best.whole
+            self._watched = (best.trip, f"{summary.headline}. Fetched {summary.offer_fetched(fare)}.")
+        self._watch_button.configure(state="normal" if self._watched else "disabled")
+
+    def watch_fare(self) -> None:
+        """Open the small window where the rules for watching the fare on show are set."""
+        if self._watched is None:
+            return
+        if self._watch_dialog is not None:
+            self._watch_dialog.lift()
+            return
+        trip, price = self._watched
+        self._watch_dialog = dialog = tk.Toplevel(self.root)
+        dialog.title("Watch this fare")
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+        dialog.protocol("WM_DELETE_WINDOW", self._close_watch)
+        body = ttk.Frame(dialog, padding=12)
+        body.pack(fill="both", expand=True)
+        about = [f"{watch_title(trip)}: the cheapest fare on these dates, with any airline.", price]
+        if trip.bags or trip.market:
+            about.append("A watch prices the fare as an ordinary search does: no carry-on bags added, and no other country's prices.")
+        ttk.Label(body, text="\n".join(about), justify="left", wraplength=self._font.measure("0") * 80).grid(
+            row=0, column=0, columnspan=2, sticky="w", pady=(0, 10)
+        )
+        below = ttk.Entry(body, textvariable=self.watch_below, width=12)
+        fields = (
+            (f"Tell me when it is below this price, in {trip.currency}", below),
+            (
+                f"or this many percent under its {watch.MEDIAN_DAYS}-day median (0 for never)",
+                ttk.Spinbox(body, from_=0, to=99, textvariable=self.watch_drop, width=4),
+            ),
+            (
+                "or below Google's typical range for these dates",
+                ttk.Checkbutton(body, variable=self.watch_typical),
+            ),
+            (
+                "Check it every this many days",
+                ttk.Spinbox(body, from_=1, to=watch.LONGEST_INTERVAL, textvariable=self.watch_every, width=4),
+            ),
+        )
+        for row, (text, box) in enumerate(fields, 1):
+            ttk.Label(body, text=text).grid(row=row, column=0, sticky="w", padx=(0, 10), pady=3)
+            box.grid(row=row, column=1, sticky="w", pady=3)
+        ttk.Label(body, text=WATCH_NOTE, foreground="gray40", justify="left").grid(
+            row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0)
+        )
+        buttons = ttk.Frame(body)
+        buttons.grid(row=len(fields) + 2, column=0, columnspan=2, sticky="e", pady=(10, 0))
+        self._add_button = ttk.Button(buttons, text="Watch", default="active", command=self.add_watch)
+        self._add_button.pack(side="left", padx=(0, 8))
+        ttk.Button(buttons, text="Close", command=self._close_watch).pack(side="left")
+        dialog.bind("<Return>", lambda event: self.add_watch())
+        dialog.bind("<Escape>", lambda event: self._close_watch())
+        below.focus_set()
+
+    def add_watch(self) -> None:
+        """Set the watch against the searches there are, off the main thread, and keep it if they cover it."""
+        if self._watched is None or self.adding:
+            return
+        entered = self.watch_below.get().strip()
+        try:
+            try:
+                below = typed.price(entered)
+            except ValueError:
+                raise UserError(f"{entered!r} is not a price. Type a number such as 412, or leave it empty") from None
+            try:
+                drop = float(self.watch_drop.get())
+            except ValueError:
+                raise UserError("the percentage under the median must be a number from 0 to 99") from None
+            rules = dict(
+                below=below,
+                drop_percent=drop,
+                typical=self.watch_typical.get(),
+                every_days=_whole(self.watch_every.get(), "the days between checks", 1, watch.LONGEST_INTERVAL),
+            )
+        except UserError as e:
+            self._fail(str(e), parent=self._watch_dialog)
+            return
+        self.adding = True
+        self._add_button.configure(state="disabled")
+        threading.Thread(target=_watch_work, args=(self._watched[0], rules, self._events.put), daemon=True).start()
+
+    def _on_watched(self, added: watch.Added) -> None:
+        self.adding = False
+        self._close_watch()
+        # Kept short: the line shares its row with three buttons.
+        if config.ntfy_topic() is None:
+            self.status.set(f"Watching it, but alerts are not set up. Run: {notify.SETUP}")
+            return
+        every = added.watch.every_days
+        status = f"Watching this fare every {every} day{'s' if every != 1 else ''}."
+        if added.budget:
+            status += f" The searches cover it, with {added.budget.now.spare} to spare."
+        self.status.set(status)
+
+    def _on_unwatched(self, message: str) -> None:
+        self.adding = False
+        if self._watch_dialog is not None:
+            self._add_button.configure(state="normal")
+        self._fail(message, parent=self._watch_dialog)
+
+    def _close_watch(self) -> None:
+        if self._watch_dialog is not None:
+            self._watch_dialog.destroy()
+            self._watch_dialog = None
+
     def _set_busy(self, busy: bool) -> None:
         self.busy = busy
         self._search_button.configure(state="disabled" if busy else "normal")
@@ -590,6 +724,18 @@ def _work(request: scan.Request, post) -> None:
         post(("error", str(e)))
     except Exception as e:  # nothing is watching this thread, so say it in the window
         post(("error", f"something unexpected went wrong: {e!r}"))
+
+
+def _watch_work(trip: Query, rules: dict, post) -> None:
+    """Adding a watch, run off the main thread because it asks the account what is left. It spends nothing."""
+    try:
+        post(("watched", watch.add(trip, **rules)))
+    except watch.OverBudget as e:
+        post(("unwatched", "\n".join([str(e), "", *budget_lines(e.budget)])))
+    except UserError as e:
+        post(("unwatched", str(e)))
+    except Exception as e:  # nothing is watching this thread, so say it in the window
+        post(("unwatched", f"something unexpected went wrong: {e!r}"))
 
 
 def _sharpen() -> None:
