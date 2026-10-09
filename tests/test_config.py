@@ -72,6 +72,14 @@ class SettingsTest(unittest.TestCase):
             "# my notes\nSERPAPI_API_KEY=k\nFLIGHTSLEUTH_NTFY_TOPIC=def-456\n",
         )
 
+    def test_a_value_saved_from_another_folder_is_found_when_this_folders_file_lacks_it(self):
+        elsewhere = self.home / "elsewhere"
+        elsewhere.mkdir()
+        (elsewhere / ".env").write_text("FLIGHTSLEUTH_NTFY_TOPIC=from-home\n", encoding="utf-8")
+        (self.home / ".env").write_text("SERPAPI_API_KEY=k\n", encoding="utf-8")
+        with mock.patch.dict(os.environ, {config.HOME_VAR: str(elsewhere), config.KEY_VAR: ""}):
+            self.assertEqual((config.ntfy_topic(), config.find_api_key()), ("from-home", "k"))
+
     def test_there_is_no_topic_until_one_is_set_up(self):
         self.assertIsNone(config.ntfy_topic())
 

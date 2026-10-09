@@ -60,13 +60,15 @@ def setting(name: str) -> str | None:
     value = os.environ.get(name, "").strip()
     if value:
         return value
-    path = key_file()
-    if path.is_file():
-        for line in path.read_text(encoding="utf-8-sig").splitlines():
-            found, _, value = line.partition("=")
-            value = value.strip().strip("\"'")
-            if found.strip() == name and value:
-                return value
+    # The folder's own file first, then flightsleuth's: a value saved from one folder is still
+    # found by a run started in another, as the scheduled check of the watches is.
+    for path in dict.fromkeys((Path.cwd() / ".env", home() / ".env")):
+        if path.is_file():
+            for line in path.read_text(encoding="utf-8-sig").splitlines():
+                found, _, value = line.partition("=")
+                value = value.strip().strip("\"'")
+                if found.strip() == name and value:
+                    return value
     return None
 
 

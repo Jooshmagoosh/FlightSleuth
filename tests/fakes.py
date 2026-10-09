@@ -139,6 +139,9 @@ def rich_reply(query):
         # Google's own order drops the phantom fares and adds its rating, as the recorded reply did.
         body["other_flights"] = body["other_flights"][FakeSerpApi.phantoms :]
         body["price_insights"] = {"lowest_price": price, "price_level": "typical", "typical_price_range": [500, 800]}
+    if FakeSerpApi.insights is not None:
+        # What a test wants the listing to say about its price: daily lows, another range, or nothing at all.
+        body["price_insights"] = {**body.get("price_insights", {}), **FakeSerpApi.insights}
     return body
 
 
@@ -154,6 +157,7 @@ class FakeSerpApi:
     separate = False  # in rich replies: the cheapest seller sells two separate tickets
     return_surcharge = 0  # in rich replies: how much dearer the return lookup makes the fare
     market_savings = {}  # in rich replies: how much cheaper each other market is
+    insights = None  # in rich replies: laid over every listing's price_insights, as real one-way replies carry them
     countries = ("US", "GB")
     explore_reply = {"search_metadata": {"status": "Success"}, "destinations": []}
 
@@ -202,6 +206,7 @@ def install(test):
     FakeSerpApi.separate = False
     FakeSerpApi.return_surcharge = 0
     FakeSerpApi.market_savings = {}
+    FakeSerpApi.insights = None
     FakeSerpApi.countries = ("US", "GB")
     FakeSerpApi.explore_reply = {"search_metadata": {"status": "Success"}, "destinations": []}
     FakeSerpApi.account_reply = {
