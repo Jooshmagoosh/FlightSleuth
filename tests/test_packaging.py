@@ -25,6 +25,13 @@ class PackagingTest(unittest.TestCase):
             dotted = ".".join(init.parent.relative_to(ROOT).parts)
             self.assertTrue(dotted.startswith("flightsleuth"), dotted)
 
+    def test_every_data_file_is_included(self):
+        patterns = PROJECT["tool"]["setuptools"]["package-data"]["flightsleuth"]
+        for path in PACKAGE.iterdir():
+            if path.is_file() and path.suffix != ".py":
+                self.assertTrue(any(path.match(pattern) for pattern in patterns), path.name)
+        self.assertTrue((PACKAGE / "links.json").is_file())
+
     def test_the_core_imports_only_the_standard_library(self):
         for path in PACKAGE.rglob("*.py"):
             for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):

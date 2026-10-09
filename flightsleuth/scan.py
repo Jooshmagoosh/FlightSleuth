@@ -63,6 +63,7 @@ class Request:
     other_market: str = ""  # the second country to price the best fare in; "" means the destination's
     bags: int = 0  # carry-on bags every price must include
     risky: bool = False  # also list hidden-city and self-transfer fares, labelled
+    by_price: bool = True  # cheapest first; False asks for the source's own order
 
 
 @dataclass(frozen=True)
@@ -332,6 +333,7 @@ def _base(request: Request) -> Query:
         deep=request.deep,
         market=request.market,
         bags=request.bags,
+        by_price=request.by_price,
     )
 
 

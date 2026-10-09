@@ -1,0 +1,40 @@
+{
+  "about": "Address patterns that open the same search on other sites. They are not APIs and they change, so they live here and nowhere else. Placeholders: {origin} {destination} {depart} {return}. 'airports' is 'all' where a comma-separated list is accepted and 'first' where only one code is. 'dates' is a strftime format. 'warning' is shown with the link whenever it is offered.",
+  "sites": [
+    {
+      "name": "Momondo",
+      "round_trip": "https://www.momondo.com/flight-search/{origin}-{destination}/{depart}/{return}?sort=price_a",
+      "one_way": "https://www.momondo.com/flight-search/{origin}-{destination}/{depart}?sort=price_a",
+      "airports": "all",
+      "dates": "%Y-%m-%d",
+      "checked": "2026-10-08: a round trip and a round trip with airport lists both opened the right search. One way not checked."
+    },
+    {
+      "name": "Skyscanner",
+      "round_trip": "https://www.skyscanner.com/transport/flights/{origin}/{destination}/{depart}/{return}/",
+      "one_way": "https://www.skyscanner.com/transport/flights/{origin}/{destination}/{depart}/",
+      "airports": "first",
+      "lowercase": true,
+      "dates": "%y%m%d",
+      "checked": "2026-10-08: the page named the right cities, then a robot check replaced it, so the dates were not seen. Not confirmed."
+    },
+    {
+      "name": "Skiplagged",
+      "round_trip": "https://skiplagged.com/flights/{origin}/{destination}/{depart}/{return}",
+      "one_way": "https://skiplagged.com/flights/{origin}/{destination}/{depart}",
+      "airports": "first",
+      "dates": "%Y-%m-%d",
+      "warning": "lists hidden-city fares",
+      "checked": "2026-10-08: a round trip opened the right search in a browser. One way not checked."
+    },
+    {
+      "name": "Kiwi.com",
+      "round_trip": "https://www.kiwi.com/deep?from={origin}&to={destination}&departure={depart}&return={return}",
+      "one_way": "https://www.kiwi.com/deep?from={origin}&to={destination}&departure={depart}",
+      "airports": "first",
+      "dates": "%Y-%m-%d",
+      "warning": "lists self-transfer fares",
+      "checked": "2026-10-08: a round trip and a one way both opened with the right airports and dates."
+    }
+  ]
+}

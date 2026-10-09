@@ -199,4 +199,9 @@ def install(test):
     test.enterContext(mock.patch.object(scan, "WORKERS", 1))
     # Run from the throwaway folder: a real .env in the project must never be read or overwritten.
     test.enterContext(contextlib.chdir(home))
+    # No test may open a real browser tab, or wait on a keyboard nobody is at.
+    test.enterContext(mock.patch("webbrowser.open"))
+    nobody = mock.Mock()
+    nobody.isatty.return_value = False
+    test.enterContext(mock.patch("sys.stdin", nobody))
     return home
