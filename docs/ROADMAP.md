@@ -79,6 +79,10 @@ Requirements added after Phase 1:
 - [ ] In the bake-off, measure whether `--split` ever beats the fare Google already lists.
 - [ ] Remove expired replies from `cache.db`.
 - [ ] Store `price_history` in its own table, as decided above. Real replies now contain it.
+- [ ] In the bake-off, count how often the cheapest listed fare fails its return-flight lookup,
+      and whether dropping `sort_by` would have avoided it. Decide `sort_by` from that count.
+- [ ] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
+      Google's lowest price, its rating and 61 days of price history.
 
 ## Phase 3, second sources: not started
 
