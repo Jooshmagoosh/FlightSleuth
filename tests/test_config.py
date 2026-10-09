@@ -51,5 +51,55 @@ class KeyTest(unittest.TestCase):
             self.assertEqual(config.load_api_key(), "k")
 
 
+class SettingsTest(unittest.TestCase):
+    """The alert topic and the watch budget live where the key does: the environment, or the .env file."""
+
+    def setUp(self):
+        self.home = Path(install(self))
+
+    def test_a_setting_is_read_from_the_environment_first_and_then_the_file(self):
+        (self.home / ".env").write_text("FLIGHTSLEUTH_NTFY_TOPIC=from-file\n", encoding="utf-8")
+        self.assertEqual(config.ntfy_topic(), "from-file")
+        with mock.patch.dict(os.environ, {config.TOPIC_VAR: "from-env"}):
+            self.assertEqual(config.ntfy_topic(), "from-env")
+
+    def test_saving_one_setting_leaves_the_key_and_every_other_line_alone(self):
+        (self.home / ".env").write_text("# my notes\nSERPAPI_API_KEY=k\n", encoding="utf-8")
+        config.save_setting(config.TOPIC_VAR, "abc-123")
+        config.save_setting(config.TOPIC_VAR, "def-456")
+        self.assertEqual(
+            (self.home / ".env").read_text(encoding="utf-8"),
+            "# my notes\nSERPAPI_API_KEY=k\nFLIGHTSLEUTH_NTFY_TOPIC=def-456\n",
+        )
+
+    def test_there_is_no_topic_until_one_is_set_up(self):
+        self.assertIsNone(config.ntfy_topic())
+
+    def test_a_topic_ntfy_would_refuse_is_refused_without_repeating_it(self):
+        with mock.patch.dict(os.environ, {config.TOPIC_VAR: "my secret/topic"}):
+            with self.assertRaises(UserError) as caught:
+                config.ntfy_topic()
+        self.assertNotIn("secret", str(caught.exception))
+
+    def test_alerts_go_to_ntfy_sh_unless_another_server_is_named(self):
+        self.assertEqual(config.ntfy_server(), "https://ntfy.sh")
+        with mock.patch.dict(os.environ, {config.NTFY_VAR: "https://ntfy.example.org/"}):
+            self.assertEqual(config.ntfy_server(), "https://ntfy.example.org")
+        with mock.patch.dict(os.environ, {config.NTFY_VAR: "ntfy.example.org"}):
+            with self.assertRaises(UserError):
+                config.ntfy_server()
+
+    def test_watches_may_use_150_searches_a_month_until_the_owner_raises_it(self):
+        self.assertEqual(config.watch_monthly(), 150)
+        config.save_setting(config.WATCH_MONTHLY_VAR, "400")
+        self.assertEqual(config.watch_monthly(), 400)
+        with mock.patch.dict(os.environ, {config.WATCH_MONTHLY_VAR: "lots"}):
+            with self.assertRaises(UserError):
+                config.watch_monthly()
+
+    def test_the_watch_log_lives_with_the_history(self):
+        self.assertEqual(config.log_path(), config.history_path().parent / "watch.log")
+
+
 if __name__ == "__main__":
     unittest.main()

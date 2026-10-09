@@ -193,6 +193,9 @@ def install(test):
     }
     home = test.enterContext(tempfile.TemporaryDirectory())
     test.enterContext(mock.patch.dict(os.environ, {config.HOME_VAR: home, config.KEY_VAR: "test-key"}))
+    # Whatever this machine's environment says about alerts and the watch budget, a test starts without it.
+    for name in (config.TOPIC_VAR, config.NTFY_VAR, config.WATCH_MONTHLY_VAR):
+        os.environ.pop(name, None)
     providers.register(FakeProvider)  # takes the real one's place under the same name
     test.addCleanup(providers.register, SerpApiProvider)
     # One at a time, so "fails after N searches" means exactly N.
