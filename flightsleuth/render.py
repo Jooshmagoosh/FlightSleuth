@@ -3,10 +3,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from . import links
 from .models import Alternative, Check, Destination, Insights, Offer, Query, SearchResult, Segment
 from .planner import one_way_legs
+
+if TYPE_CHECKING:  # watch words its alerts through this module, so it cannot be imported here for real
+    from . import watch
 
 NO_FARES = "No fares found. Try other dates, more airports, or fewer filters."
 UNCONFIRMED = "This is the listed price: its return flights have not been looked up."
@@ -540,6 +544,69 @@ def render_text(summary: Summary, *, hint: str = "") -> str:
     lines += [f"{label}: {url}" for label, url in summary.links]
     lines += [f"Same dates on {label}: {url}" for label, url in summary.other_links]
     return "\n".join(lines)
+
+
+def watch_title(trip: Query) -> str:
+    """A watch in a few words: where and when."""
+    return f"{trip.origin} -> {trip.destination}, {_dates(trip)}"
+
+
+def _count(number: int, noun: str) -> str:
+    return f"{number} {noun}" if number == 1 else f"{number} {noun}{'es' if noun.endswith('ch') else 's'}"
+
+
+def why(found: watch.Fired, price: float, currency: str) -> str:
+    """One rule a price satisfied, as the alert says it."""
+    if found.rule == "below":
+        return f"below the {money(found.mark, currency)} you set"
+    if found.rule == "median":
+        under = (found.mark - price) / found.mark * 100
+        return f"{under:.0f}% under the {found.days}-day median of {money(found.mark, currency)}"
+    return f"below Google's typical range of {money(found.mark, currency)} to {money(found.top, currency)}"
+
+
+def _span_lines(span: watch.Span, have: str) -> list[str]:
+    lines = [
+        f"  {watch_title(found.trip)}: {_count(count, 'check')}, one every {_count(found.every_days, 'day')}"
+        for found, count in span.checks
+    ]
+    cost = span.count * span.per_check
+    each = "1 search" if span.per_check == 1 else f"{span.per_check} searches"
+    lines.append(
+        f"  {_count(span.count, 'check')} at {each} each, and {span.hold} held back for each of "
+        f"{_count(span.watching, 'watch')} to confirm an alert: {cost} + {span.held} = {span.needed}"
+    )
+    verdict = f"so {span.spare} would be spare" if span.spare >= 0 else f"so that is {-span.spare} too many"
+    return [*lines, f"  {have}, {verdict}."]
+
+
+def budget_lines(budget: watch.Budget) -> list[str]:
+    """The sums behind accepting or refusing a watch, written out so the owner can check them."""
+    now, after = budget.now, budget.after
+    if budget.reset_known:
+        first = f"Until the searches reset on {day(now.end)}:"
+    else:
+        first = "In the next 30 days (the account did not say when its searches reset):"
+    room = budget.ceiling - budget.used
+    if budget.left <= room:
+        have = f"{_count(budget.left, 'search')} {'is' if budget.left == 1 else 'are'} left"
+    else:
+        have = (
+            f"Watches have used {budget.used} of the {budget.ceiling} searches a month they may, "
+            f"which leaves {max(room, 0)}"
+        )
+    if budget.per_month is None:
+        monthly = f"Watches may use {budget.ceiling} searches a month"
+    elif budget.ceiling <= budget.per_month:
+        monthly = f"Watches may use {budget.ceiling} of the plan's {budget.per_month} searches a month"
+    else:
+        monthly = f"The plan gives {budget.per_month} searches a month"
+    return [
+        first,
+        *_span_lines(now, have),
+        f"In the month after that, to {day(after.end)}:",
+        *_span_lines(after, monthly),
+    ]
 
 
 def place_cells(place: Destination, currency: str) -> list[str]:
