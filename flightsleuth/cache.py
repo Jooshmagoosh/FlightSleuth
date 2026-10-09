@@ -18,11 +18,16 @@ class Cache:
         )
 
     def get(self, key: str, max_age_s: float, *, now: float | None = None) -> dict | None:
+        found = self.lookup(key, max_age_s, now=now)
+        return found[0] if found else None
+
+    def lookup(self, key: str, max_age_s: float, *, now: float | None = None) -> tuple[dict, float] | None:
+        """The saved reply and when it was fetched (seconds since the epoch), if it is fresh enough."""
         now = time.time() if now is None else now
         row = self._db.execute(
-            "SELECT body FROM responses WHERE key = ? AND fetched_at >= ?", (key, now - max_age_s)
+            "SELECT body, fetched_at FROM responses WHERE key = ? AND fetched_at >= ?", (key, now - max_age_s)
         ).fetchone()
-        return json.loads(row[0]) if row else None
+        return (json.loads(row[0]), row[1]) if row else None
 
     def put(self, key: str, body: dict, *, now: float | None = None) -> None:
         now = time.time() if now is None else now

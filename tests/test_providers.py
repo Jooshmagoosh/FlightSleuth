@@ -7,7 +7,7 @@ from unittest import mock
 
 from flightsleuth import cli, config, providers, scan
 from flightsleuth.errors import UserError
-from flightsleuth.models import Offer, SearchResult
+from flightsleuth.models import Offer, SearchResult, Segment
 from flightsleuth.providers import Capability, DataClass, Provider, SerpApiProvider
 from tests.fakes import FakeSerpApi, install
 
@@ -27,18 +27,8 @@ class CheapSource(Provider):
 
     def parse(self, query, raw):
         leaves = datetime.fromisoformat(raw["leaves"])
-        offer = Offer(
-            query=query,
-            price=raw["fare"],
-            airlines=(raw["carrier"],),
-            origin=query.origin,
-            destination=query.destination,
-            depart_at=leaves,
-            arrive_at=leaves,
-            stops=0,
-            duration_min=400,
-        )
-        return SearchResult(query, (offer,))
+        flight = Segment(raw["carrier"], "ZZ 1", query.origin, query.destination, leaves, leaves)
+        return SearchResult(query, (Offer(query, raw["fare"], (flight,), duration_min=400),))
 
 
 REQUEST = scan.Request("JFK", "LHR", date(2030, 3, 12))
@@ -75,6 +65,8 @@ class RegistryTest(unittest.TestCase):
         self.assertEqual([(offer.price, offer.airlines) for offer in result.offers], [(99, ("Cheapair",)), (200, ("Testair",))])
         # Only SerpApi is metered, so only its call comes off the count.
         self.assertEqual(outcome.searches_left, 249)
+        # scan labels each offer with its source; the sources do not have to.
+        self.assertEqual([offer.source for offer in result.offers], ["cheapsource", "serpapi"])
 
     def test_the_second_source_shows_up_in_the_command_line_with_no_other_change(self):
         self.add_cheap_source()

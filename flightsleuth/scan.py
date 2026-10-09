@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, replace
-from datetime import date
+from datetime import date, datetime, timezone
 
 from . import config, providers
 from .cache import Cache
@@ -52,6 +53,15 @@ class Call:
     query: Query
 
 
+@dataclass(frozen=True)
+class Reply:
+    """A source's raw answer to one call."""
+
+    body: dict
+    fetched_at: datetime  # when it reached this machine, in UTC
+    live: bool  # fetched during this run rather than read back from the cache
+
+
 @dataclass
 class Plan:
     """A request broken into calls, split by whether a saved reply already covers each."""
@@ -59,20 +69,20 @@ class Plan:
     trips: list[Query]  # the date pairs being compared
     split: bool  # each trip is also priced as two one-ways
     calls: list[Call]  # every call the request needs, in order
-    raw: dict[Call, dict]  # saved replies
+    replies: dict[Call, Reply]  # the calls a saved reply already answers
 
     @property
     def missing(self) -> list[Call]:
         """The calls that have to be made, and paid for where the source charges."""
-        return [call for call in self.calls if call not in self.raw]
+        return [call for call in self.calls if call not in self.replies]
 
     @property
     def saved(self) -> int:
-        return len(self.raw)
+        return len(self.replies)
 
     @property
     def live(self) -> int:
-        return len(self.calls) - len(self.raw)
+        return len(self.calls) - len(self.replies)
 
     @property
     def total(self) -> int:
@@ -127,17 +137,18 @@ def plan(
         raise UserError("no price source is available")
     keys = {Call(source.name, query): source.cache_key(query) for query in wanted for source in sources}
 
-    raw = {}
+    replies = {}
     if not fresh:
         cache = Cache(config.cache_path())
         try:
             for call, key in keys.items():
-                saved = cache.get(key, max_age_hours * 3600)
+                saved = cache.lookup(key, max_age_hours * 3600)
                 if saved is not None:
-                    raw[call] = saved
+                    body, when = saved
+                    replies[call] = Reply(body, datetime.fromtimestamp(when, timezone.utc), live=False)
         finally:
             cache.close()
-    return Plan(trips, split, list(keys), raw)
+    return Plan(trips, split, list(keys), replies)
 
 
 class OverCap(UserError):
@@ -163,7 +174,7 @@ def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None)
     """
     check_cap(plan, max_searches)
     sources = {name: providers.load(name) for name in dict.fromkeys(call.provider for call in plan.calls)}
-    raw = dict(plan.raw)
+    replies = dict(plan.replies)
     missing = plan.missing
     searches_left = None
 
@@ -179,10 +190,11 @@ def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None)
         cache = Cache(config.cache_path())
 
         def store(call: Call, body: dict) -> None:
-            cache.put(sources[call.provider].cache_key(call.query), body)
-            raw[call] = body
+            now = time.time()
+            cache.put(sources[call.provider].cache_key(call.query), body, now=now)
+            replies[call] = Reply(body, datetime.fromtimestamp(now, timezone.utc), live=True)
             if on_search:
-                on_search(len(raw) - plan.saved, plan.live)
+                on_search(len(replies) - plan.saved, plan.live)
 
         try:
             error = fetch_all(sources, missing, store)
@@ -190,7 +202,7 @@ def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None)
             cache.close()
         if error:
             raise UserError(
-                f"stopped after {len(raw) - plan.saved} of {plan.live} live searches: {error}. "
+                f"stopped after {len(replies) - plan.saved} of {plan.live} live searches: {error}. "
                 f"Finished searches are saved, so running this again picks up where it left off."
             )
         left = []
@@ -202,9 +214,20 @@ def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None)
 
     parts: dict[Query, list[SearchResult]] = {}
     for call in plan.calls:
-        parts.setdefault(call.query, []).append(sources[call.provider].parse(call.query, raw[call]))
+        source, reply = sources[call.provider], replies[call]
+        result = source.parse(call.query, reply.body)
+        when = source.fetched_at(reply.body) or reply.fetched_at
+        parts.setdefault(call.query, []).append(_stamp(result, source.name, when, reply.live))
     results = {query: _merge(found) for query, found in parts.items()}
     return Outcome(plan.trips, results, plan.split, searches_left)
+
+
+def _stamp(result: SearchResult, source: str, fetched_at: datetime, live: bool) -> SearchResult:
+    """Mark every offer with where and when its price came from, so no source can leave that out."""
+    offers = tuple(
+        replace(offer, source=source, fetched_at=fetched_at, verified_live=live) for offer in result.offers
+    )
+    return replace(result, offers=offers)
 
 
 def _merge(parts: list[SearchResult]) -> SearchResult:

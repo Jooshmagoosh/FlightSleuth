@@ -8,10 +8,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .errors import UserError
-from .models import Insights, Offer, Query, SearchResult
+from .models import Insights, Offer, Query, SearchResult, Segment
 
 SEARCH_URL = "https://serpapi.com/search.json"
 ACCOUNT_URL = "https://serpapi.com/account.json"
@@ -116,30 +116,47 @@ def parse(query: Query, raw: dict) -> SearchResult:
     options = (raw.get("best_flights") or []) + (raw.get("other_flights") or [])
     try:
         offers = [_offer(query, option) for option in options if option.get("price") is not None]
+        insights = _insights(raw.get("price_insights"))
     except (KeyError, IndexError, ValueError, TypeError) as e:
         raise SerpApiError(f"unexpected response shape from SerpApi ({e!r})") from None
     offers.sort(key=lambda o: (o.price, o.duration_min))
     return SearchResult(
         query=query,
         offers=tuple(offers),
-        insights=_insights(raw.get("price_insights")),
+        insights=insights,
         url=(raw.get("search_metadata") or {}).get("google_flights_url"),
     )
 
 
+def fetched_at(raw: dict) -> datetime | None:
+    """When SerpApi asked Google, in UTC. Earlier than now when SerpApi answers from its own cache."""
+    stamp = (raw.get("search_metadata") or {}).get("processed_at")
+    try:
+        return datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S UTC").replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
 def _offer(query: Query, option: dict) -> Offer:
-    segments = option["flights"]
-    first, last = segments[0], segments[-1]
+    flights = option["flights"]
+    if not flights:
+        raise ValueError("an option with no flights")
     return Offer(
         query=query,
         price=option["price"],
-        airlines=tuple(dict.fromkeys(s["airline"] for s in segments)),
-        origin=first["departure_airport"]["id"],
-        destination=last["arrival_airport"]["id"],
-        depart_at=datetime.fromisoformat(first["departure_airport"]["time"]),
-        arrive_at=datetime.fromisoformat(last["arrival_airport"]["time"]),
-        stops=len(segments) - 1,
-        duration_min=option.get("total_duration") or sum(s.get("duration", 0) for s in segments),
+        segments=tuple(_segment(flight) for flight in flights),
+        duration_min=option.get("total_duration") or sum(flight.get("duration", 0) for flight in flights),
+    )
+
+
+def _segment(flight: dict) -> Segment:
+    return Segment(
+        carrier=flight["airline"],
+        flight_number=flight.get("flight_number", ""),
+        origin=flight["departure_airport"]["id"],
+        destination=flight["arrival_airport"]["id"],
+        depart_at=datetime.fromisoformat(flight["departure_airport"]["time"]),
+        arrive_at=datetime.fromisoformat(flight["arrival_airport"]["time"]),
     )
 
 
@@ -147,8 +164,10 @@ def _insights(raw: dict | None) -> Insights | None:
     if not raw:
         return None
     typical = raw.get("typical_price_range")
+    history = raw.get("price_history") or []
     return Insights(
         lowest_price=raw.get("lowest_price"),
         level=raw.get("price_level"),
         typical_range=tuple(typical) if typical and len(typical) == 2 else None,
+        price_history=tuple((datetime.fromtimestamp(stamp, timezone.utc), price) for stamp, price in history),
     )

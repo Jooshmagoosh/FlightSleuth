@@ -3,11 +3,11 @@ import json
 import unittest
 import urllib.error
 import urllib.parse
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from flightsleuth.models import Query
-from flightsleuth.serpapi import RateLimited, SerpApi, SerpApiError, cache_key, parse, search_params
+from flightsleuth.serpapi import RateLimited, SerpApi, SerpApiError, cache_key, fetched_at, parse, search_params
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -97,6 +97,13 @@ class ParseTest(unittest.TestCase):
         airlines = {offer.airlines for offer in parse(TRIP, FIXTURE).offers}
         self.assertNotIn(("Virgin Atlantic",), airlines)
 
+    def test_price_history_is_kept(self):
+        history = parse(TRIP, FIXTURE).insights.price_history
+        self.assertEqual(
+            history,
+            ((datetime(2030, 1, 1, tzinfo=timezone.utc), 610), (datetime(2030, 1, 2, tzinfo=timezone.utc), 438)),
+        )
+
     def test_insights_and_link(self):
         result = parse(TRIP, FIXTURE)
         self.assertEqual(result.insights.level, "low")
@@ -133,6 +140,34 @@ class RecordedReplyTest(unittest.TestCase):
         self.assertEqual((cheapest.origin, cheapest.destination, cheapest.stops), ("EWR", "LHR", 2))
         self.assertEqual(cheapest.airlines, ("Scandinavian Airlines",))
         self.assertTrue(result.url.startswith("https://www.google.com/travel/flights"))
+
+    def test_offers_keep_every_flight_of_a_connection(self):
+        cheapest = parse(REAL_TRIP, recorded("roundtrip_outbound.json")).cheapest
+        self.assertEqual([segment.flight_number for segment in cheapest.segments], ["SK 904", "SK 491", "SK 815"])
+        self.assertEqual([(s.origin, s.destination) for s in cheapest.segments], [("EWR", "ARN"), ("ARN", "OSL"), ("OSL", "LHR")])
+        self.assertEqual(cheapest.segments[0].depart_at, datetime(2026, 12, 8, 17, 40))
+        self.assertEqual(cheapest.segments[-1].arrive_at, datetime(2026, 12, 9, 21, 35))
+        self.assertEqual(
+            cheapest.itinerary_key, "SK904@2026-12-08T17:40>SK491@2026-12-09T16:20>SK815@2026-12-09T20:10"
+        )
+        self.assertEqual(cheapest.duration_min, 1375)
+
+    def test_every_real_offer_has_flight_numbers_and_a_key_of_its_own(self):
+        offers = parse(REAL_TRIP, recorded("roundtrip_outbound.json")).offers
+        self.assertTrue(all(segment.flight_number for offer in offers for segment in offer.segments))
+        self.assertEqual(len({offer.itinerary_key for offer in offers}), len(offers))
+
+    def test_nothing_in_a_search_reply_marks_a_catch_or_a_seller(self):
+        for offer in parse(REAL_TRIP, recorded("roundtrip_outbound.json")).offers:
+            self.assertIsNone(offer.seller)
+            self.assertIsNone(offer.return_segments)
+            self.assertFalse(offer.self_transfer or offer.hidden_city or offer.separate_tickets or offer.basic_economy)
+
+    def test_reply_says_when_serpapi_fetched_it(self):
+        when = fetched_at(recorded("roundtrip_outbound.json"))
+        self.assertEqual(when, datetime(2026, 10, 9, 0, 35, 57, tzinfo=timezone.utc))
+        self.assertIsNone(fetched_at({"search_metadata": {}}))
+        self.assertIsNone(fetched_at({"search_metadata": {"processed_at": "yesterday"}}))
 
     def test_sorting_by_price_brings_no_best_flights_and_no_price_insights(self):
         reply = recorded("roundtrip_outbound.json")

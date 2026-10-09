@@ -4,6 +4,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+from datetime import datetime
 from enum import Enum
 
 from ..models import Query, SearchResult
@@ -44,8 +45,15 @@ class Provider:
         raise NotImplementedError
 
     def parse(self, query: Query, raw: dict) -> SearchResult:
-        """Turn a raw reply, fresh or saved, into offers. Needed for LIVE_SEARCH."""
+        """Turn a raw reply, fresh or saved, into offers. Needed for LIVE_SEARCH.
+
+        Leave `source`, `fetched_at` and `verified_live` alone: scan stamps them on every offer.
+        """
         raise NotImplementedError
+
+    def fetched_at(self, raw: dict) -> datetime | None:
+        """When the source itself fetched this reply, in UTC, if the reply says. Else None."""
+        return None
 
     def budget_problem(self, calls: int) -> str | None:
         """Why this source cannot afford `calls` more calls right now, if it can't."""

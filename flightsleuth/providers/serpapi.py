@@ -1,6 +1,8 @@
 """SerpApi's Google Flights engine, as a provider."""
 from __future__ import annotations
 
+from datetime import datetime
+
 from .. import config, serpapi
 from ..models import Query, SearchResult
 from .base import Capability, DataClass, Provider
@@ -32,6 +34,9 @@ class SerpApiProvider(Provider):
 
     def parse(self, query: Query, raw: dict) -> SearchResult:
         return serpapi.parse(query, raw)
+
+    def fetched_at(self, raw: dict) -> datetime | None:
+        return serpapi.fetched_at(raw)
 
     def budget_problem(self, calls: int) -> str | None:
         self._account = account = self._connect().account()
