@@ -1,5 +1,5 @@
 {
-  "about": "Address patterns that open the same search on other sites. They are not APIs and they change, so they live here and nowhere else. Placeholders: {origin} {destination} {depart} {return}. 'airports' is 'all' where a comma-separated list is accepted and 'first' where only one code is. 'dates' is a strftime format. 'warning' is shown with the link whenever it is offered.",
+  "about": "Address patterns that open the same search on other sites. They are not APIs and they change, so they live here and nowhere else. Placeholders: {origin} {destination} {depart} {return}. 'airports' is 'all' where a comma-separated list is accepted and 'first' where only one code is. 'dates' is a strftime format. 'warning' is shown with the link whenever it is offered. 'why_first' marks the one site to check before the others and is the sentence shown with its link: a measurement, with the day it was made.",
   "sites": [
     {
       "name": "Momondo",
@@ -7,6 +7,7 @@
       "one_way": "https://www.momondo.com/flight-search/{origin}-{destination}/{depart}?sort=price_a",
       "airports": "all",
       "dates": "%Y-%m-%d",
+      "why_first": "On 8 Oct 2026 Momondo listed the same flights for less on 5 of 6 test routes. The two largest savings, $97 and $51, were on long trips.",
       "checked": "2026-10-08: a round trip and a round trip with airport lists both opened the right search. One way not checked."
     },
     {

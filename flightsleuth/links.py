@@ -4,6 +4,7 @@ from __future__ import annotations
 import functools
 import json
 from pathlib import Path
+from typing import NamedTuple
 
 from .models import Query
 
@@ -29,9 +30,24 @@ def site_link(site: dict, trip: Query) -> str:
     )
 
 
+def _label(site: dict) -> str:
+    return f"{site['name']} ({site['warning']})" if site.get("warning") else site["name"]
+
+
 def other_sites(trip: Query) -> list[tuple[str, str]]:
     """(label, address) for the same dates on each other site. A site's warning is part of its label."""
-    return [
-        (f"{site['name']} ({site['warning']})" if site.get("warning") else site["name"], site_link(site, trip))
-        for site in sites()
-    ]
+    return [(_label(site), site_link(site, trip)) for site in sites()]
+
+
+class First(NamedTuple):
+    """The site to check before the others, opened on one trip's dates."""
+
+    name: str  # as it is recorded, such as "Momondo"
+    label: str  # as it is shown: the name, with the site's warning if it has one
+    url: str
+    why: str  # what was measured that put it first, and when
+
+
+def first_site(trip: Query) -> First | None:
+    site = next((site for site in sites() if site.get("why_first")), None)
+    return First(site["name"], _label(site), site_link(site, trip), site["why_first"]) if site else None
