@@ -149,8 +149,10 @@ def cmd_search(args: argparse.Namespace) -> int:
 
 
 def cmd_gui(args: argparse.Namespace) -> int:
-    from .gui import main as open_window  # imported late so the command line works without tkinter
-
+    try:
+        from .gui import main as open_window  # imported late so the command line works without tkinter
+    except ImportError:
+        raise UserError("the window needs tkinter, which this Python was installed without") from None
     open_window()
     return 0
 

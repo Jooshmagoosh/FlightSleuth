@@ -92,4 +92,4 @@ py -m unittest discover -s tests -t .
 
 The tests fake SerpApi's replies, so they need no key and spend no searches. They also run
 from a throwaway folder, so your real `.env` and saved results are never touched. The window
-tests open a hidden window and are skipped where there is no display.
+tests open a hidden window and are skipped where tkinter is missing or there is no display.

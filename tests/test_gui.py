@@ -1,11 +1,16 @@
 import gc
 import os
 import time
-import tkinter as tk
 import unittest
 from datetime import date
 from pathlib import Path
 from unittest import mock
+
+try:
+    import tkinter as tk
+except ImportError:
+    # Some Pythons ship without tkinter. The rest of the suite must still run there.
+    raise unittest.SkipTest("tkinter is not installed, so the window cannot be tested") from None
 
 from flightsleuth import config, gui
 from tests.fakes import FakeSerpApi, install

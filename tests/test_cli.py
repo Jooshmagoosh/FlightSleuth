@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import sys
 import unittest
 from unittest import mock
 
@@ -144,6 +145,12 @@ class CliTest(unittest.TestCase):
         code, out, err = self.run_cli("search", "jfk, ewr", "lhr", "--depart", "2030-03-12", "--one-way")
         self.assertEqual(code, 0, err)
         self.assertIn("JFK,EWR -> LHR", out)
+
+    def test_gui_command_explains_a_python_without_tkinter(self):
+        with mock.patch.dict(sys.modules, {"flightsleuth.gui": None}):
+            code, _, err = self.run_cli("gui")
+        self.assertEqual(code, 1)
+        self.assertIn("the window needs tkinter", err)
 
     def test_cache_command_counts_and_clears(self):
         self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
