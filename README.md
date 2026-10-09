@@ -155,12 +155,15 @@ It is on for `--window` and off otherwise. The line under the tables says which 
 
 ```
 py -m flightsleuth bakeoff docs/routes.txt --dry-run
+py -m flightsleuth bakeoff docs/routes.txt --only 2
 py -m flightsleuth bakeoff docs/routes.txt
 py -m flightsleuth bakeoff --report
 ```
 
 A route is one line: `MCO,SFB to JFK,EWR | depart between 2026-11-10 and 2026-12-20 | 2 to 4 nights`.
 The length may also be `7 nights` or `one way`. The first six routes are used unless `--routes N` says otherwise.
+`--only N` runs just the Nth route in the file, counting from 1: up to 25 searches, to try one
+route before paying for them all. Run within six hours, the full bake-off then replays that route for nothing.
 
 Each route gets a window search with the closer look. `--budget` (150 by default) is shared out
 evenly, and no route gets more than one run's limit. It asks before spending unless `--yes` is given.

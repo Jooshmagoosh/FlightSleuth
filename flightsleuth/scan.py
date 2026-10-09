@@ -260,16 +260,17 @@ def plan(
     keys = {Call(source.name, query): source.cache_key(query) for query in wanted for source in askers}
     replies = _saved(keys, max_age_hours, fresh)
 
-    # A saved listing may be too old for its tokens, and looking closer then starts by fetching it again.
+    # A saved listing may be too old for its tokens, and looking closer then starts by fetching it
+    # again. That call is counted for any source holding such a reply. It can never push a plan
+    # over a cap it was sized to, because the saved reply it replaces is one call the plan no
+    # longer needs; and the refining is left as it was, so an old run replays to the same fare.
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=TOKEN_MINUTES)
-    refresh = int(bool(checks) and any(reply.fetched_at < cutoff for reply in replies.values()))
-    if refresh and refine and strategy in ("sampled", "explore"):
-        refine -= 1  # these two are sized to the cap, so the extra call comes out of the refining
+    old = {call.provider for call, reply in replies.items() if reply.fetched_at < cutoff}
     reserved = {}
     for source in sources:
         follow = checks * costs[source.name]
-        if follow and source.capabilities & _FOLLOW_UPS:
-            follow += refresh
+        if follow and source.name in old and source.capabilities & _FOLLOW_UPS:
+            follow += 1
         if refine + follow:
             reserved[source.name] = refine + follow
     return Plan(

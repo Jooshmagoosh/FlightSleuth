@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import unittest
 from datetime import date, timedelta
 from unittest import mock
@@ -205,6 +206,24 @@ class WindowRunTest(unittest.TestCase):
         self.assertEqual((again.live, again.saved), (0, spent))
         self.assertEqual(pairs(again.trips), pairs(first.trips))
         self.assertEqual(again.checks[0].confirmed.price, first.checks[0].confirmed.price)
+
+    def test_an_old_window_run_replays_to_the_same_fare_for_nothing(self):
+        _, first = self.run_window()
+        spent = len(FakeSerpApi.searches)
+        # Two hours on, the saved listings are too old for a new lookup. Nothing new is needed.
+        db = sqlite3.connect(config.cache_path())
+        with db:
+            db.execute("UPDATE responses SET fetched_at = fetched_at - 7200")
+        db.close()
+
+        plan, again = self.run_window()
+        self.assertEqual((plan.refine_calls, plan.saved), (7, 12))
+        self.assertLessEqual(plan.live, 25)
+        self.assertEqual((len(FakeSerpApi.searches), again.live), (spent, 0))
+        self.assertEqual(pairs(again.trips), pairs(first.trips))
+        self.assertEqual(again.checks[0].trip, first.checks[0].trip)
+        self.assertEqual(again.checks[0].confirmed.price, first.checks[0].confirmed.price)
+        self.assertFalse(again.checks[0].confirmed.verified_live)
 
     def test_thorough_looks_closely_at_the_two_best_date_pairs(self):
         plan, outcome = self.run_window(thorough=True)

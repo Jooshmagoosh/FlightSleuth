@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import sqlite3
 import unittest
 from datetime import date
 from pathlib import Path
@@ -302,6 +303,41 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertIn("8 routes: up to ", err)
 
+    def test_one_route_can_be_picked_out_of_the_file_by_its_position(self):
+        with mock.patch.dict(os.environ, {config.KEY_VAR: ""}):
+            code, out, err = self.run_cli("bakeoff", "routes.txt", "--only", "2", "--dry-run")
+        self.assertEqual(code, 0, err)
+        lines = err.splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(lines[0].startswith("BOS to WAW: Up to 24 searches needed"))
+        self.assertTrue(lines[1].startswith("1 route: up to 25 live searches in all."))
+        self.assertEqual(FakeSerpApi.searches, [])
+
+    def test_that_one_route_runs_alone_and_stays_inside_one_runs_limit(self):
+        code, out, err = self.run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
+        self.assertEqual(code, 0, err)
+        self.assertLessEqual(len(FakeSerpApi.searches), 25)
+        self.assertEqual({(query.origin, query.destination) for query in FakeSerpApi.searches}, {("BOS", "WAW"), ("WAW", "BOS")})
+        self.assertIn("BOS to WAW: $", out)
+        self.assertIn("Bake-off report: 1 route\n", out)
+        self.assertEqual({row["route"] for row in rows("bakeoff_fares")}, {"BOS to WAW"})
+
+    def test_a_single_route_keeps_its_share_small_when_the_budget_is(self):
+        code, _, err = self.run_cli("bakeoff", "routes.txt", "--only", "1", "--budget", "15", "--dry-run")
+        self.assertEqual(code, 0, err)
+        self.assertIn("1 route: up to 15 live searches in all.", err)
+
+    def test_a_position_that_is_not_in_the_file_is_refused(self):
+        for position in ("0", "9"):
+            code, _, err = self.run_cli("bakeoff", "routes.txt", "--only", position, "--dry-run")
+            self.assertEqual(code, 1)
+            self.assertIn("routes.txt has 8 routes, so --only takes a number from 1 to 8", err)
+
+    def test_picking_one_route_and_taking_the_first_few_cannot_be_combined(self):
+        with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()) as err:
+            cli.main(["bakeoff", "routes.txt", "--only", "2", "--routes", "3"])
+        self.assertIn("not allowed with argument", err.getvalue())
+
     def test_it_will_not_spend_without_a_yes(self):
         code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "1")
         self.assertEqual(code, 1)
@@ -341,6 +377,22 @@ class BakeoffCommandTest(unittest.TestCase):
         code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
         self.assertEqual(code, 0, err)
         self.assertEqual(len(FakeSerpApi.searches), spent)
+
+    def test_a_route_tried_alone_replays_for_nothing_in_the_full_run_hours_later(self):
+        FakeSerpApi.phantoms = 1  # so the unsorted probe is part of what has to replay
+        self.run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
+        alone = len(FakeSerpApi.searches)
+        db = sqlite3.connect(config.cache_path())
+        with db:
+            db.execute("UPDATE responses SET fetched_at = fetched_at - 3 * 3600")
+        db.close()
+
+        code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+        self.assertEqual(code, 0, err)
+        again = FakeSerpApi.searches[alone:]
+        self.assertEqual([query for query in again if "WAW" in (query.origin, query.destination)], [])
+        self.assertRegex(out, r"BOS to WAW: \$\d+ confirmed, .* \(saved\)")
+        self.assertIn("Bake-off report: 3 routes", out)
 
     def test_running_into_the_hourly_limit_keeps_what_finished_and_says_how_to_carry_on(self):
         FakeSerpApi.account_reply["account_rate_limit_per_hour"] = 30

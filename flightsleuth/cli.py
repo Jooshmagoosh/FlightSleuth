@@ -190,13 +190,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     measure = commands.add_parser("bakeoff", help="measure each price source against SerpApi on a file of routes")
     measure.add_argument("routes", type=Path, nargs="?", help="the route file, e.g. docs/routes.txt")
-    measure.add_argument(
+    which = measure.add_mutually_exclusive_group()
+    which.add_argument(
         "--routes",
         dest="count",
         type=_count,
         default=bakeoff.DEFAULT_ROUTES,
         metavar="N",
         help=f"use the first N routes in the file; 0 for all (default: {bakeoff.DEFAULT_ROUTES})",
+    )
+    which.add_argument(
+        "--only",
+        type=_count,
+        default=None,
+        metavar="N",
+        help="run just the Nth route in the file, counting from 1, to try one before paying for them all",
     )
     measure.add_argument(
         "--budget",
@@ -350,14 +358,19 @@ def cmd_bakeoff(args: argparse.Namespace) -> int:
     if args.routes is None:
         raise UserError("name the route file, e.g. flightsleuth bakeoff docs/routes.txt")
     routes = bakeoff.read_routes(args.routes)
-    if args.count:
+    if args.only is not None:
+        if not 1 <= args.only <= len(routes):
+            raise UserError(f"{args.routes.name} has {len(routes)} routes, so --only takes a number from 1 to {len(routes)}")
+        routes = [routes[args.only - 1]]
+    elif args.count:
         routes = routes[: args.count]
     plans = bakeoff.plan(routes, budget=args.budget, max_age_hours=args.max_age, fresh=args.fresh)
     for route, plan in plans:
         print(f"{route.label}: {plan_line(plan)}", file=sys.stderr)
     most = bakeoff.ceiling(plans)
     extra = " That includes one for each route in case its cheapest fare has no return flights." if most else ""
-    print(f"{len(plans)} routes: up to {_searches(most, 'live')} in all.{extra}", file=sys.stderr)
+    count = f"{len(plans)} route{'s' if len(plans) != 1 else ''}"
+    print(f"{count}: up to {_searches(most, 'live')} in all.{extra}", file=sys.stderr)
     if args.dry_run:
         return 0
 

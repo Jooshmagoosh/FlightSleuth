@@ -13,6 +13,7 @@ py -m flightsleuth search JFK LHR --depart 2026-12-10 --nights 7 --dry-run   # p
 py -m flightsleuth search JFK LHR --window 2026-12-01 2027-03-01 --nights 5-9 --dry-run   # the gate search
 py -m flightsleuth explore MCO --area europe --month 3 --dry-run             # plan only, free
 py -m flightsleuth bakeoff docs/routes.txt --dry-run                         # plan only, free
+py -m flightsleuth bakeoff docs/routes.txt --only 2 --dry-run                # one route's plan, free
 py -m flightsleuth bakeoff --report          # what the last bake-off recorded; free
 py -m flightsleuth gui                       # the window (also: double-click "Start Flightsleuth.pyw")
 py -m flightsleuth quota                     # searches left; free
