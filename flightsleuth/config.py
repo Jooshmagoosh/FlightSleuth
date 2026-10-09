@@ -8,6 +8,16 @@ from .errors import UserError
 
 KEY_VAR = "SERPAPI_API_KEY"
 HOME_VAR = "FLIGHTSLEUTH_HOME"
+MODE_VAR = "FLIGHTSLEUTH_MODE"
+MODES = ("personal", "hosted")
+
+
+def mode() -> str:
+    """`personal` on the user's own machine, which is the default, or `hosted` when serving other people."""
+    value = os.environ.get(MODE_VAR, "").strip().lower() or MODES[0]
+    if value not in MODES:
+        raise UserError(f"{MODE_VAR} must be personal or hosted, not {value!r}")
+    return value
 
 
 def home() -> Path:
