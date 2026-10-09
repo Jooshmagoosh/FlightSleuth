@@ -25,8 +25,13 @@ Double-click `Start Flightsleuth.pyw`, or run `py -m flightsleuth gui` from this
 
 Fill in the airports and dates, press Search, and the cheapest price for each date
 and the cheapest flights appear below. The first column of every list says when that
-price was fetched. The button under the result opens that search on Google Flights in
-your browser, and the row below it opens the same dates on four other sites.
+price was fetched.
+
+Under a round trip's result the first button is "Check this fare on Momondo", which opens the
+same airports and dates there. Beside it, "Copy the address" puts that address on the clipboard
+for another browser, "Save the price you found there..." records what Momondo showed, and
+"Check and book" opens the search on Google Flights. The row below opens the same dates on
+three more sites. A one-way has "Check and book" and all four sites in the row below.
 
 Tick "Or search a whole range" to leave on any day between two dates, staying a span of
 nights. Tick "Confirm the best fare" to have the return flights and the sellers looked up;
@@ -174,19 +179,57 @@ For each route it records, in `history.db`:
 - the one-ticket price, when the cheapest fare is two separate tickets;
 - whether the cheapest listed fare had return flights, and, when it had none, whether a search in
   Google's own order (no `sort_by`) would have listed that fare at all. That costs one more search;
-- for Momondo, Skyscanner, Skiplagged and Kiwi.com, which have no provider yet: it opens the same
+- for Momondo, Skyscanner, Skiplagged and Kiwi.com, which have no provider: it opens the same
   dates in your browser and you type the best price you see. `--no-manual` skips this.
 
 The report says how often and by how much each one beat SerpApi, split into the same flights
 and a different itinerary. If a limit stops it part-way, run the same command again: finished
 routes replay from saved results.
 
+The owner ran it on six routes on 2026-10-08. [docs/ROADMAP.md](docs/ROADMAP.md) has every price.
+Momondo listed the same flights for less on five of the six; the next best site did on two. That
+is why the next section exists and why no second price source was built.
+
+## Check this fare on Momondo
+
+After a round trip, confirmed or not, the first link printed is Momondo's, ahead of Google's
+"Check and book" and the other three sites:
+
+```
+Check this fare on Momondo: https://www.momondo.com/flight-search/JFK-LHR/2026-12-10/2026-12-17?sort=price_a
+  Checking it on Momondo is a free way to confirm it: it uses none of your searches.
+  On 8 Oct 2026 Momondo listed the same flights for less on 5 of 6 test routes. The two largest savings, $97 and $51, were on long trips.
+```
+
+The first indented line appears only while the fare's return flights have not been fetched. It
+does not change the headline: only `--check` turns `Cheapest listed` into `Cheapest`. The link
+carries the airports and dates and nothing else, so a search for more than one adult, another
+cabin, a stop limit or bags adds a line saying what to set on the page before comparing.
+
+Flightsleuth does not fetch anything from Momondo. You open the page and read it. When you run
+`search` at a keyboard it then asks what you found:
+
+```
+USD price you found on Momondo for this fare (Enter to skip):
+Who sells it at that price (Enter to skip):
+Is that the same flights? y, n, or Enter if unsure:
+Did the seller's payment page show that price? y, n, or Enter if you did not get that far:
+```
+
+Enter at the first question skips all four. Nothing is asked when the output is piped or
+scheduled, after a one-way, on a dry run, or with `--no-record`. The answers go into
+`site_prices` in `history.db`, beside the fare they were checked against, and a line says which
+was cheaper and by how much, with both times. The window does the same through its save button.
+
+Momondo's deal buttons did not work in the owner's Firefox in October 2026 and did in Chrome.
+
 ## Other sites
 
 Links to the same dates on Momondo, Skyscanner, Skiplagged and Kiwi.com are built from
 `flightsleuth/links.json`. These are address patterns, not APIs, and they change; each entry
 says when it was last checked and how far. Skiplagged's and Kiwi.com's links say that those
-sites list hidden-city and self-transfer fares.
+sites list hidden-city and self-transfer fares. The entry marked `why_first` is the site a
+round trip leads with, and that text is the sentence shown with its link.
 
 ## What it keeps on disk
 
@@ -201,13 +244,17 @@ Two files, in `%LOCALAPPDATA%\flightsleuth` on Windows and `~/.cache/flightsleut
   - `provider_calls`: every call, live or saved, with what it was for.
   - `google_price_history`: Google's own daily lowest price, when a reply carries it. One row a day per search.
   - `bakeoff_fares` and `bakeoff_lookups`: what each bake-off found.
+  - `site_prices`: each price you read on another site and typed in, with the seller, your two
+    answers, and the fare of flightsleuth's it was checked against: its price, its flights, when
+    it was fetched and whether it had been confirmed. No command reads it back yet; any SQLite
+    tool can.
 
 ## Price sources
 
 Every source sits behind one interface in `flightsleuth/providers` and is labelled by how it may
 be used: `vendor` (a paid API), `sanctioned` (offered by its owner for programs to call) or
-`personal_only` (only ever from your own machine). SerpApi, labelled `vendor`, is the only source
-today.
+`personal_only` (only ever from your own machine). SerpApi, labelled `vendor`, is the only source.
+The bake-off justified no second one, and nothing here scrapes Momondo or any other site.
 
 `FLIGHTSLEUTH_MODE` is `personal` by default. Set it to `hosted` when running flightsleuth for
 other people: `personal_only` sources then refuse to load.
@@ -231,6 +278,10 @@ No source marks one today.
   flight (one was 37 hours), so price the dates before relying on them.
 - `explore --area` and a bare `explore` are built from SerpApi's documentation, which shows a list
   of places with a start date and no end date. No real reply of that kind has been recorded.
+- "5 of 6 test routes" is six round trips, read by eye on one evening. Two of the five lower
+  prices were followed to the seller's payment page, and both held.
+- A price you type is kept as you typed it. Nothing checks it against the site.
+- A one-way keeps Momondo among the other sites: its one-way link has never been checked.
 - Fares move. Treat a saved price as a lead and confirm it on the link before booking.
 
 ## Tests

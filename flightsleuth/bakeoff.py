@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from . import config, links, render, scan
+from . import config, links, render, scan, typed
 from .errors import UserError
 from .history import History
 from .models import Check, Offer, Query
@@ -209,19 +209,12 @@ def _typed(label: str, url: str, currency: str, ask, open_link, say) -> tuple[fl
     say(f"  {label}: {url}")
     if open_link:
         open_link(url)
-    while True:
-        answer = ask(f"  Best {currency} price there for these dates (Enter to skip): ").strip()
-        if not answer:
-            return None
-        try:
-            price = float(answer.replace(",", "").lstrip("$"))
-            if price <= 0:
-                raise ValueError
-            break
-        except ValueError:
-            say(f"  {answer!r} is not a price. Type a number such as 412, or press Enter to skip.")
-    same = ask("  Is that the same flights as above? y, n, or Enter if unsure: ").strip().lower()[:1]
-    return price, {"y": True, "n": False}.get(same)
+    price = typed.ask_price(
+        ask, lambda line: say("  " + line), f"  Best {currency} price there for these dates (Enter to skip): "
+    )
+    if price is None:
+        return None
+    return price, typed.yes_no(ask("  Is that the same flights as above? y, n, or Enter if unsure: "))
 
 
 def new_run() -> str:

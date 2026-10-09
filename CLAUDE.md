@@ -54,6 +54,10 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 - Never call a round-trip fare the cheapest until its return flights have been fetched. Until
   then both front ends print `Cheapest listed: $N ... (not yet confirmed)`. `Summary.headline`
   and `Summary.caveat` hold that wording, and the tests pin all four forms of the line.
+  A price somebody found on another site never changes that line.
+- No Momondo provider and no scraper of any kind, and no Kiwi, Travelpayouts or Skiplagged
+  provider. The owner ruled this on 2026-10-09 from the bake-off. Other sites are reached by a
+  link that a person opens, and what they read there is typed in.
 
 ## Layout
 
@@ -66,8 +70,9 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 | `models.py` | `Query`, `Explore`, `Segment`, `Offer`, `Seller`, `Alternative`, `Check`, `Destination`, `Insights`, `SearchResult`. |
 | `cache.py` | Disposable SQLite cache of raw replies (`cache.db`). Pruned after any run that fetched something. |
 | `history.py` | Append-only tables in `history.db`. Never cleared. |
-| `render.py` | Wording shared by both front ends, including the headline rules and every catch. |
-| `links.py`, `links.json` | Addresses for the same dates on other sites. The patterns are data and say when they were checked. |
+| `render.py` | Wording shared by both front ends, including the headline rules, every catch and the next step. |
+| `links.py`, `links.json` | Addresses for the same dates on other sites. The patterns are data and say when they were checked. One site is marked `why_first`. |
+| `typed.py` | Prices somebody read on another site and typed in: parsing, the questions, and the `site_prices` row. Reaches no network. |
 | `bakeoff.py` | Route file, budget sharing, recording and the report. Its calls go through `scan`. |
 | `cli.py`, `gui.py` | The two front ends. They hold no search logic. |
 | `config.py` | Data folder, API key, run mode. |
@@ -110,8 +115,21 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
   exists for the bake-off's probe, which asks whether Google's own order lists a fare that failed.
 - **Stopping.** After the first failed call no further call is sent; calls already in flight
   finish and are saved.
+- **The next step.** After a round trip, confirmed or not, both front ends lead with
+  `Check this fare on Momondo`, then Google's `Check and book`, then the other three sites.
+  `Summary.next_step` holds it, with the fare a price found there is set against: the confirmed
+  fare if there is one, else the listing. A one-way, and two one-ways that beat the round trip,
+  have none and keep all four sites in `Summary.other_links`. The sentence shown with it is
+  `why_first` in `links.json`: a dated measurement, to be replaced when it is measured again.
+- **Typed prices.** `typed.record` writes one `site_prices` row: the price, the seller, whether it
+  was the same flights, whether the seller's payment page showed it, and our fare with its fetch
+  time and whether it was confirmed. The command line asks at the end of `search` when someone
+  is at the keyboard (`--no-record` turns it off); the window has a button. A typed price goes
+  nowhere else: no `price_points` row, no change to the headline. The window tests replace the
+  clipboard in `GuiTest.setUp`, so a new window test class must reuse it.
 - **Pinned by tests, so work around rather than change:** the window's table headings and cell
   values, its detail text, the `price_points` columns, and the wording
   `N searches needed: X saved, Y live.` for a plan with nothing reserved. New window content goes
-  in new widgets; the fetch time is the tree column `#0`. The owner changes pinned wording, as
-  with the headline on 2026-10-08; nobody else does.
+  in new widgets; the fetch time is the tree column `#0`. The window has two tabs, and a test
+  pins that too. The owner changes pinned wording, as with the headline on 2026-10-08 and the
+  Momondo sentence and link order on 2026-10-09; nobody else does.

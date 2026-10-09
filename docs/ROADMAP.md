@@ -41,6 +41,30 @@ Decided on 2026-10-08, after Phase 2 was built:
 - **`auto` never picks the `one-way` or `explore` strategy.**
 - **A search priced with `--bags` or `--market` writes no `price_points` row.**
 
+Decided on 2026-10-09, from the bake-off results below:
+
+- **Phase 3 is rescoped** to the three items listed under it. They replace the brief's
+  "Phase 3, second sources".
+- **No Momondo provider and no scraper of any kind.** Momondo is reached by its link, opened by a
+  person, and the price found there is typed in.
+- **No Kiwi, Travelpayouts or Skiplagged provider.**
+- **Phase 3 needs no searches**, so it spends no credits.
+- **`sort_by=2` stays**, now on the bake-off's count as well. The cheapest listed fare had return
+  flights on all 6 routes, and the closer look covers the rare miss.
+- **Momondo is promoted on every round trip, confirmed or not.** Under a fare that is not
+  confirmed it also says that checking it on Momondo is a free way to confirm it. One-way results
+  stay as they were.
+- **The order is Momondo, then Google's "Check and book", then the other three sites.**
+- **The sentence shown with it**: "On 8 Oct 2026 Momondo listed the same flights for less on 5 of
+  6 test routes. The two largest savings, $97 and $51, were on long trips."
+- **The command line asks for the price found at the end of a search**, as the bake-off does:
+  Enter skips, nobody is asked when no one is at the keyboard, and `--no-record` turns it off.
+- **Two more questions go with the price and the seller**, both skippable: whether it was the
+  same flights, and whether the seller's payment page showed that price. A price recorded against
+  a fare that was not confirmed is stored as such.
+- **The window gets a "Copy the address" button** beside the Momondo one, because its deal buttons
+  did not work in the owner's Firefox.
+
 ## Found in the real replies
 
 These come from `tests/fixtures`; its README has the detail.
@@ -65,7 +89,7 @@ These come from `tests/fixtures`; its README has the detail.
   and a real search reply takes 120 to 220 KB there. The owner's file had reached 12 MB by the end
   of Phase 1.
 
-## Phase 2, smarter search and measurement: built, awaiting review (branch `phase-2-search`)
+## Phase 2, smarter search and measurement: merged (branch `phase-2-search`, pull request #2)
 
 Gate: the search that costs 455 calls today (91-day window, trips of 5 to 9 nights) dry-runs at
 25 or fewer by default and about 40 with `--thorough`, and the bake-off report runs on the
@@ -75,12 +99,12 @@ Where the gate stands:
 
 - **Met:** the 455-pair search dry-runs at exactly 25, and at 40 with `--thorough`. `tests/test_window.py`
   and `tests/test_commands.py` pin both.
-- **Waiting on the owner:** `bakeoff docs/routes.txt --dry-run` plans the six routes at up to 150
-  live searches, and the report runs on what a bake-off records. The bake-off itself has not been
-  run; that is the owner's to start. `bakeoff docs/routes.txt --only N` runs one route first.
+- **Met:** the owner ran the bake-off on the six routes in `docs/routes.txt` on 2026-10-08, and
+  `bakeoff --report` prints it. What it found is under "Bake-off results" below.
 
-Credits spent in this phase: two, on the owner's say-so, for the two explore replies in
-`tests/fixtures`. Monthly searches left went from 168 to 166.
+Credits spent while building this phase: two, on the owner's say-so, for the two explore replies
+in `tests/fixtures`. Monthly searches left went from 168 to 166. The owner's bake-off then made
+135 live searches, inside its budget of 150; `provider_calls` in `history.db` counts them.
 
 - [x] Departure window on `Request`; planner strategies reported through `Plan`
 - [x] Return flights and booking options (seller) through the token chain
@@ -103,7 +127,9 @@ Requirements added after Phase 1:
 - [x] Store `price_history` in its own table, as decided above. Real replies now contain it.
 - [x] In the bake-off, count how often the cheapest listed fare fails its return-flight lookup,
       and whether dropping `sort_by` would have avoided it.
-- [ ] Decide `sort_by` from that count. Needs the bake-off to have been run.
+- [x] Decide `sort_by` from that count. Decided by the owner on 2026-10-09: it stays. The
+      cheapest listed fare had return flights on all 6 bake-off routes, and the closer look
+      covers the rare miss.
 - [ ] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
       Google's lowest price, its rating and 61 days of price history.
 
@@ -174,12 +200,101 @@ Still for the owner to confirm or overturn:
   pair, refining reached a pair $10 from the best. That says the stages work, not how good the
   fares it finds on real routes are; the bake-off's baseline is the first real measure of that.
 
-## Phase 3, second sources: not started
+## Bake-off results, 2026-10-08
 
-Gate: the mode test passes and each provider has recorded-response tests.
+Six routes, each a window search with the closer look, run by the owner between 23:10 and 23:36
+local time. SerpApi's fare is the confirmed one. The four site prices were read by eye from the
+page each link opened and typed in, once, and all 24 were marked as the same flights. The rows are
+in `bakeoff_fares` in the owner's `history.db`; `bakeoff --report` prints the summary.
 
-- [ ] Only sources the bake-off justifies: Skiplagged MCP, Kiwi MCP, Travelpayouts Data API,
-      then optional `personal_only` providers
+| Route and dates | SerpApi | Momondo | Skyscanner | Skiplagged | Kiwi.com |
+| --- | --- | --- | --- | --- | --- |
+| MCO,SFB to JFK,EWR,LGA, 5 to 8 Dec 2026 | $147 | $129 | $210 | $169 | $220 |
+| BOS to WAW, 24 Jan to 2 Feb 2027 | $482 | $480 | $555 | $482 | $624 |
+| MCO,SFB to PVG,SHA, 12 to 26 Jan 2027 | $1,094 | $997 | $1,094 | $1,057 | $1,163 |
+| MCO,SFB to DCA,IAD,BWI, 14 to 17 Nov 2026 | $44 | $43 | $137 | $137 | $167 |
+| BOS to LAX,BUR,SNA,LGB,ONT, 29 Jun to 5 Jul 2027 | $347 | $369 | $395 | $412 | $472 |
+| MCO,SFB to WAW, 6 to 14 Apr 2027 | $704 | $653 | $681 | $680 | $720 |
+
+- **Momondo listed the same flights for less on 5 of the 6 routes, by $33.80 (6%) on average.**
+  The five savings were $97, $51, $18, $2 and $1. On the sixth, Boston to Los Angeles, it was $22 dearer.
+- **The two largest savings were the two long trips from Orlando**: $97 to Shanghai and $51 to
+  Warsaw. The third long trip, Boston to Warsaw, saved $2. As a share of the fare the largest was
+  Orlando to New York, 12%.
+- **Two Momondo fares were followed to the seller's payment page by the owner, and both held**:
+  $43 against $44 (Orlando to Washington) and $997 against $1,094 (Orlando to Shanghai).
+- **Skiplagged was cheaper on 2 routes** ($37 and $24), **Skyscanner on 1** ($23), **Kiwi.com on none.**
+- **Another country's price was cheaper on 0 of 3**: Poland twice, China once.
+- **Two one-way tickets were cheaper on 1 of 6**: Orlando to New York, $129 against $147, with a
+  different flight out.
+- **The cheapest listed fare had return flights on all 6 routes**, so the search in Google's own
+  order was never made.
+
+Six routes on one evening is a small sample, and only two of the five savings were followed past
+the listing. Phase 3 item 2 exists to build a larger one.
+
+## Phase 3, the Momondo next step: built, awaiting review (branch `phase-3-momondo`)
+
+Rescoped by the owner on 2026-10-09. The bake-off justified no new provider, so this replaces the
+brief's "Phase 3, second sources" and its list (Skiplagged MCP, Kiwi MCP, Travelpayouts Data API,
+`personal_only` providers). The phase is now only the three items below; the owner's rulings on
+how they are built are under "Decisions the owner has made".
+
+Gate, confirmed by the owner on 2026-10-09: the three items are done and tested, the registry
+still holds SerpApi alone, the mode test passes, and the phase added no call to any network. It
+stands in for the brief's gate, "the mode test passes and each provider has recorded-response
+tests", because no provider is being added.
+
+Where the gate stands: met. The suite is 399 tests, 50 of them new, and all pass.
+`tests/test_next_step.py` and `NextStepWindowTest` in `tests/test_gui.py` cover the three items.
+`GateTest` pins that SerpApi is the only source and that `serpapi.py` is the only module importing
+anything that reaches a network. `tests/test_mode.py` passes unchanged.
+
+Credits spent in this phase: none. No search was made and no site was opened.
+
+- [x] "Check this fare on Momondo" is the main next step after a round trip, in the window and on
+      the command line, ahead of the other site links. It says plainly that Momondo listed lower
+      on 5 of 6 test routes and that the saving was larger on long trips.
+- [x] The owner can record the price found there, and the seller's name, so that `history.db`
+      builds up real savings data over time.
+- [x] `HOW-TO-USE.txt` notes that Momondo's deal buttons did not work for the owner in Firefox and
+      did in Chrome.
+
+Not built, as ruled: a Momondo provider, any scraper, or a Kiwi, Travelpayouts or Skiplagged provider.
+
+### Decisions made while building
+
+For the owner to confirm or overturn:
+
+- **Two one-way tickets that beat the round trip get no Momondo step** and keep the four links
+  they had. The ruling was "every round trip, confirmed or not"; here the fare is not one ticket,
+  and Momondo's page for those dates would be compared with the wrong price.
+- **The step says what the link cannot carry.** Momondo's address holds the airports and dates
+  only. A search for more than one adult, another cabin, a stop limit or bags adds a line naming
+  what to set on the page, so that a price for one adult is not recorded against a fare for two.
+- **The price is typed into a small separate window, opened by a button.** A third tab would have
+  broken the test that pins the two tabs, and boxes in the main window cost height the tables need.
+- **"Check and book" shares the row with the Momondo buttons, to their right**, and the window
+  starts two lines taller where the screen allows. Stacked, the new row and its sentence squeezed
+  the flights table to nothing at the starting size.
+- **The sentence is data**: `why_first` in `links.json`, beside the address pattern, as each site's
+  warning is. It names its own date and should be replaced when the measurement is repeated.
+- **A typed price lives only in `site_prices`.** It writes no `price_points` row and never changes
+  the headline: a fare found on Momondo does not turn `Cheapest listed` into `Cheapest`.
+- **Saving twice writes two rows.** The table is append-only like the others, so a price cannot be
+  corrected, only added again.
+- **Two existing tests changed**, both because the ruling moves Momondo out of "Same dates on" for
+  a round trip: `test_the_best_dates_come_with_a_link_to_each_other_site` in
+  `tests/test_commands.py` and `test_the_best_dates_can_be_opened_on_each_other_site` in
+  `tests/test_gui.py`. No other existing test was touched.
+
+### Not done
+
+- **Nothing reads `site_prices` back.** The rows are kept; no command reports on them yet.
+- **No Momondo page was opened in this phase.** Its round-trip link was last checked on
+  2026-10-08, and its one-way link never has been, which is why a one-way does not lead with it.
+- **The window was looked at once, on the owner's machine**, with the test fake behind it: a
+  round trip nobody confirmed, with a price saved. Other screens and scalings were not tried.
 
 ## Phase 4, watches and alerts: not started
 
