@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .models import Offer, Query
 
-TABLES = ("price_points", "provider_calls", "google_price_history", "bakeoff_fares", "bakeoff_lookups")
+TABLES = ("price_points", "provider_calls", "google_price_history", "bakeoff_fares", "bakeoff_lookups", "site_prices")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS price_points (
@@ -82,6 +82,32 @@ CREATE TABLE IF NOT EXISTS bakeoff_lookups (
     cheapest INTEGER NOT NULL,     -- 1 it was the cheapest fare listed for those dates
     found INTEGER NOT NULL,        -- 1 return flights came back, 0 the reply was empty
     in_unsorted INTEGER            -- after a miss: 1 Google's own order still listed it, 0 it did not, NULL not checked
+);
+-- A price somebody read on another site and typed in, beside the fare flightsleuth had shown them.
+-- Nothing here was fetched by a program, so none of it goes into price_points.
+CREATE TABLE IF NOT EXISTS site_prices (
+    id INTEGER PRIMARY KEY,
+    origin TEXT NOT NULL,          -- the search, as in price_points
+    destination TEXT NOT NULL,
+    depart_date TEXT NOT NULL,
+    return_date TEXT,
+    adults INTEGER NOT NULL,
+    cabin TEXT NOT NULL,
+    stops TEXT NOT NULL,
+    currency TEXT NOT NULL,
+    market TEXT NOT NULL,          -- '' for the source's default
+    bags INTEGER NOT NULL,
+    site TEXT NOT NULL,            -- such as "Momondo"
+    price REAL NOT NULL,           -- as typed
+    seller TEXT NOT NULL,          -- who the site said sells it at that price, as typed; '' when not given
+    same_flights INTEGER,          -- 1 the flights of our fare, 0 a different itinerary, NULL not known
+    held INTEGER,                  -- 1 the seller's payment page showed that price, 0 it did not, NULL not followed that far
+    our_price REAL NOT NULL,       -- the fare it is set against
+    our_source TEXT NOT NULL,      -- the provider that fare came from
+    our_fetched_at TEXT,           -- UTC, when that fare was fetched
+    our_confirmed INTEGER NOT NULL, -- 1 that fare's return flights had been fetched, 0 it was only listed
+    itinerary_key TEXT NOT NULL,   -- that fare's flights
+    recorded_at TEXT NOT NULL      -- UTC, when the price was typed
 );
 """ + "".join(
     f"""
@@ -220,6 +246,51 @@ class History:
                 ),
             )
 
+    def add_site_price(
+        self,
+        trip: Query,
+        site: str,
+        price: float,
+        *,
+        seller: str,
+        same_flights: bool | None,
+        held: bool | None,
+        ours: Offer,
+        confirmed: bool,
+        recorded_at: datetime,
+    ) -> None:
+        """Keep a price read on another site by eye, with the fare of ours it was checked against."""
+        with self._db:
+            self._db.execute(
+                "INSERT INTO site_prices (origin, destination, depart_date, return_date, adults, cabin, stops,"
+                " currency, market, bags, site, price, seller, same_flights, held, our_price, our_source,"
+                " our_fetched_at, our_confirmed, itinerary_key, recorded_at)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    trip.origin,
+                    trip.destination,
+                    trip.depart_date.isoformat(),
+                    trip.return_date.isoformat() if trip.return_date else None,
+                    trip.adults,
+                    trip.cabin,
+                    trip.stops,
+                    trip.currency,
+                    trip.market,
+                    trip.bags,
+                    site,
+                    price,
+                    seller,
+                    None if same_flights is None else int(same_flights),
+                    None if held is None else int(held),
+                    ours.price,
+                    ours.source,
+                    _utc(ours.fetched_at) if ours.fetched_at else None,
+                    int(confirmed),
+                    ours.itinerary_key,
+                    _utc(recorded_at),
+                ),
+            )
+
     def price_points(self) -> list[dict]:
         return [dict(row) for row in self._db.execute("SELECT * FROM price_points ORDER BY id")]
 
@@ -234,6 +305,9 @@ class History:
 
     def bakeoff_lookups(self) -> list[dict]:
         return [dict(row) for row in self._db.execute("SELECT * FROM bakeoff_lookups ORDER BY id")]
+
+    def site_prices(self) -> list[dict]:
+        return [dict(row) for row in self._db.execute("SELECT * FROM site_prices ORDER BY id")]
 
     def close(self) -> None:
         self._db.close()

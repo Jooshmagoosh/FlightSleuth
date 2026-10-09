@@ -1,10 +1,12 @@
 import contextlib
 import io
+import sqlite3
 import unittest
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from unittest import mock
 
-from flightsleuth import cli, links, scan
+from flightsleuth import cli, config, links, scan
+from flightsleuth.history import History
 from flightsleuth.models import Query
 from flightsleuth.render import UNCONFIRMED, summarise
 from tests.fakes import FakeSerpApi, install, rich_reply
@@ -166,3 +168,103 @@ class NextStepTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+TYPED_AT = datetime(2030, 1, 2, 12, 0, tzinfo=timezone.utc)
+
+
+def site_prices():
+    history = History(config.history_path())
+    try:
+        return history.site_prices()
+    finally:
+        history.close()
+
+
+class SitePriceTableTest(unittest.TestCase):
+    """history.db keeps what was read on another site, and what it was read against."""
+
+    def setUp(self):
+        install(self)
+        FakeSerpApi.rich = True
+
+    def keep(self, step, price, **answers):
+        answers = {"seller": "", "same_flights": None, "held": None, **answers}
+        history = History(config.history_path())
+        try:
+            history.add_site_price(
+                step.trip, step.site, price, ours=step.fare, confirmed=step.confirmed, recorded_at=TYPED_AT, **answers
+            )
+        finally:
+            history.close()
+
+    def test_a_typed_price_is_kept_beside_the_fare_it_was_checked_against(self):
+        before = datetime.now(timezone.utc) - timedelta(seconds=2)
+        self.keep(summary(check=True, adults=2, bags=1).next_step, 499.5, seller="Mytrip", same_flights=True, held=False)
+        (row,) = site_prices()
+        fetched = datetime.fromisoformat(row.pop("our_fetched_at"))
+        self.assertTrue(before <= fetched <= datetime.now(timezone.utc) + timedelta(seconds=2))
+        self.assertEqual(
+            row,
+            {
+                "id": 1,
+                "origin": "JFK",
+                "destination": "LHR",
+                "depart_date": "2030-03-12",
+                "return_date": "2030-03-19",
+                "adults": 2,
+                "cabin": "economy",
+                "stops": "any",
+                "currency": "USD",
+                "market": "",
+                "bags": 1,
+                "site": "Momondo",
+                "price": 499.5,
+                "seller": "Mytrip",
+                "same_flights": 1,
+                "held": 0,
+                "our_price": 555,
+                "our_source": "serpapi",
+                "our_confirmed": 1,
+                "itinerary_key": "TA1@2030-03-12T18:30|TA2@2030-03-19T09:00",
+                "recorded_at": "2030-01-02T12:00:00+00:00",
+            },
+        )
+
+    def test_a_price_set_against_a_fare_nobody_confirmed_says_so(self):
+        self.keep(summary().next_step, 480)
+        (row,) = site_prices()
+        self.assertEqual((row["our_price"], row["our_confirmed"], row["itinerary_key"]), (520, 0, "TA1@2030-03-12T18:30"))
+        self.assertEqual((row["seller"], row["same_flights"], row["held"]), ("", None, None))
+
+    def test_it_adds_nothing_to_the_prices_flightsleuth_fetched_itself(self):
+        step = summary().next_step
+        history = History(config.history_path())
+        fetched = history.price_points()
+        history.close()
+        self.keep(step, 480)
+        history = History(config.history_path())
+        self.addCleanup(history.close)
+        self.assertEqual(history.price_points(), fetched)
+        self.assertEqual(len(fetched), 1)
+
+    def test_its_rows_cannot_be_changed_or_deleted(self):
+        self.keep(summary().next_step, 480)
+        db = sqlite3.connect(config.history_path())
+        self.addCleanup(db.close)
+        for statement in ("UPDATE site_prices SET price = 1", "DELETE FROM site_prices"):
+            with self.assertRaisesRegex(sqlite3.DatabaseError, "append-only", msg=statement):
+                db.execute(statement)
+        db.rollback()
+        self.assertEqual(site_prices()[0]["price"], 480)
+
+    def test_a_history_file_from_before_this_table_gains_it_and_keeps_its_rows(self):
+        step = summary().next_step
+        db = sqlite3.connect(config.history_path())
+        db.executescript("DROP TRIGGER site_prices_no_update; DROP TRIGGER site_prices_no_delete; DROP TABLE site_prices;")
+        db.close()
+        self.keep(step, 480)
+        self.assertEqual(len(site_prices()), 1)
+        history = History(config.history_path())
+        self.addCleanup(history.close)
+        self.assertEqual(len(history.price_points()), 1)
