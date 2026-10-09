@@ -5,14 +5,14 @@ import argparse
 import re
 import sys
 import webbrowser
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from . import bakeoff, config, providers, scan, typed
+from . import bakeoff, config, notify, providers, scan, typed, watch
 from .cache import Cache
 from .errors import UserError
 from .models import Explore
-from .render import NO_FARES, render_places, render_text, summarise
+from .render import NO_FARES, budget_lines, render_places, render_text, summarise, watch_lines, watch_title
 from .serpapi import CABINS, DURATIONS, STOPS
 
 # The only regions SerpApi's documentation gives an id for. Any other is passed as its id.
@@ -65,6 +65,16 @@ def _count(value: str) -> int:
     if number < 0:
         raise argparse.ArgumentTypeError(f"{value!r} is not a whole number of zero or more")
     return number
+
+
+def _price(value: str) -> float:
+    try:
+        amount = typed.price(value)
+    except ValueError:
+        amount = None
+    if amount is None:
+        raise argparse.ArgumentTypeError(f"{value!r} is not a price like 450")
+    return amount
 
 
 def _country(value: str) -> str:
@@ -223,6 +233,49 @@ def build_parser() -> argparse.ArgumentParser:
     measure.add_argument("--no-open", action="store_true", help="print each site's link without opening the browser")
     measure.add_argument("--report", action="store_true", help="print the report from what is already recorded; free")
     _saving_options(measure)
+
+    watching = commands.add_parser("watch", help="keep an eye on a fare and be told on your phone when it drops")
+    actions = watching.add_subparsers(dest="action", required=True)
+    add = actions.add_parser("add", help="watch the cheapest fare on fixed dates; adding costs nothing")
+    add.add_argument("origin", type=_airports, help="departure airport(s), e.g. JFK or JFK,EWR,LGA")
+    add.add_argument("destination", type=_airports, help="arrival airport(s), e.g. LHR or LHR,LGW")
+    add.add_argument("--depart", type=_date, required=True, metavar="YYYY-MM-DD", help="the day to leave")
+    back = add.add_mutually_exclusive_group(required=True)
+    back.add_argument("--return", dest="return_date", type=_date, metavar="YYYY-MM-DD")
+    back.add_argument("--nights", type=_count, metavar="N", help="come back this many nights later")
+    back.add_argument("--one-way", action="store_true")
+    add.add_argument("--below", type=_price, default=None, metavar="PRICE", help="alert when the fare is below this")
+    add.add_argument(
+        "--drop",
+        type=float,
+        default=watch.DEFAULT_DROP,
+        metavar="PERCENT",
+        help=f"alert when it is this far under the median of Google's daily lows for the last {watch.MEDIAN_DAYS} "
+        f"days (default: {watch.DEFAULT_DROP:g}; 0 turns this off)",
+    )
+    add.add_argument(
+        "--no-typical", action="store_true", help="do not alert just because it is below Google's typical range"
+    )
+    add.add_argument("--every", type=_count, default=1, metavar="DAYS", help="days between checks (default: 1)")
+    add.add_argument("--stops", choices=list(STOPS), default="any", help="most stops allowed (default: any)")
+    add.add_argument("--cabin", choices=list(CABINS), default="economy")
+    add.add_argument("--adults", type=_count, default=1)
+    add.add_argument("--currency", default="USD")
+    add.add_argument("--dry-run", action="store_true", help="show whether the searches cover it, and add nothing")
+    shown = actions.add_parser("list", help="show each watch: its last check, last price, next due date and searches used")
+    shown.add_argument("--all", action="store_true", help="also show watches that were removed or have retired")
+    remove = actions.add_parser("remove", help="stop checking a watch; its history is kept")
+    remove.add_argument("number", type=_count, help="the watch's number, as `watch list` shows it")
+    run = actions.add_parser("run", help="check every watch that is due, once, and exit. This spends searches")
+    run.add_argument("--dry-run", action="store_true", help="show what is due and what it could cost, then stop")
+    run.add_argument(
+        "--max-searches", type=_count, default=None, metavar="N", help="the most live searches this run may make"
+    )
+    setup = actions.add_parser("setup", help="make the secret ntfy topic the alerts go to, and show how to subscribe")
+    setup.add_argument("--new", action="store_true", help="replace the topic with a new one")
+    actions.add_parser("test-alert", help="send a test alert to your phone; makes no search")
+    limit = actions.add_parser("limit", help="show or set the most searches the watches may use in a month")
+    limit.add_argument("searches", type=_count, nargs="?", help="the new limit")
 
     commands.add_parser("gui", help="open the search window")
     commands.add_parser("quota", help="show how many SerpApi searches are left")
@@ -432,6 +485,125 @@ def cmd_bakeoff(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_watch(args: argparse.Namespace) -> int:
+    return WATCH_ACTIONS[args.action](args)
+
+
+def _watch_add(args: argparse.Namespace) -> int:
+    if args.nights == 0:
+        raise UserError("--nights must be 1 or more; for a one-way fare use --one-way")
+    back = args.return_date or (args.depart + timedelta(days=args.nights) if args.nights else None)
+    wanted = watch.trip(
+        args.origin,
+        args.destination,
+        args.depart,
+        back,
+        adults=args.adults,
+        cabin=args.cabin,
+        stops=args.stops,
+        currency=args.currency.upper(),
+    )
+    try:
+        added = watch.add(
+            wanted,
+            below=args.below,
+            drop_percent=args.drop,
+            typical=not args.no_typical,
+            every_days=args.every,
+            dry_run=args.dry_run,
+        )
+    except watch.OverBudget as e:
+        # The sums first, so the refusal that follows them can be checked.
+        print("\n".join(budget_lines(e.budget)), file=sys.stderr)
+        raise
+    if added.budget:
+        print("\n".join(budget_lines(added.budget)))
+    if args.dry_run:
+        print(f"That fits. Nothing was added: {watch_title(added.watch.trip)}.")
+        return 0
+    print(f"Watching, as number {added.watch.id}: {watch_title(added.watch.trip)}. Adding it used no searches.")
+    print("It is checked the next time the watches are run: py -m flightsleuth watch run")
+    if config.ntfy_topic() is None:
+        print(f"Alerts are not set up yet, and nothing is checked until they are. Run: {notify.SETUP}")
+    return 0
+
+
+def _watch_list(args: argparse.Namespace) -> int:
+    found = watch.listed(ended=args.all)
+    if not found:
+        print("There are no watches. Add one with: py -m flightsleuth watch add JFK LHR --depart 2026-12-08 --return 2026-12-15 --below 600")
+        return 0
+    now = datetime.now().astimezone()
+    print("\n\n".join("\n".join(watch_lines(standing, now, watch.RESEND_HOURS)) for standing in found))
+    print(f"\nWhat each run did is in {config.log_path()}")
+    return 0
+
+
+def _watch_remove(args: argparse.Namespace) -> int:
+    removed = watch.remove(args.number)
+    print(f"Removed watch {args.number}: {watch_title(removed.trip)}. Its history is kept.")
+    return 0
+
+
+def _watch_run(args: argparse.Namespace) -> int:
+    now = datetime.now().astimezone()
+    try:
+        report = watch.run_due(now=now, max_searches=args.max_searches, dry_run=args.dry_run)
+    except UserError as e:
+        if not args.dry_run:
+            watch.log([f"Nothing was checked: {e}"], now)
+        raise
+    except Exception as e:
+        # Nobody is at the screen when the scheduler starts this, so the log has to say.
+        watch.log([f"The run stopped unexpectedly: {e!r}"], now)
+        raise
+    print("\n".join(report.lines))
+    if not args.dry_run:
+        watch.log(report.lines, now)
+    return 1 if report.failed else 0
+
+
+def _watch_setup(args: argparse.Namespace) -> int:
+    topic, new = watch.setup(new=args.new)
+    if new:
+        print(f"A new alert topic was made and saved in {config.key_file()}")
+    else:
+        print("The alert topic is already set up. To replace it: py -m flightsleuth watch setup --new")
+    print(f"\n  {topic}\n")
+    print("Keep it to yourself: anyone who knows the topic can read your alerts. It is in no file that git tracks.")
+    print(f'On your phone, install the ntfy app, choose "Subscribe to topic" and enter the topic above. The server is {config.ntfy_server()}')
+    if args.new:
+        print("Remove the old topic from the app: nothing is sent to it any more.")
+    print("Then send yourself a test, which makes no search: py -m flightsleuth watch test-alert")
+    return 0
+
+
+def _watch_test_alert(args: argparse.Namespace) -> int:
+    sent = watch.send_test()
+    print("Test alert sent. It should reach your phone within a few seconds. No search was made.")
+    print(f"Tapping it opens {sent.click}" if sent.click else "It opens nothing when tapped, because there is no watch yet.")
+    return 0
+
+
+def _watch_limit(args: argparse.Namespace) -> int:
+    if args.searches is not None:
+        path = config.save_setting(config.WATCH_MONTHLY_VAR, str(args.searches))
+        print(f"Saved in {path}")
+    print(f"Watches may use up to {_searches(config.watch_monthly())} a month, and never more than the plan has left.")
+    return 0
+
+
+WATCH_ACTIONS = {
+    "add": _watch_add,
+    "list": _watch_list,
+    "remove": _watch_remove,
+    "run": _watch_run,
+    "setup": _watch_setup,
+    "test-alert": _watch_test_alert,
+    "limit": _watch_limit,
+}
+
+
 def cmd_gui(args: argparse.Namespace) -> int:
     try:
         from .gui import main as open_window  # imported late so the command line works without tkinter
@@ -464,6 +636,7 @@ COMMANDS = {
     "search": cmd_search,
     "explore": cmd_explore,
     "bakeoff": cmd_bakeoff,
+    "watch": cmd_watch,
     "gui": cmd_gui,
     "quota": cmd_quota,
     "cache": cmd_cache,
