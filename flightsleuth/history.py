@@ -1,13 +1,25 @@
 """The durable record of what was fetched (`history.db`). Unlike the cache, it is never cleared."""
 from __future__ import annotations
 
+import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from .models import Offer, Query
 
-TABLES = ("price_points", "provider_calls", "google_price_history", "bakeoff_fares", "bakeoff_lookups", "site_prices")
+TABLES = (
+    "price_points",
+    "provider_calls",
+    "google_price_history",
+    "bakeoff_fares",
+    "bakeoff_lookups",
+    "site_prices",
+    "watches",
+    "watch_events",
+    "watch_checks",
+    "watch_alerts",
+)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS price_points (
@@ -108,6 +120,68 @@ CREATE TABLE IF NOT EXISTS site_prices (
     our_confirmed INTEGER NOT NULL, -- 1 that fare's return flights had been fetched, 0 it was only listed
     itinerary_key TEXT NOT NULL,   -- that fare's flights
     recorded_at TEXT NOT NULL      -- UTC, when the price was typed
+);
+-- A fare somebody asked to be told about. A watch is never changed: what happens to it afterwards
+-- is in the three tables below, and where it stands is worked out from them.
+CREATE TABLE IF NOT EXISTS watches (
+    id INTEGER PRIMARY KEY,
+    origin TEXT NOT NULL,          -- the search, as in price_points
+    destination TEXT NOT NULL,
+    depart_date TEXT NOT NULL,
+    return_date TEXT,              -- NULL for a one-way
+    adults INTEGER NOT NULL,
+    cabin TEXT NOT NULL,
+    stops TEXT NOT NULL,
+    currency TEXT NOT NULL,
+    below REAL,                    -- alert under this price; NULL when no price was set
+    drop_percent REAL NOT NULL,    -- alert this far under the recent median; 0 turns that rule off
+    typical INTEGER NOT NULL,      -- 1 alert under Google's typical range
+    every_days INTEGER NOT NULL,   -- days from one check to the next
+    created_at TEXT NOT NULL,      -- UTC
+    created_day TEXT NOT NULL      -- that moment's date on the owner's calendar: the day it first falls due
+);
+-- What happened to a watch besides its checks: 'removed' by the owner, 'retired' once its departure
+-- date had passed, or 'outage', when the owner was told it had gone unchecked.
+CREATE TABLE IF NOT EXISTS watch_events (
+    id INTEGER PRIMARY KEY,
+    watch_id INTEGER NOT NULL,
+    event TEXT NOT NULL,
+    detail TEXT NOT NULL,
+    at TEXT NOT NULL               -- UTC
+);
+-- Every time a watch was looked at, whether or not the look worked.
+CREATE TABLE IF NOT EXISTS watch_checks (
+    id INTEGER PRIMARY KEY,
+    watch_id INTEGER NOT NULL,
+    checked_at TEXT NOT NULL,      -- UTC
+    day TEXT NOT NULL,             -- that moment's date on the owner's calendar; the next check counts from it
+    finished INTEGER NOT NULL,     -- 1 the fare was priced; 0 the check failed or was skipped, and the watch stays due
+    outcome TEXT NOT NULL,         -- such as 'quiet', 'alerted', 'repeat', 'no return flights', 'failed'
+    detail TEXT NOT NULL,          -- one line: what was found, or what went wrong
+    price REAL,                    -- the cheapest fare listed; NULL when none was
+    confirmed_price REAL,          -- that fare once its return flights were fetched; NULL when they were not
+    itinerary_key TEXT,            -- the flights of the fare the prices are for
+    median REAL,                   -- the median of Google's daily lows that the price was set against
+    typical_low REAL,              -- Google's typical range for those dates
+    typical_high REAL,
+    reasons TEXT NOT NULL,         -- the rules that fired, comma-separated; '' when none did
+    no_returns TEXT NOT NULL,      -- JSON: [outbound flights, price] of each fare with no return flights
+    searches INTEGER NOT NULL,     -- live searches this check spent
+    fetched_at TEXT                -- UTC, when the price was fetched
+);
+-- Every alert composed for a watch and every try at sending it. Only a row with sent = 1 reached ntfy.
+CREATE TABLE IF NOT EXISTS watch_alerts (
+    id INTEGER PRIMARY KEY,
+    watch_id INTEGER NOT NULL,
+    check_id INTEGER NOT NULL,     -- the check that found the price
+    price REAL NOT NULL,           -- the confirmed fare the alert is about
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    click TEXT NOT NULL,           -- the address the alert opens
+    sent INTEGER NOT NULL,         -- 1 ntfy accepted it, 0 it did not
+    error TEXT NOT NULL,           -- why not; '' when it was sent
+    fetched_at TEXT NOT NULL,      -- UTC, when the price was fetched
+    at TEXT NOT NULL               -- UTC, when this try was made
 );
 """ + "".join(
     f"""
@@ -290,6 +364,130 @@ class History:
                     _utc(recorded_at),
                 ),
             )
+
+    def add_watch(
+        self,
+        trip: Query,
+        *,
+        below: float | None,
+        drop_percent: float,
+        typical: bool,
+        every_days: int,
+        created_at: datetime,
+        created_day: date,
+    ) -> int:
+        """Keep a new watch. Returns its number, which is how the owner names it afterwards."""
+        with self._db:
+            return self._db.execute(
+                "INSERT INTO watches (origin, destination, depart_date, return_date, adults, cabin, stops, currency,"
+                " below, drop_percent, typical, every_days, created_at, created_day)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    trip.origin,
+                    trip.destination,
+                    trip.depart_date.isoformat(),
+                    trip.return_date.isoformat() if trip.return_date else None,
+                    trip.adults,
+                    trip.cabin,
+                    trip.stops,
+                    trip.currency,
+                    below,
+                    drop_percent,
+                    int(typical),
+                    every_days,
+                    _utc(created_at),
+                    created_day.isoformat(),
+                ),
+            ).lastrowid
+
+    def add_watch_event(self, watch_id: int, event: str, detail: str, at: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT INTO watch_events (watch_id, event, detail, at) VALUES (?, ?, ?, ?)",
+                (watch_id, event, detail, _utc(at)),
+            )
+
+    def add_watch_check(
+        self,
+        watch_id: int,
+        *,
+        checked_at: datetime,
+        day: date,
+        finished: bool,
+        outcome: str,
+        detail: str,
+        price: float | None = None,
+        confirmed_price: float | None = None,
+        itinerary_key: str | None = None,
+        median: float | None = None,
+        typical_range: tuple[float, float] | None = None,
+        reasons: tuple[str, ...] = (),
+        no_returns: tuple[tuple[str, float], ...] = (),
+        searches: int = 0,
+        fetched_at: datetime | None = None,
+    ) -> int:
+        low, high = typical_range or (None, None)
+        with self._db:
+            return self._db.execute(
+                "INSERT INTO watch_checks (watch_id, checked_at, day, finished, outcome, detail, price,"
+                " confirmed_price, itinerary_key, median, typical_low, typical_high, reasons, no_returns, searches,"
+                " fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    watch_id,
+                    _utc(checked_at),
+                    day.isoformat(),
+                    int(finished),
+                    outcome,
+                    detail,
+                    price,
+                    confirmed_price,
+                    itinerary_key,
+                    median,
+                    low,
+                    high,
+                    ",".join(reasons),
+                    json.dumps([list(pair) for pair in no_returns]),
+                    searches,
+                    _utc(fetched_at) if fetched_at else None,
+                ),
+            ).lastrowid
+
+    def add_watch_alert(
+        self,
+        watch_id: int,
+        check_id: int,
+        *,
+        price: float,
+        title: str,
+        message: str,
+        click: str,
+        sent: bool,
+        error: str,
+        fetched_at: datetime,
+        at: datetime,
+    ) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT INTO watch_alerts (watch_id, check_id, price, title, message, click, sent, error, fetched_at, at)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (watch_id, check_id, price, title, message, click, int(sent), error, _utc(fetched_at), _utc(at)),
+            )
+
+    def spent(self) -> float:
+        """Everything the live calls so far have cost, in the sources' own credits."""
+        return self._db.execute("SELECT COALESCE(SUM(cost), 0) FROM provider_calls WHERE live = 1").fetchone()[0]
+
+    def watches(self) -> list[dict]:
+        return [dict(row) for row in self._db.execute("SELECT * FROM watches ORDER BY id")]
+
+    def watch_events(self) -> list[dict]:
+        return [dict(row) for row in self._db.execute("SELECT * FROM watch_events ORDER BY id")]
+
+    def watch_checks(self) -> list[dict]:
+        return [dict(row) for row in self._db.execute("SELECT * FROM watch_checks ORDER BY id")]
+
+    def watch_alerts(self) -> list[dict]:
+        return [dict(row) for row in self._db.execute("SELECT * FROM watch_alerts ORDER BY id")]
 
     def price_points(self) -> list[dict]:
         return [dict(row) for row in self._db.execute("SELECT * FROM price_points ORDER BY id")]
