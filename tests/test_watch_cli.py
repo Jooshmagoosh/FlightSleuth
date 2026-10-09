@@ -347,5 +347,43 @@ class LimitCommandTest(WatchCommandCase):
         self.assertEqual(self.run_cli("add", *ROUTE)[0], 0)
 
 
+class GateTest(unittest.TestCase):
+    """What Phase 4 promised that nothing else pins: the limits, and that the documents say how to run it."""
+
+    ROOT = Path(cli.__file__).parent.parent
+
+    def test_at_most_three_watches_and_three_searches_held_for_each(self):
+        self.assertEqual((watch.MAX_WATCHES, watch.HOLD), (3, 3))
+
+    def test_a_further_drop_is_five_dollars_and_two_percent_and_the_median_is_of_thirty_days_at_fifteen_percent(self):
+        self.assertEqual((watch.FURTHER_DROP, watch.FURTHER_PERCENT), (5, 2))
+        self.assertEqual((watch.MEDIAN_DAYS, watch.DEFAULT_DROP), (30, 15))
+
+    def test_the_ceiling_is_150_a_month_unless_the_owner_changes_it(self):
+        self.assertEqual(config.WATCH_MONTHLY, 150)
+
+    def test_the_readme_gives_the_command_that_schedules_the_run_and_makes_up_a_missed_one(self):
+        readme = (self.ROOT / "README.md").read_text(encoding="utf-8")
+        (command,) = [line for line in readme.splitlines() if line.startswith("$action = New-ScheduledTaskAction")]
+        self.assertIn('-Argument "-m flightsleuth watch run"', command)
+        self.assertIn("(Get-Command pyw).Source", command)  # no console window, and no path written down
+        self.assertIn("New-ScheduledTaskSettingsSet -StartWhenAvailable", readme)
+        self.assertIn('Register-ScheduledTask -TaskName "FlightSleuth watches"', readme)
+
+    def test_nothing_in_the_repository_schedules_it_for_the_owner(self):
+        for path in (self.ROOT / "flightsleuth").rglob("*.py"):
+            self.assertNotIn("ScheduledTask", path.read_text(encoding="utf-8"), path.name)
+
+    def test_the_beginners_guide_describes_the_button(self):
+        guide = (self.ROOT / "HOW-TO-USE.txt").read_text(encoding="utf-8")
+        self.assertIn('"Watch this fare..."', guide)
+        self.assertIn("You can\nhave 3 watches at most.", guide)
+
+    def test_no_topic_is_written_in_any_tracked_document(self):
+        for name in ("README.md", "HOW-TO-USE.txt", "CLAUDE.md", ".env.example", "docs/ROADMAP.md"):
+            text = (self.ROOT / name).read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"flightsleuth-[-_A-Za-z0-9]{40,}", text), name)
+
+
 if __name__ == "__main__":
     unittest.main()

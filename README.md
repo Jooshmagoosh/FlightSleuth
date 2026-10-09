@@ -5,6 +5,8 @@ closer at the best one: its return flights, who sells it, and other ways to fly 
 Prices come from Google Flights through [SerpApi](https://serpapi.com/google-flights-api),
 a paid API that permits automated access, so nothing here scrapes airline sites.
 
+It can also watch a fare and tell your phone when it drops: see [Watches and alerts](#watches-and-alerts).
+
 Needs Python 3.11 or newer. No other packages.
 
 It has two front ends over the same search: a window and a command line.
@@ -36,6 +38,12 @@ three more sites. A one-way has "Check and book" and all four sites in the row b
 Tick "Or search a whole range" to leave on any day between two dates, staying a span of
 nights. Tick "Confirm the best fare" to have the return flights and the sellers looked up;
 a range does that by itself. What it finds goes in the second tab.
+
+"Watch this fare...", beside Search, is greyed out until a search has found a fare. It opens a
+small box for the rules of a watch on the best dates shown: a price to be told below, how far
+under its recent median, whether Google's typical range counts, and how often to check. Adding
+a watch spends no search. Setting up alerts, running the checks, and listing or removing
+watches are command-line only: see [Watches and alerts](#watches-and-alerts).
 
 Other currencies, another country's prices, `--thorough`, `--strategy`, `--deep`, `--fresh`,
 `--dry-run`, `explore` and `bakeoff` are command-line only.
@@ -79,6 +87,13 @@ Find cheap places to go in March when the destination is open:
 
 ```
 py -m flightsleuth explore MCO,SFB --area europe --month 3 --length week
+```
+
+Watch that fare and be told on your phone when it drops below $600 (adding it costs nothing;
+[Watches and alerts](#watches-and-alerts) has the rest):
+
+```
+py -m flightsleuth watch add JFK LHR --depart 2026-12-10 --return 2026-12-17 --below 600
 ```
 
 Other commands: `py -m flightsleuth quota` shows searches left, `py -m flightsleuth cache`
@@ -223,6 +238,166 @@ was cheaper and by how much, with both times. The window does the same through i
 
 Momondo's deal buttons did not work in the owner's Firefox in October 2026 and did in Chrome.
 
+## Watches and alerts
+
+A watch is the cheapest fare on one pair of dates, with any airline. A command checks every
+watch that is due, once, and exits; your computer's scheduler starts it once a day. When a fare
+is worth it, an alert goes to your phone through [ntfy](https://ntfy.sh).
+
+### Set it up, once
+
+```
+py -m flightsleuth watch setup
+```
+
+This makes a long random topic name, saves it in the git-ignored `.env` beside the key, and
+prints it. Install the ntfy app on your phone, choose "Subscribe to topic" and enter it. **The
+topic is a secret**: anyone who knows it can read your alerts. Only `watch setup` ever prints it.
+Then send yourself a test, which makes no search:
+
+```
+py -m flightsleuth watch test-alert
+```
+
+### Add a watch
+
+```
+py -m flightsleuth watch add JFK LHR --depart 2026-12-08 --return 2026-12-15 --below 600 --every 4
+```
+
+`--return`, `--nights N` or `--one-way` says which trip. Three rules can fire, and any one is enough:
+
+- `--below PRICE`: the fare is below a price you set.
+- `--drop PERCENT` (default 15; 0 turns it off): the fare is that far under the median of
+  Google's daily lowest prices for the last 30 days.
+- under Google's typical range for those dates (`--no-typical` turns it off).
+
+`--every DAYS` is the time between checks (default 1). `--stops`, `--cabin`, `--adults` and
+`--currency` work as they do for `search`. Adding spends nothing, and at most three watches are
+checked at a time.
+
+**A watch the searches cannot cover is refused, and the sums are shown either way:**
+
+```
+Until the searches reset on Sun 08 Nov:
+  JFK -> LHR, Tue 08 Dec - Tue 15 Dec: 8 checks, one every 4 days
+  8 checks at 1 search each, and 3 held back for each of 1 watch to confirm an alert: 8 + 3 = 11
+  26 searches are left, so 15 would be spare.
+In the month after that, to Tue 08 Dec:
+  JFK -> LHR, Tue 08 Dec - Tue 15 Dec: 7 checks, one every 4 days
+  7 checks at 1 search each, and 3 held back for each of 1 watch to confirm an alert: 7 + 3 = 10
+  Watches may use 150 of the plan's 250 searches a month, so 140 would be spare.
+```
+
+What is left, the plan's monthly total and the reset day are read from SerpApi's free account
+endpoint every time, so the sums follow a change of plan by themselves. A refusal names the
+shortest interval that would fit. `--dry-run` shows the sums and adds nothing.
+
+Watches may use at most 150 searches in one of the plan's months, however much the plan has
+left. Show or change that with:
+
+```
+py -m flightsleuth watch limit
+py -m flightsleuth watch limit 400
+```
+
+### What a check costs and when it alerts
+
+A check is **one search**: Google's own order for a round trip, the ordinary cheapest-first
+search for a one-way. The round trip's is unsorted because only that reply carries Google's
+typical range and its daily lows, and because the sorted reply lists fares that may not exist
+(see [Limits](#limits)).
+
+If no rule fires, that is all. If one does, and the price is not one you were already told
+about, the check goes on to fetch the fare's **return flights and then its sellers**: up to 3
+more searches. The rules are tried again on the price with its return flights, and only then is
+the alert sent. A round trip is never alerted on a listing alone.
+
+- **Never twice for the same price.** A second alert needs a further drop: at least $5 and at
+  least 2% under the lowest price already alerted.
+- **A fare whose return flights came back empty** is remembered by its flights and its price,
+  and is not asked about again until that price changes. The next fare behind it is still followed.
+- **Two watches on the same dates** share one search.
+- **A watch retires itself** the day after its departure date.
+
+The alert names the route and the price in its title. Its text gives the dates, which rules
+fired, the flights out and back with the time they were fetched, any cheaper listing that had no
+return flights, and who sells it. A price that is really two separate tickets says so, with the
+one-ticket price when a seller offers one. Tapping the alert opens Momondo for those dates.
+
+```
+JFK to LHR: $520 round trip
+
+Tue 12 Mar - Tue 19 Mar. Why: below the $600 you set.
+Out: JFK->LHR Tue 12 Mar 18:30 -> 23:10, nonstop, 7h 10m, Testair (TA 1).
+Back: LHR->JFK Tue 19 Mar 09:00 -> 12:00, nonstop, 8h 00m, Testair (TA 2).
+Return flights fetched 09 Oct 14:02.
+Sold on one ticket by Testair at $520.
+Tap to check it on Momondo.
+```
+
+### Run the checks
+
+```
+py -m flightsleuth watch run --dry-run     # what is due and the most it could cost; free
+py -m flightsleuth watch run               # check what is due, once, and exit. This spends searches
+```
+
+`watch run` asks no questions, prints a line for each watch and writes the same lines to
+`watch.log` in flightsleuth's folder. It exits 1 if a check failed. `--max-searches N` limits
+one run.
+
+To have Windows start it every day at 9 in the morning, run this once in PowerShell **from the
+flightsleuth folder**:
+
+```powershell
+$action = New-ScheduledTaskAction -Execute ('"' + (Get-Command pyw).Source + '"') -Argument "-m flightsleuth watch run" -WorkingDirectory (Get-Location).Path
+$trigger = New-ScheduledTaskTrigger -Daily -At 9am
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 15)
+Register-ScheduledTask -TaskName "FlightSleuth watches" -Action $action -Trigger $trigger -Settings $settings -Description "Checks every due FlightSleuth watch once and exits."
+```
+
+`pyw` runs it with no console window. `-StartWhenAvailable` makes Windows run a start that was
+missed while the computer was off as soon as it can after you next sign in, usually within ten
+minutes. The run is safe to start at any time or more than once a day: it only checks what is
+due, and a watch whose check was missed stays due until it is made. To stop it:
+`Unregister-ScheduledTask -TaskName "FlightSleuth watches"`.
+
+On macOS or Linux, one line in `crontab -e` does the same, though cron does not make up a
+missed start (the next day's run checks whatever is due):
+
+```
+0 9 * * * cd /path/to/flightsleuth && python3 -m flightsleuth watch run
+```
+
+### Seeing where they stand
+
+```
+py -m flightsleuth watch list          # --all includes removed and retired watches
+py -m flightsleuth watch remove 2
+```
+
+```
+1. JFK -> LHR, Tue 08 Dec - Tue 15 Dec, round trip, 1 adult, economy
+   Alert when it is below $600, or 15% under its 30-day median, or below Google's typical range. Checked every 4 days.
+   Last check: 10 Oct 09:01. $693 listed. No rule fired.
+   Last price: $693 listed, fetched 10 Oct 09:01.
+   Next due: Wed 14 Oct. Searches used: 1.
+```
+
+### When something goes wrong
+
+- **A check that fails** (no network, SerpApi refuses) is logged, shows as the watch's last
+  check, and leaves the watch due, so the next run tries it again.
+- **A check skipped for want of searches**, because the account, the monthly ceiling or the
+  run's own limit has none left, is logged the same way and also stays due.
+- **After two missed intervals** you get one alert saying the watch has gone unchecked. It is
+  not repeated until the watch has been checked again.
+- **An alert ntfy could not take** is sent at the next run, marked as late, without another
+  search. After a day it is let go, and the next check looks at the fare afresh.
+- **Without a topic** nothing is checked and nothing is spent: an alert nobody can receive is
+  not worth a search.
+
 ## Other sites
 
 Links to the same dates on Momondo, Skyscanner, Skiplagged and Kiwi.com are built from
@@ -248,6 +423,15 @@ Two files, in `%LOCALAPPDATA%\flightsleuth` on Windows and `~/.cache/flightsleut
     answers, and the fare of flightsleuth's it was checked against: its price, its flights, when
     it was fetched and whether it had been confirmed. No command reads it back yet; any SQLite
     tool can.
+  - `watches`, `watch_events`, `watch_checks` and `watch_alerts`: each watch as it was made;
+    its removal, retirement and outage notices; every check, with the price, which rules fired
+    and what it cost; and every alert with each try at sending it. `watch list` reads them. A
+    watch is never edited: remove it and add another.
+- `watch.log` gets a line for each watch every time `watch run` runs. Nothing trims it.
+
+The `.env` file, in this folder or that one, holds the SerpApi key and, once `watch setup` has
+run, the ntfy topic. `watch limit N` adds `FLIGHTSLEUTH_WATCH_MONTHLY`. `FLIGHTSLEUTH_NTFY_SERVER`
+names another ntfy server than `https://ntfy.sh`. Git ignores the file.
 
 ## Price sources
 
@@ -281,7 +465,21 @@ No source marks one today.
 - "5 of 6 test routes" is six round trips, read by eye on one evening. Two of the five lower
   prices were followed to the seller's payment page, and both held.
 - A price you type is kept as you typed it. Nothing checks it against the site.
-- A one-way keeps Momondo among the other sites: its one-way link has never been checked.
+- A one-way keeps Momondo among the other sites: its one-way link has never been checked. A
+  one-way watch's alert opens that link all the same, because it is the only one there is.
+- A watch only runs while the computer is on and signed in. A start missed while it was off is
+  made up afterwards; an alert is as late as that.
+- A round-trip watch reads Google's own order, not the cheapest-first one `search` uses, so its
+  price can be higher than a search shows. In the one pair of replies recorded, the sorted list
+  had ten fares cheaper than anything in Google's own order, and the one that was followed up
+  had no return flights. A real fare that only the sorted list shows would be missed.
+- The median rule needs at least 10 of Google's daily lows from the last 30 days. A reply
+  without them cannot fire it, and a reply with no price rating can fire only the set price.
+- An alert's price is the fare with its return flights. The seller's own price can differ by a
+  little, and the alert gives both. Nothing follows a fare to the seller's payment page.
+- Alerts go through the public ntfy.sh server, which keeps a message for 12 hours and lets
+  anyone who knows the topic read it. An alert holds the route, dates, flights and price, and
+  nothing about you.
 - Fares move. Treat a saved price as a lead and confirm it on the link before booking.
 
 ## Tests
@@ -292,8 +490,9 @@ py -m unittest discover -s tests -t .
 
 The tests fake SerpApi's replies, so they need no key and spend no searches. They also run
 from a throwaway folder, so your real `.env`, saved results and history are never touched, and
-they cannot open a browser. The window tests open a hidden window and are skipped where tkinter
-is missing or there is no display.
+they cannot open a browser. A fake stands in for ntfy too, so no test can send an alert, and
+the watch tests run on a clock that is handed to them. The window tests open a hidden window
+and are skipped where tkinter is missing or there is no display.
 
 `tests/fixtures` holds real SerpApi replies recorded in October 2026, and two hand-written ones
 that are labelled synthetic. Its README says how each was recorded, what it showed, and what no

@@ -130,8 +130,9 @@ Requirements added after Phase 1:
 - [x] Decide `sort_by` from that count. Decided by the owner on 2026-10-09: it stays. The
       cheapest listed fare had return flights on all 6 bake-off routes, and the closer look
       covers the rare miss.
-- [ ] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
-      Google's lowest price, its rating and 61 days of price history.
+- [x] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
+      Google's lowest price, its rating and 61 days of price history. Evaluated on the recorded
+      reply and adopted for round trips by the owner on 2026-10-09; Phase 4 has the reasons.
 
 ### Decisions made while building
 
@@ -296,7 +297,7 @@ For the owner to confirm or overturn:
 - **The window was looked at once, on the owner's machine**, with the test fake behind it: a
   round trip nobody confirmed, with a price saved. Other screens and scalings were not tried.
 
-## Phase 4, watches and alerts: planned, not started (branch `phase-4-watches`)
+## Phase 4, watches and alerts: built; two live steps of the gate remain (branch `phase-4-watches`)
 
 Rescoped by the owner on 2026-10-09. This replaces the brief's "Phase 4, watches and alerts" and
 its gate, "a watch runs unattended for a week in a container and sends one true alert with no
@@ -360,12 +361,132 @@ The owner's rulings on the plan, also 2026-10-09:
 ### Checked while planning, at no cost
 
 - **The searches reset on 2026-11-08.** SerpApi's account endpoint, which is free, reports
-  `plan_renewal_date`; the code does not read it yet. On 2026-10-09 it also reported 31 of 250 left.
+  `plan_renewal_date`, which the code did not read then. On 2026-10-09 it also reported 31 of 250 left.
 - **ntfy, from its documentation on 2026-10-09**: a message is a POST of JSON to the server's root
   address with `topic`, `title`, `message`, `click`, `tags` and `priority`. A topic may use
   letters, digits, `-` and `_`, up to 64 characters. ntfy.sh allows 250 messages a day and keeps a
-  message for 12 hours. Nothing has been sent yet.
+  message for 12 hours. Nothing had been sent then. The code sends the first three and `click`.
 - **The suite is 399 tests and all pass** on `main` at 1809298.
+
+### Where the gate stands
+
+- **Met: all existing tests pass.** The suite is 637 tests, 238 of them new. One existing test
+  was changed, with the owner's say-so: `GateTest` now allows `notify.py` beside `serpapi.py`.
+- **Met: the watch logic is tested with a fake clock and fake replies.** `tests/test_watch.py`
+  (rules, news, standing, budget), `tests/test_watch_run.py` (the run, on a clock handed to it,
+  with a fake ntfy), `tests/test_watch_cli.py` and `WatchWindowTest` in `tests/test_gui.py`. One
+  class runs a check over the real unsorted reply in `tests/fixtures`.
+- **Not yet: the test alert reaches the owner's phone.** The owner runs `watch setup` and
+  `watch test-alert`; nobody else sees the topic. Nothing has been sent to ntfy so far.
+- **Not yet: one real check runs end to end.** It waits for the step above, because a run with
+  no topic checks nothing.
+
+Credits spent so far in this phase: none.
+
+- [x] `watch run`: checks every due watch once and exits; a missed run is made up at the next
+- [x] Alerts through ntfy with the standard library; the topic generated, kept in `.env`, never committed
+- [x] `watch test-alert`: a test alert with no search
+- [x] At most three watches; a watch the budget cannot cover is refused with the sums
+- [x] The plan's numbers read from the account each time; the 150-a-month ceiling a setting (`watch limit`)
+- [x] The three rules; return flights and sellers before any alert; never twice for one price
+- [x] A watch retires itself; `watch list` shows last check, last price, next due and searches used
+- [x] Log file, status line, and one alert per outage after two missed intervals
+- [x] "Watch this fare..." in the window, last and small
+- [x] The Task Scheduler command, in the README for the owner to run
+- [ ] The test alert on the owner's phone
+- [ ] One real check, end to end
+
+### The schedule until 8 November
+
+Two watches, three searches held for each, against 26 (the 31 left on 2026-10-09 less the 5 this
+phase may spend), counting checks from 10 October:
+
+| Interval | Checks | Held | Total | Spare of 26 |
+| --- | --- | --- | --- | --- |
+| Every 3 days | 2 x 10 = 20 | 6 | 26 | 0 |
+| Every 4 days | 2 x 8 = 16 | 6 | 22 | 4 |
+
+Every 4 days is the shortest interval that leaves at least 2 spare. `BudgetTest` pins both rows.
+`watch add` works the sums out afresh from the account on the day, so they move with the date
+and with what the phase really spent.
+
+### What the unsorted search was chosen on
+
+One pair of real replies, recorded 29 minutes apart on 2026-10-09 for the same round trip:
+
+- **Only the unsorted reply can run two of the three rules.** It carried Google's typical range
+  ($480 to $830) and 61 daily lows; the sorted reply carried neither.
+- **Its cheapest fare was the believable one**: $693, which is also what Google itself reports as
+  the lowest price. The sorted reply's cheapest, $646, was the fare whose return flights came
+  back empty, and nine more fares from the same airline sat between the two.
+- **The cost**: a real fare that only the sorted order lists would be missed. One route on one
+  evening cannot say how often that happens.
+- **Not proved by any recorded reply**: that a `departure_token` from an unsorted listing
+  fetches return flights. All 77 listings carry one. The real check is the first test of it.
+- **A one-way uses the ordinary sorted search.** The recorded one-way reply was sorted and still
+  carried the rating and the daily lows.
+
+### Decisions made while building
+
+For the owner to confirm or overturn:
+
+- **A check that fires can cost four searches in all, not three**: the listing, up to two return
+  lookups (the second only if the first comes back empty), and the sellers. The three held for
+  each watch cover everything after the listing. The usual cost is three.
+- **The price is looked at twice.** The rules and the no-repeat test run on the listed price
+  before anything more is spent, and again on the price with its return flights. The alert
+  gives the second. A fare that fires as listed and not once confirmed sends nothing.
+- **"Below" means under, and the median rule means at or under**: $599 fires a $600 limit and
+  $600 does not; 15% under a $600 median is $510, and $510 fires.
+- **The median needs at least 10 of Google's daily lows from the last 30 days**, taken from the
+  reply being checked. With fewer, that rule cannot fire.
+- **A listing with no price rating takes the typical range from the sellers' reply**, which
+  carries one. So that rule can fire on the confirmed price even when the listing was silent.
+- **A fare with no return flights is remembered by its outbound flights and its price.** It is
+  skipped while it is listed at that price, and the next fare is still followed. When every fare
+  listed is one of those, the check says so and spends only its one search.
+- **Return flights saved more than five minutes ago are fetched again** before an alert. The
+  listing fetched a moment earlier in the same check is reused.
+- **A new watch is due at once**, and a watch counts its interval from the day of its last
+  finished check, on the computer's own calendar. A late check moves the ones after it.
+- **A failed or skipped check stays due and is retried at every run until it works.** The
+  scheduler command has no restart-on-failure setting: a check that fails after spending would
+  spend again at each restart.
+- **A watch skipped for want of searches counts as unchecked** for the outage alert, as a
+  failed one does.
+- **An alert ntfy could not take is tried again for 24 hours**, at each run, marked "Sent late",
+  with no search. After that it is dropped and the next due check starts afresh.
+- **With no topic set up, `watch run` checks nothing and spends nothing**, and says so in the log.
+- **The budget is two sums.** Until the reset: the checks left plus the held searches, against
+  the smaller of what the account has left and the ceiling less what watches have used this
+  month. For the month after: the same against the smaller of the ceiling and the plan's total.
+  An account that names no reset day is budgeted 30 days ahead and the sums say so.
+- **The ceiling counts every watch's searches in the plan's month**, ended watches included.
+- **`watch limit N` sets the ceiling**, as `FLIGHTSLEUTH_WATCH_MONTHLY` in `.env`.
+- **A watch carries no bags and no other market**, as `price_points` does not. A watch made
+  from a search with bags drops them, and the window says so.
+- **A watch cannot be edited.** Remove it and add another; the old one's history stays.
+- **`config.setting` reads this folder's `.env` and then flightsleuth's own**, so a topic saved
+  from one folder is found by a run started in another. The key is read the same way now.
+- **The window's button sits beside Search**, not under the headline. Tests pin exactly what the
+  rows under the headline hold.
+- **The alert uses none of ntfy's tags or priorities.** It is a title, a text and an address.
+- **`scan` gained three things, all off unless asked for**: `Request.look`, `Request.known_empty`
+  and `plan(reserve=...)`. `Provider` gained `allowance`.
+
+### Not done
+
+- **The scheduler command has not been run.** Its action, trigger and settings were built in
+  memory on the owner's machine to check the syntax, and nothing was registered. `pyw -m
+  flightsleuth watch run` was run once against an empty throwaway folder: it exited 0 and wrote
+  its line to the log. The cron line for macOS and Linux has not been tried.
+- **Momondo's one-way link is still unchecked**, and a one-way alert opens it.
+- **`watch list` does not show the budget.** `watch add --dry-run` does.
+- **Nothing reads `watch.log` back or trims it.**
+- **The window was looked at once**, on the owner's machine with the test fake behind it: the
+  result of a round trip, the small box, and the status line after adding.
+- **The trigger's hour may move with the clocks.** Built on 2026-10-09 it read 13:00 UTC for
+  9 in the morning; after the clocks change it may start at 8. The run does not care when.
 
 ## Phase 5, web app: not started
 
