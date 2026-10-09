@@ -1,11 +1,13 @@
+import ast
 import contextlib
 import io
 import sqlite3
 import unittest
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from unittest import mock
 
-from flightsleuth import cli, config, links, scan, typed
+from flightsleuth import cli, config, links, providers, scan, typed
 from flightsleuth.history import History
 from flightsleuth.models import Query
 from flightsleuth.render import UNCONFIRMED, summarise
@@ -385,3 +387,28 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
         history = History(config.history_path())
         self.addCleanup(history.close)
         self.assertEqual((len(history.calls()), len(history.price_points()), len(history.site_prices())), (1, 1, 1))
+
+
+class GateTest(unittest.TestCase):
+    """Phase 3 was to add no price source and no call to any network."""
+
+    NETWORK = {"urllib", "http", "socket", "ssl", "ftplib", "smtplib", "poplib", "imaplib", "xmlrpc", "asyncio"}
+
+    def test_serpapi_is_still_the_only_source(self):
+        install(self)
+        self.assertEqual(providers.names(), ["serpapi"])
+
+    def test_only_the_serpapi_client_imports_anything_that_reaches_a_network(self):
+        package = Path(links.__file__).parent
+        reaching = set()
+        for path in package.rglob("*.py"):
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+                if isinstance(node, ast.Import):
+                    names = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                    names = [node.module]
+                else:
+                    continue
+                if any(name.split(".")[0] in self.NETWORK for name in names):
+                    reaching.add(path.relative_to(package).as_posix())
+        self.assertEqual(reaching, {"serpapi.py"})

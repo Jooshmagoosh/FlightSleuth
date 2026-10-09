@@ -233,7 +233,7 @@ in `bakeoff_fares` in the owner's `history.db`; `bakeoff --report` prints the su
 Six routes on one evening is a small sample, and only two of the five savings were followed past
 the listing. Phase 3 item 2 exists to build a larger one.
 
-## Phase 3, the Momondo next step: in progress (branch `phase-3-momondo`)
+## Phase 3, the Momondo next step: built, awaiting review (branch `phase-3-momondo`)
 
 Rescoped by the owner on 2026-10-09. The bake-off justified no new provider, so this replaces the
 brief's "Phase 3, second sources" and its list (Skiplagged MCP, Kiwi MCP, Travelpayouts Data API,
@@ -245,16 +245,56 @@ still holds SerpApi alone, the mode test passes, and the phase added no call to 
 stands in for the brief's gate, "the mode test passes and each provider has recorded-response
 tests", because no provider is being added.
 
-- [ ] "Check this fare on Momondo" is the main next step after a round trip, in the window and on
+Where the gate stands: met. The suite is 399 tests, 50 of them new, and all pass.
+`tests/test_next_step.py` and `NextStepWindowTest` in `tests/test_gui.py` cover the three items.
+`GateTest` pins that SerpApi is the only source and that `serpapi.py` is the only module importing
+anything that reaches a network. `tests/test_mode.py` passes unchanged.
+
+Credits spent in this phase: none. No search was made and no site was opened.
+
+- [x] "Check this fare on Momondo" is the main next step after a round trip, in the window and on
       the command line, ahead of the other site links. It says plainly that Momondo listed lower
       on 5 of 6 test routes and that the saving was larger on long trips.
-- [ ] The owner can record the price found there, and the seller's name, so that `history.db`
+- [x] The owner can record the price found there, and the seller's name, so that `history.db`
       builds up real savings data over time.
-- [ ] `HOW-TO-USE.txt` notes that Momondo's deal buttons did not work for the owner in Firefox and
+- [x] `HOW-TO-USE.txt` notes that Momondo's deal buttons did not work for the owner in Firefox and
       did in Chrome.
 
-Not to be built: a Momondo provider, any scraper, or a Kiwi, Travelpayouts or Skiplagged provider.
-No searches are needed for this phase.
+Not built, as ruled: a Momondo provider, any scraper, or a Kiwi, Travelpayouts or Skiplagged provider.
+
+### Decisions made while building
+
+For the owner to confirm or overturn:
+
+- **Two one-way tickets that beat the round trip get no Momondo step** and keep the four links
+  they had. The ruling was "every round trip, confirmed or not"; here the fare is not one ticket,
+  and Momondo's page for those dates would be compared with the wrong price.
+- **The step says what the link cannot carry.** Momondo's address holds the airports and dates
+  only. A search for more than one adult, another cabin, a stop limit or bags adds a line naming
+  what to set on the page, so that a price for one adult is not recorded against a fare for two.
+- **The price is typed into a small separate window, opened by a button.** A third tab would have
+  broken the test that pins the two tabs, and boxes in the main window cost height the tables need.
+- **"Check and book" shares the row with the Momondo buttons, to their right**, and the window
+  starts two lines taller where the screen allows. Stacked, the new row and its sentence squeezed
+  the flights table to nothing at the starting size.
+- **The sentence is data**: `why_first` in `links.json`, beside the address pattern, as each site's
+  warning is. It names its own date and should be replaced when the measurement is repeated.
+- **A typed price lives only in `site_prices`.** It writes no `price_points` row and never changes
+  the headline: a fare found on Momondo does not turn `Cheapest listed` into `Cheapest`.
+- **Saving twice writes two rows.** The table is append-only like the others, so a price cannot be
+  corrected, only added again.
+- **Two existing tests changed**, both because the ruling moves Momondo out of "Same dates on" for
+  a round trip: `test_the_best_dates_come_with_a_link_to_each_other_site` in
+  `tests/test_commands.py` and `test_the_best_dates_can_be_opened_on_each_other_site` in
+  `tests/test_gui.py`. No other existing test was touched.
+
+### Not done
+
+- **Nothing reads `site_prices` back.** The rows are kept; no command reports on them yet.
+- **No Momondo page was opened in this phase.** Its round-trip link was last checked on
+  2026-10-08, and its one-way link never has been, which is why a one-way does not lead with it.
+- **The window was looked at once, on the owner's machine**, with the test fake behind it: a
+  round trip nobody confirmed, with a price saved. Other screens and scalings were not tried.
 
 ## Phase 4, watches and alerts: not started
 

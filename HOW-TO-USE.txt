@@ -173,8 +173,9 @@ The bold line tells you how far to trust the price:
     Cheapest listed: ... (not yet confirmed)
         This is what you see for a round trip unless you ticked "Confirm
         the best fare". It is normal. The price is listed, but nobody
-        has looked up the flight home yet. Tick the box and search again
-        before you rely on it.
+        has looked up the flight home yet. Before you rely on it, either
+        tick the box and search again, or click "Check this fare on
+        Momondo", which uses none of your searches.
 
     Cheapest: ...
         The price was checked, flight home and all. A one-way ticket
@@ -247,6 +248,56 @@ Under that is a list of other ways to fly the same days:
               "8h 35m layover"        a long wait between planes
 
 A lower price with a catch is not always the better buy.
+
+
+Check this fare on Momondo (do this first)
+------------------------------------------
+After a round-trip search, the first button under the bold line is
+"Check this fare on Momondo". Momondo is a travel website that compares
+many sellers. Click the button and your web browser opens Momondo on the
+same airports and the same days.
+
+Why first: in a test of 6 trips on 8 October 2026, Momondo showed the
+same flights for less on 5 of them. The two largest savings, $97 and $51,
+were on long trips. It is not always cheaper, so look before you decide.
+
+On the Momondo page, find the same flights (the same airline and the same
+times) and compare the price with the one Flightsleuth showed.
+
+If the bold line says "not yet confirmed" or "not confirmed", this is
+also a free way to confirm the price. It uses none of your searches. If
+Momondo shows those flights at about that price, that is a good sign the
+price is real.
+
+Momondo opens for 1 adult in Economy with any number of stops. If you
+searched for something else, the line under the buttons says what to set
+on the Momondo page first, so that you compare like with like.
+
+A one-way search has no such button. Momondo is then one of the "Same
+dates on:" buttons described further down.
+
+If clicking a deal on Momondo does nothing
+    When this was written (October 2026), the deal buttons on Momondo did
+    nothing in the Firefox browser on the computer of the person who made
+    Flightsleuth. They worked in the Chrome browser. If the same happens
+    to you:
+
+      1. In Flightsleuth, click "Copy the address".
+      2. Open Chrome, or any other browser you have.
+      3. Click in the address bar at the top, hold the Ctrl key and
+         press V to paste, then press Enter.
+
+Save the price you found there (you can skip this)
+    Click "Save the price you found there...". A small window opens.
+    Type the price you saw on Momondo. If you know them, also fill in who
+    sells the ticket at that price, whether it is the same flights, and
+    whether the seller's payment page still showed that price. Only the
+    price is needed. Click Save.
+
+    Flightsleuth writes this down on your own computer, next to the price
+    it found itself, and says under the buttons which was cheaper and by
+    how much. Over time that shows how much checking Momondo really
+    saves. It uses none of your searches and sends nothing anywhere.
 
 
 Booking the flight
@@ -337,7 +388,8 @@ QUICK REMINDER CARD
   1. Windows key + E, then open the Flightsleuth folder you were given
   2. Double-click "Start Flightsleuth"
   3. Type the airport codes, pick the dates, click Search
-  4. Click "Check and book" to buy the flight in your web browser
+  4. Click "Check this fare on Momondo" to see if it is cheaper there
+  5. Click "Check and book" to buy the flight in your web browser
 
 (There is also a way to run searches by typing commands. It is described
 in the file named README, for people comfortable with that.)
