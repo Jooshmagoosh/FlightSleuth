@@ -6,11 +6,11 @@ import re
 import sys
 from datetime import date
 
-from . import config, scan
+from . import config, providers, scan
 from .cache import Cache
 from .errors import UserError
 from .render import render_text, summarise
-from .serpapi import CABINS, STOPS, SerpApi
+from .serpapi import CABINS, STOPS
 
 
 def _airports(value: str) -> str:
@@ -160,13 +160,9 @@ def cmd_gui(args: argparse.Namespace) -> int:
 
 
 def cmd_quota(args: argparse.Namespace) -> int:
-    account = SerpApi(config.load_api_key()).account()
-    print(f"Plan: {account.get('plan_name')}")
-    print(f"This month: {account.get('total_searches_left')} of {account.get('searches_per_month')} searches left")
-    print(
-        f"This hour: {account.get('this_hour_searches')} used of "
-        f"{account.get('account_rate_limit_per_hour')} allowed"
-    )
+    for name in providers.names():
+        for line in providers.load(name).quota_lines():
+            print(line)
     return 0
 
 

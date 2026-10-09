@@ -4,7 +4,8 @@ import os
 import tempfile
 from unittest import mock
 
-from flightsleuth import config, scan
+from flightsleuth import config, providers, scan
+from flightsleuth.providers import SerpApiProvider
 from flightsleuth.serpapi import RateLimited
 
 # Round-trip fare by departure day of March 2030; the 11th is the cheap one.
@@ -56,8 +57,14 @@ class FakeSerpApi:
         return reply(query)
 
 
+class FakeProvider(SerpApiProvider):
+    """The real SerpApi provider with the fake client behind it."""
+
+    client_class = FakeSerpApi
+
+
 def install(test):
-    """Give one test the fake client, a throwaway home folder and a test key. Returns the folder."""
+    """Give one test the fake provider, a throwaway home folder and a test key. Returns the folder."""
     FakeSerpApi.searches = []
     FakeSerpApi.fail_after = None
     FakeSerpApi.account_reply = {
@@ -67,7 +74,8 @@ def install(test):
     }
     home = test.enterContext(tempfile.TemporaryDirectory())
     test.enterContext(mock.patch.dict(os.environ, {config.HOME_VAR: home, config.KEY_VAR: "test-key"}))
-    test.enterContext(mock.patch.object(scan, "SerpApi", FakeSerpApi))
+    providers.register(FakeProvider)  # takes the real one's place under the same name
+    test.addCleanup(providers.register, SerpApiProvider)
     # One at a time, so "fails after N searches" means exactly N.
     test.enterContext(mock.patch.object(scan, "WORKERS", 1))
     # Run from the throwaway folder: a real .env in the project must never be read or overwritten.
