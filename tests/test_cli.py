@@ -29,7 +29,9 @@ class CliTest(unittest.TestCase):
         self.assertIn("Searching .....\n", err)
         self.assertIn("JFK,EWR -> LHR, round trip, 1 adult, economy", out)
         self.assertIn("Mon 11 Mar  Mon 18 Mar  $455        <- cheapest", out)
-        self.assertIn("Cheapest: $455 round trip, Mon 11 Mar - Mon 18 Mar", out)
+        # Its return flights were never fetched, so the line may not call it the cheapest outright.
+        self.assertIn("Cheapest listed: $455 round trip, Mon 11 Mar - Mon 18 Mar (not yet confirmed)\n", out)
+        self.assertNotIn("Cheapest: ", out)
         self.assertIn("Google rates $455 as low for those dates (typical range $500 to $800).", out)
         self.assertIn("Check and book: https://www.google.com/travel/flights?tfs=X", out)
         self.assertIn("About 245 SerpApi searches left this month.", out)
@@ -42,7 +44,7 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertEqual(len(FakeSerpApi.searches), 3)
         self.assertIn("3 searches needed: 3 saved, 0 live.", err)
-        self.assertIn("Cheapest: $455 round trip", out)
+        self.assertIn("Cheapest listed: $455 round trip", out)
 
     def test_fresh_ignores_saved_results(self):
         argv = ("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")

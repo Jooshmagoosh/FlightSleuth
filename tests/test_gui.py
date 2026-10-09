@@ -63,7 +63,9 @@ class GuiTest(unittest.TestCase):
 
         self.assertEqual(self.errors, [])
         self.assertEqual(len(FakeSerpApi.searches), 3)
-        self.assertEqual(self.app.headline.get(), "Cheapest: $455 round trip, Mon 11 Mar - Mon 18 Mar")
+        self.assertEqual(
+            self.app.headline.get(), "Cheapest listed: $455 round trip, Mon 11 Mar - Mon 18 Mar (not yet confirmed)"
+        )
         self.assertEqual(self.app.detail.get(), "Google rates $455 as low for those dates (typical range $500 to $800).")
         self.assertEqual(headings(self.app.dates), ["Depart", "Return", "Round trip"])
         self.assertEqual(
@@ -116,7 +118,9 @@ class GuiTest(unittest.TestCase):
         }
         with mock.patch.object(FakeSerpApi, "search", lambda self, query: risky):
             self.search()
-        self.assertEqual(self.app.headline.get(), "Cheapest: $300 round trip, Tue 12 Mar - Tue 19 Mar")
+        self.assertEqual(
+            self.app.headline.get(), "Cheapest listed: $300 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)"
+        )
         self.assertEqual(self.app._links.winfo_children(), [])
 
     def test_repeating_a_search_reuses_saved_results(self):
@@ -202,7 +206,9 @@ class GuiTest(unittest.TestCase):
             self.search()
         asked.assert_called_once()
         self.assertEqual((self.home / ".env").read_text(encoding="utf-8"), "SERPAPI_API_KEY=pasted-key\n")
-        self.assertEqual(self.app.headline.get(), "Cheapest: $520 round trip, Tue 12 Mar - Tue 19 Mar")
+        self.assertEqual(
+            self.app.headline.get(), "Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)"
+        )
 
     def test_backing_out_of_the_key_prompt_cancels_the_search(self):
         self.enterContext(mock.patch.dict(os.environ, {config.KEY_VAR: ""}))

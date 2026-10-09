@@ -168,11 +168,14 @@ class Summary:
         if self.best.split_wins:
             return f"Cheapest: {price} as two one-way tickets, {_dates(self.best.trip)}"
         kind = "round trip" if self.round_trip else "one way"
-        check = self.check
-        if self.round_trip and self.checks:
-            # Once any fare has been looked at closely, only a confirmed one may be called the cheapest.
+        if self.round_trip:
+            # Only a round trip whose return flights were fetched may be called the cheapest.
+            listed = f"Cheapest listed: {price} {kind}, {_dates(self.best.trip)}"
+            if not self.checks:
+                return f"{listed} (not yet confirmed)"  # nobody has looked
+            check = self.check
             if check is None or check.confirmed is None:
-                return f"Cheapest listed: {price} {kind}, {_dates(self.best.trip)} (not confirmed)"
+                return f"{listed} (not confirmed)"  # somebody looked, and it did not hold up
             price = money(check.confirmed.price, self.currency)
             if check.unchecked:
                 return f"Cheapest confirmed: {price} {kind}, {_dates(self.best.trip)}"

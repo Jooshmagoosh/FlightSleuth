@@ -50,8 +50,9 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
   `scan` drops them unless `Request.risky` is set; `render.catches` words the label.
 - Show the fetch time next to every price. Never present a saved or indicative price as live.
   `render.fetched` words it; a saved price reads "(saved)".
-- Never call a round-trip fare the cheapest until its return flights have been fetched.
-  `Summary.headline` and `Summary.caveat` hold that wording for both front ends.
+- Never call a round-trip fare the cheapest until its return flights have been fetched. Until
+  then both front ends print `Cheapest listed: $N ... (not yet confirmed)`. `Summary.headline`
+  and `Summary.caveat` hold that wording, and the tests pin all four forms of the line.
 
 ## Layout
 
@@ -109,6 +110,7 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 - **Stopping.** After the first failed call no further call is sent; calls already in flight
   finish and are saved.
 - **Pinned by tests, so work around rather than change:** the window's table headings and cell
-  values, its headline and detail text, the `price_points` columns, and the wording
+  values, its detail text, the `price_points` columns, and the wording
   `N searches needed: X saved, Y live.` for a plan with nothing reserved. New window content goes
-  in new widgets; the fetch time is the tree column `#0`.
+  in new widgets; the fetch time is the tree column `#0`. The owner changes pinned wording, as
+  with the headline on 2026-10-08; nobody else does.

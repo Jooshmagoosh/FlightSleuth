@@ -31,6 +31,16 @@ the file instead.
 - **`sort_by=2` stays.** The test was: drop it only if the unsorted reply has `price_insights`
   and still holds the cheapest fare. The first held and the second did not.
 
+Decided on 2026-10-08, after Phase 2 was built:
+
+- **A round trip whose return flights have not been fetched is never printed as `Cheapest: $N`.**
+  Both front ends print `Cheapest listed: $N round trip, <dates> (not yet confirmed)`. The Phase 1
+  tests that pinned the old line were changed to pin this one.
+- **The closer look stays off by default for `--depart`** and on for `--window`.
+- **The spare return lookup goes to a different airline** than the one whose fare came back empty.
+- **`auto` never picks the `one-way` or `explore` strategy.**
+- **A search priced with `--bags` or `--market` writes no `price_points` row.**
+
 ## Found in the real replies
 
 These come from `tests/fixtures`; its README has the detail.
@@ -81,7 +91,7 @@ Requirements added after Phase 1:
 
 - [x] Never present a fare as the cheapest until its return flights have been fetched. If the
       follow-up is empty, fall through to the next fare and say so. Budget one spare call per
-      cross-check. (One exception, listed under the decisions below.)
+      cross-check.
 - [x] Label a fare sold as separate tickets, and show the one-ticket price beside it when the
       booking options give one.
 - [x] In the bake-off, measure whether `--split` ever beats the fare Google already lists.
@@ -93,28 +103,30 @@ Requirements added after Phase 1:
 - [ ] For Phase 4, evaluate an unsorted search as the light watch check: one call returned
       Google's lowest price, its rating and 61 days of price history.
 
-### Decisions made while building, for the owner to confirm or overturn
+### Decisions made while building
 
-- **The closer look is on for `--window` and off for `--depart`.** Turning it on everywhere would
-  add up to six searches to every simple search and change the counts that the existing tests pin.
-  So a fixed-date round trip still prints `Cheapest: $N round trip`, as those tests require, and
-  now prints under it that this is the listed price and how to confirm it. That line is the one
-  place a fare is called the cheapest without its return flights. Making `--check` the default
-  means changing those tests.
-- **The spare return lookup goes to a different airline.** The brief says "the next fare". In the
-  recorded search the ten cheapest fares were all Scandinavian Airlines and the first had no
-  return flights, so the next fare would probably have wasted the spare. The cheaper fares that
-  were skipped are counted and reported as not looked up, and the headline then reads
+The owner has ruled on four of these; they are recorded under "Decisions the owner has made",
+and the reasons are kept here.
+
+- **The closer look is on for `--window` and off for `--depart`** (confirmed). Turning it on
+  everywhere would add up to six searches to every simple search.
+- **The spare return lookup goes to a different airline** (confirmed). The brief says "the next
+  fare". In the recorded search the ten cheapest fares were all Scandinavian Airlines and the first
+  had no return flights, so the next fare would probably have wasted the spare. The cheaper fares
+  that were skipped are counted and reported as not looked up, and the headline then reads
   `Cheapest confirmed`.
-- **`auto` never picks the `one-way` or `explore` strategy.** One-way needs to know the market is
-  one where two one-ways cost what a round trip does, which is what the bake-off's split measure
-  is for. Explore is unverified. Both work when asked for by name.
+- **`auto` never picks the `one-way` or `explore` strategy** (confirmed). One-way needs to know the
+  market is one where two one-ways cost what a round trip does, which is what the bake-off's split
+  measure is for. Both work when asked for by name.
+- **`price_points` gets no row for a search priced with `--bags` or `--market`** (confirmed). The
+  table has no column for either and a Phase 1 test pins its columns. Phase 4 will want to settle this.
+
+Still for the owner to confirm or overturn:
+
 - **A token is trusted for 60 minutes** (`scan.TOKEN_MINUTES`). Nothing recorded says how long one
   lasts. An older listing is fetched again before its tokens are followed, and the dry run counts that.
 - **The other market is the destination's country**, read from the reply. A domestic route has
   none, so its closer look is one search cheaper.
-- **`price_points` gets no row for a search priced with `--bags` or `--market`.** The table has no
-  column for either and a Phase 1 test pins its columns. Phase 4 will want to settle this.
 - **The bake-off gives each route `min(25, budget / routes)` searches and keeps one of them back**
   for the unsorted probe, which is only made when a lookup fails. Six routes at 150 is 24 + 1 each.
 - **The window shows the closer look in a second tab.** Stacked under the price lists it needed

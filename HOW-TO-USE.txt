@@ -163,22 +163,30 @@ PART 4: READING THE RESULTS
 
 The big bold line is the answer, for example:
 
-    Cheapest: $455 round trip, Mon 11 Mar - Mon 18 Mar
+    Cheapest listed: $455 round trip, Mon 11 Mar - Mon 18 Mar (not yet confirmed)
 
 Under it, a line may say what Google thinks of that price, such as
 "low" (a good deal) or "high" (more than usual for those dates).
 
-The bold line starts in one of three ways:
+The bold line tells you how far to trust the price:
 
-    Cheapest:            the price was checked, or it is a one-way ticket
-                         and needs no checking.
-    Cheapest confirmed:  this price was checked. Cheaper ones are listed
-                         too, but nobody checked those.
-    Cheapest listed:     nobody could confirm this price. Be careful.
+    Cheapest listed: ... (not yet confirmed)
+        This is what you see for a round trip unless you ticked "Confirm
+        the best fare". It is normal. The price is listed, but nobody
+        has looked up the flight home yet. Tick the box and search again
+        before you rely on it.
 
-If you did not tick "Confirm the best fare", a line says "This is the
-listed price". That is normal. It means the flight home has not been
-looked up yet. Tick the box and search again before you rely on it.
+    Cheapest: ...
+        The price was checked, flight home and all. A one-way ticket
+        always says this, because it has no flight home to check.
+
+    Cheapest confirmed: ...
+        This price was checked. Cheaper ones are listed too, but nobody
+        checked those.
+
+    Cheapest listed: ... (not confirmed)
+        Flightsleuth tried to check this price and could not. Be careful
+        with it.
 
 
 The two tabs

@@ -128,8 +128,14 @@ No round-trip fare is called the cheapest until its return flights have been fet
 Each of these is set beside the confirmed fare as "same flights" or "different itinerary", with its catch:
 separate tickets, an agency rather than the airline, a layover of five hours or more.
 
-It is on for `--window` and off otherwise. Without it, a round-trip price is shown as
-"the listed price", and the output says how to confirm it.
+It is on for `--window` and off otherwise. The line under the tables says which you got:
+
+| Line | Meaning |
+| --- | --- |
+| `Cheapest listed: $455 round trip, ... (not yet confirmed)` | A round trip nobody looked up. The output says how to confirm it. |
+| `Cheapest: $455 round trip, ...` | Its return flights were fetched. A one-way always reads this way. |
+| `Cheapest confirmed: $555 round trip, ...` | Confirmed, but cheaper fares are listed that were not looked up. |
+| `Cheapest listed: $550 round trip, ... (not confirmed)` | The closer look tried and no fare held up. |
 
 ## How it stays inside the limits
 

@@ -117,7 +117,8 @@ class FetchTimeTest(CommandTest):
 class CloserLookOutputTest(CommandTest):
     def test_without_it_a_round_trip_price_is_called_listed_and_the_way_to_confirm_it_is_given(self):
         code, out, _ = self.run_cli(*FIXED)
-        self.assertIn("Cheapest: $520 round trip, Tue 12 Mar - Tue 19 Mar\n", out)
+        self.assertIn("Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)\n", out)
+        self.assertNotIn("Cheapest: ", out)
         self.assertIn(
             "This is the listed price: its return flights have not been looked up. "
             "Add --check to look them up, for up to 6 more searches.",
@@ -127,12 +128,28 @@ class CloserLookOutputTest(CommandTest):
 
     def test_a_one_way_price_needs_no_such_warning(self):
         _, out, _ = self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
-        self.assertNotIn("listed price", out)
+        self.assertIn("Cheapest: $200 one way, Tue 12 Mar\n", out)
+        self.assertNotIn("listed", out)
 
     def test_two_one_ways_winning_needs_no_such_warning(self):
         _, out, _ = self.run_cli(*FIXED, "--split")
         self.assertIn("Cheapest: $400 as two one-way tickets", out)
-        self.assertNotIn("listed price", out)
+        self.assertNotIn("listed", out)
+
+    def test_a_window_searched_without_the_closer_look_is_listed_too(self):
+        _, out, _ = self.run_cli(*GATE, "--no-check")
+        self.assertRegex(out, r"Cheapest listed: \$\d+ round trip, .* \(not yet confirmed\)\n")
+        self.assertNotIn("Cheapest: ", out)
+
+    def test_not_yet_confirmed_and_not_confirmed_are_different_things(self):
+        # Nobody looked, against somebody looked and the fare did not hold up.
+        _, before, _ = self.run_cli(*FIXED)
+        FakeSerpApi.phantoms = 1
+        with mock.patch.object(FakeSerpApi, "search", lambda self, q: EMPTY if q.departure_token else rich_reply(q)):
+            _, after, _ = self.run_cli(*FIXED, "--check", "--fresh")
+        self.assertIn("(not yet confirmed)\n", before)
+        self.assertIn("(not confirmed)\n", after)
+        self.assertNotIn("not yet", after)
 
     def test_with_it_the_fare_is_confirmed_and_set_beside_the_other_ways_to_fly(self):
         FakeSerpApi.market_savings = {"gb": 30}
@@ -215,7 +232,7 @@ class CloserLookOutputTest(CommandTest):
         _, out, _ = self.run_cli(*FIXED, "--bags", "1", "--market", "GB")
         self.assertIn("JFK -> LHR, round trip, 1 adult, economy, 1 carry-on bag in every price, priced for GB", out)
         self.assertEqual((FakeSerpApi.searches[0].bags, FakeSerpApi.searches[0].market), (1, "gb"))
-        self.assertIn("Cheapest: $555 round trip", out)  # the fake adds 35 a bag
+        self.assertIn("Cheapest listed: $555 round trip", out)  # the fake adds 35 a bag
 
     def test_a_long_layover_is_called_out(self):
         def slow(self, query):
