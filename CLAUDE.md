@@ -71,6 +71,9 @@ py -m flightsleuth quota                     # searches left; free
   (SerpApi's `processed_at`), else this machine's clock when the reply landed.
 - **History.** A price point is written only when a reply is fetched live, as it lands. Replaying
   the cache writes a `provider_calls` row with `live = 0` and no price point. Planning, dry runs
-  and refused runs write nothing.
+  and refused runs write nothing. Google's `price_history` never goes into `price_points`; when
+  it is stored it gets its own table, with a unique key on the query and Google's date.
+- **Sorting.** Requests keep `sort_by=2`. Without it the reply gains `price_insights` but loses
+  the cheapest fares; `tests/test_serpapi.py` pins that on two real replies.
 - **Stopping.** After the first failed call no further call is sent; calls already in flight
   finish and are saved.

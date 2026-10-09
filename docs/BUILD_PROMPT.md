@@ -77,6 +77,13 @@ Size the default pipeline to fit the 25-search cap: two seeds and one cross-chec
 
 **Phase 2, smarter search and measurement.** Implement the window planner and the pipeline, return flights, booking options, `gl`, `bags`, and an `explore` command on `google_travel_explore` for flexible destinations. Add `flightsleuth bakeoff`: for a file of routes and date windows, record the best price per source (automated where a provider exists; otherwise open the deep link and let me type the price), then report how often and by how much each source beats SerpApi, split into "same flights" and "different itinerary". Bring the window up to date last. Gate: the search that costs 455 calls today (91-day window, trips of 5 to 9 nights) dry-runs at 25 or fewer by default and about 40 with `--thorough`, and the bake-off report runs on my route file.
 
+Phase 2 requirements added after Phase 1, from the real replies in `tests/fixtures`:
+
+- Never present a fare as the cheapest until its return flights have been fetched. If the follow-up is empty, fall through to the next fare and say so. Budget one spare call per cross-check.
+- Label a fare sold as separate tickets, and show the one-ticket price beside it when the booking options give one.
+- In the bake-off, measure whether `--split` ever beats the fare Google already lists.
+- Remove expired replies from `cache.db`.
+
 **Phase 3, second sources.** Add providers only for sources the bake-off report justifies, in this order of preference: Skiplagged MCP, Kiwi MCP, Travelpayouts Data API, then optional `personal_only` providers (the `fli` library, a local browser checker). An MCP client may be an optional dependency. Gate: the mode test passes and each provider has recorded-response tests.
 
 **Phase 4, watches and alerts.** Saved searches that re-run on a schedule, price history from `price_points`, alert rules (below a set price, a set percentage under the trailing median, below Google's typical range), and notifications through ntfy or Telegram first, then email. Watches on the same route and dates share one fetch. Always re-verify live before sending an alert. Gate: a watch runs unattended for a week in a container and sends one true alert with no false ones.

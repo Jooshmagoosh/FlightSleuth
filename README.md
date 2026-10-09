@@ -107,6 +107,8 @@ other people: `personal_only` sources then refuse to load.
 - A round-trip price is the total, but only the outbound flight is shown. Use the printed link to pick the return.
 - The cheapest round-trip price Google lists is sometimes only available as two separate tickets.
   Flightsleuth does not show that yet; the booking page behind the link does.
+- A listed round-trip fare is not confirmed until its return flights are looked up, which
+  flightsleuth does not do yet. In one recorded search the cheapest fare listed had no return flights.
 - Fares move. Treat a saved price as a lead and confirm it on the link before booking.
 
 ## Tests
