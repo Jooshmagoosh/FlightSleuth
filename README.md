@@ -112,7 +112,7 @@ best fares. `--strategy` picks another way to cover the window:
 | `grid` | Every pair, as `--depart` with `--flex` and `--nights` always did. |
 | `sampled` | The three stages above. |
 | `one-way` | Prices every day out and every day back as one-ways, then searches the cheapest three sums as real round trips. For markets where two one-ways cost what a round trip does. |
-| `explore` | Asks Google's explore engine for the cheapest dates in each month, then prices those and the days around them. Not yet confirmed against a real reply; see Limits. |
+| `explore` | Asks Google's explore engine for the cheapest dates in each month of the window, one search a month, then prices those dates and the days around them. Only for the next six months, and for trips of a weekend, about a week or about two weeks. |
 
 ### The closer look
 
@@ -225,9 +225,12 @@ No source marks one today.
 - The spare return lookup goes to a different airline. Cheaper fares from the airline that came
   back empty stay listed, and the output says how many were not looked up.
 - The other country's price is a listing: its return flights are not looked up.
-- `explore` and the `explore` strategy are built from SerpApi's documentation. That documentation
-  shows a list of places with a start date and no end date, and does not show the reply for one
-  named airport. No real reply has been recorded yet, so treat both as untested against the live service.
+- `explore --to AIRPORT` and the `explore` strategy are tested on two real replies: one named
+  place comes back with one pair of dates and a price for each airline. A one-week request was
+  answered with a nine-night trip both times, and the cheapest price can belong to a very long
+  flight (one was 37 hours), so price the dates before relying on them.
+- `explore --area` and a bare `explore` are built from SerpApi's documentation, which shows a list
+  of places with a start date and no end date. No real reply of that kind has been recorded.
 - Fares move. Treat a saved price as a lead and confirm it on the link before booking.
 
 ## Tests
@@ -242,4 +245,5 @@ they cannot open a browser. The window tests open a hidden window and are skippe
 is missing or there is no display.
 
 `tests/fixtures` holds real SerpApi replies recorded in October 2026, and two hand-written ones
-that are labelled synthetic. Its README says how each was recorded and what it showed.
+that are labelled synthetic. Its README says how each was recorded, what it showed, and what no
+reply has shown yet.

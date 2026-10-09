@@ -1,0 +1,94 @@
+{
+  "search_metadata": {
+    "id": "6ac8573d49579a92f8124a82",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac8573d49579a92f8124a82.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac8573d49579a92f8124a82.md",
+    "created_at": "2026-10-09 02:53:49 UTC",
+    "processed_at": "2026-10-09 02:53:49 UTC",
+    "google_travel_explore_url": "https://www.google.com/travel/explore?hl=en&gl=us&curr=USD&tfs=CBwQAxoVEgoyMDI3LTAxLTI1agcIARIDQk9TGhUSCjIwMjctMDItMDNyBwgBEgNCT1NAAUgBcAGCAQsI____________AZgBAbIBCSoHCAESA1dBVw",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac8573d49579a92f8124a82.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac8573d49579a92f8124a82.prettify",
+    "total_time_taken": 2.73
+  },
+  "search_parameters": {
+    "engine": "google_travel_explore",
+    "hl": "en",
+    "gl": "us",
+    "departure_id": "BOS",
+    "arrival_id": "WAW",
+    "month": "1",
+    "travel_duration": 2,
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "currency": "USD"
+  },
+  "start_date": "2027-01-25",
+  "end_date": "2027-02-03",
+  "flights": [
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 2215,
+      "price": 611,
+      "cheapest_flight": true,
+      "number_of_stops": 1,
+      "airline": "Tap Air Portugal",
+      "airline_code": "TP"
+    },
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 610,
+      "price": 675,
+      "number_of_stops": 1,
+      "airline": "Lufthansa",
+      "airline_code": "LH"
+    },
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 705,
+      "price": 683,
+      "number_of_stops": 1,
+      "airline": "Air France",
+      "airline_code": "AF"
+    },
+    {
+      "departure_airport": {
+        "name": "Boston Logan International Airport",
+        "id": "BOS"
+      },
+      "arrival_airport": {
+        "name": "Warsaw Chopin Airport",
+        "id": "WAW"
+      },
+      "duration": 640,
+      "price": 694,
+      "number_of_stops": 1,
+      "airline": "Delta, KLM",
+      "airline_code": "multi"
+    }
+  ],
+  "google_flights_link": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBsQAhoeEgoyMDI3LTAxLTI1agcIARIDQk9TcgcIARIDV0FXGh4SCjIwMjctMDItMDNqBwgBEgNXQVdyBwgBEgNCT1NAAUgBUgNVU0RwAXp0Q2pSSVRHdFVRV05CUW01SVdGVkJRekJsVDNkQ1J5MHRMUzB0TFMwdGRuZGlaMnd5TUVGQlFVRkJSM0pKVm5vNFJGRm9iRTFCRWd4VVVESXhObnhVVURFeU1EWWFDd2loM1FNUUFob0RWVk5FT0J4d29kMESYAQGyAQkqBwgBEgNXQVc",
+  "google_flights_serpapi_link": "https://serpapi.com/search.json?adults=1&arrival_id=WAW&currency=USD&deep_search=true&departure_id=BOS&engine=google_flights&gl=us&hl=en&outbound_date=2027-01-25&return_date=2027-02-03&stops=0&travel_class=1"
+}

@@ -202,7 +202,8 @@ class Destination:
     end: date | None
     airline: str = ""
     stops: int | None = None
-    duration_min: int | None = None
+    duration_min: int | None = None  # the flight out
+    url: str = ""  # those dates on the source's own site, when the reply gives a link
     source: str = ""
     fetched_at: datetime | None = None
     verified_live: bool = False

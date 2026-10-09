@@ -8,8 +8,9 @@ from .models import Query
 
 Pair = tuple[date, date | None]  # (depart, return); no return date means one way
 
-# Trip lengths, in nights, that each explore duration is a fair stand-in for.
-EXPLORE_NIGHTS = {"weekend": (2, 3), "week": (6, 8), "two weeks": (13, 15)}
+# Trip lengths, in nights, that each explore duration is a fair stand-in for. "week" reaches nine
+# because both recorded replies to a one-week request suggested a nine-night trip.
+EXPLORE_NIGHTS = {"weekend": (2, 3), "week": (6, 9), "two weeks": (13, 15)}
 EXPLORE_MONTHS = 6  # the explore engine only knows this month and the five after it
 
 

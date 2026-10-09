@@ -1,9 +1,11 @@
 import contextlib
 import io
+import json
 import os
 import re
 import unittest
 from datetime import date, datetime
+from pathlib import Path
 from unittest import mock
 
 from flightsleuth import cli, config, links, providers
@@ -374,6 +376,20 @@ class ExploreCommandTest(CommandTest):
     def test_one_place_can_be_asked_about(self):
         self.run_cli("explore", "MCO", "--to", "waw", "--length", "weekend")
         self.assertEqual((FakeSerpApi.searches[0].destination, FakeSerpApi.searches[0].duration), ("WAW", "weekend"))
+
+    def test_a_real_reply_for_one_place_lists_each_airlines_price_and_the_link(self):
+        fixture = Path(__file__).parent / "fixtures" / "explore_one_place_january.json"
+        FakeSerpApi.explore_reply = json.loads(fixture.read_text(encoding="utf-8"))
+        code, out, err = self.run_cli("explore", "BOS", "--to", "WAW", "--month", "1")
+        self.assertEqual(code, 0, err)
+        self.assertIn("BOS -> WAW, January, a week", out)
+        self.assertRegex(
+            out, r"\$611   Warsaw Chopin Airport  WAW      Mon 25 Jan - Wed 03 Feb  1 stop  36h 55m  Tap Air Portugal"
+        )
+        self.assertRegex(out, r"\$694   Warsaw Chopin Airport  WAW      Mon 25 Jan - Wed 03 Feb  1 stop  10h 40m  Delta, KLM")
+        self.assertEqual(out.count("Check these dates: https://www.google.com/travel/flights?"), 1)
+        # The reply says when SerpApi fetched it, and that is the time shown: 9 October, 02:53 UTC.
+        self.assertRegex(out, STAMP)
 
     def test_a_list_of_places_is_refused(self):
         code, _, err = self.run_cli("explore", "MCO", "--to", "WAW,KRK")

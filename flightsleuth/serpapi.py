@@ -180,11 +180,14 @@ def parse(query: Query, raw: dict) -> SearchResult:
 
 
 def destinations(trip: Explore, raw: dict) -> tuple[Destination, ...]:
-    """The places an explore reply suggests, cheapest first.
+    """What an explore reply suggests, cheapest first. The two kinds of request answer differently.
 
-    SerpApi documents a `destinations` list whose entries carry a `start_date`. Dates at the top
-    level are what the reply for a single `arrival_id` is said to hold. No recorded reply has
-    confirmed either shape yet, so both are read and neither is required.
+    A request naming one place gets one pair of dates, `start_date` and `end_date`, and a
+    `flights` list with a price for each airline on those dates: one `Destination` per flight,
+    all sharing the dates. Two recorded replies show this.
+
+    A request naming a region, or nothing, is documented to get a `destinations` list, each
+    entry with its own `start_date` and no end date. No reply of that kind has been recorded.
     """
     try:
         found = [
@@ -201,19 +204,25 @@ def destinations(trip: Explore, raw: dict) -> tuple[Destination, ...]:
             )
             for place in raw.get("destinations") or []
         ]
-        if not found and raw.get("start_date"):
-            listed = (raw.get("best_flights") or []) + (raw.get("other_flights") or []) + (raw.get("flights") or [])
-            prices = [option["price"] for option in listed if isinstance(option, dict) and option.get("price")]
-            found.append(
-                Destination(
-                    name=trip.destination,
-                    country="",
-                    airport=trip.destination,
-                    price=min(prices, default=None),
-                    start=_day(raw.get("start_date")),
-                    end=_day(raw.get("end_date")),
+        start, end = _day(raw.get("start_date")), _day(raw.get("end_date"))
+        if not found and start:
+            # With no flight priced, the dates alone are still worth having.
+            for flight in raw.get("flights") or [{}]:
+                arrival = flight.get("arrival_airport") or {}
+                found.append(
+                    Destination(
+                        name=arrival.get("name") or trip.destination,
+                        country="",
+                        airport=arrival.get("id") or trip.destination,
+                        price=flight.get("price"),
+                        start=start,
+                        end=end,
+                        airline=flight.get("airline") or "",
+                        stops=flight.get("number_of_stops"),
+                        duration_min=flight.get("duration"),
+                        url=raw.get("google_flights_link") or "",
+                    )
                 )
-            )
     except (KeyError, IndexError, ValueError, TypeError, AttributeError) as e:
         raise SerpApiError(f"unexpected response shape from SerpApi ({e!r})") from None
     return tuple(sorted(found, key=lambda place: (place.price is None, place.price or 0)))

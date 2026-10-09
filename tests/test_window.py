@@ -1,13 +1,15 @@
+import json
 import os
 import sqlite3
 import unittest
 from datetime import date, timedelta
+from pathlib import Path
 from unittest import mock
 
 from flightsleuth import config, planner, providers, scan
 from flightsleuth.errors import UserError
 from flightsleuth.models import Explore, Query
-from tests.fakes import FakeSerpApi, install
+from tests.fakes import FakeSerpApi, install, rich_reply
 from tests.test_providers import CheapSource
 
 TODAY = date(2030, 1, 1)
@@ -107,6 +109,7 @@ class ExploreDatesTest(unittest.TestCase):
     def test_a_range_of_nights_maps_to_the_explore_length_it_overlaps(self):
         self.assertEqual(planner.explore_duration((2, 4)), "weekend")
         self.assertEqual(planner.explore_duration((5, 9)), "week")
+        self.assertEqual(planner.explore_duration((9, 10)), "week")  # the recorded one-week replies ran nine nights
         self.assertEqual(planner.explore_duration((10, 16)), "two weeks")
         self.assertIsNone(planner.explore_duration((10, 11)))
         self.assertIsNone(planner.explore_duration(None))
@@ -368,6 +371,41 @@ class ExploreStrategyTest(unittest.TestCase):
         self.assertIn((date(2030, 4, 15), date(2030, 4, 22)), pairs(outcome.trips))
         best = min(outcome.trips, key=lambda trip: outcome.results[trip].cheapest.price)
         self.assertEqual((best.depart_date, best.return_date), BEST)
+
+    def test_the_recorded_replies_seed_the_dates_they_suggest(self):
+        """The owner's BOS to WAW route, with the two real explore replies recorded for it."""
+        fixtures = Path(__file__).parent / "fixtures"
+        by_month = {1: "explore_one_place_january.json", 2: "explore_one_place_february.json"}
+
+        def replay(self, query):
+            FakeSerpApi.searches.append(query)
+            if isinstance(query, Explore):
+                return json.loads((fixtures / by_month[query.month]).read_text(encoding="utf-8"))
+            return rich_reply(query)
+
+        window = (date(2027, 1, 10), date(2027, 2, 28))
+        route = scan.Request("BOS", "WAW", window[0], nights=(7, 14), window=window, strategy="explore", check=False)
+        plan = scan.plan(route, today=date(2026, 10, 8))
+        self.assertEqual(
+            [(call.query.origin, call.query.destination, call.query.month, call.query.duration) for call in plan.calls],
+            [("BOS", "WAW", 1, "week"), ("BOS", "WAW", 2, "week")],
+        )
+        with mock.patch.object(FakeSerpApi, "search", replay):
+            outcome = scan.run(plan)
+
+        self.assertEqual(outcome.notes, [])
+        dated = [query for query in FakeSerpApi.searches if isinstance(query, Query)]
+        # Both suggestions are priced first, the cheaper one leading: February's $607, then January's $611.
+        self.assertEqual(
+            [(query.depart_date, query.return_date) for query in dated[:2]],
+            [(date(2027, 2, 1), date(2027, 2, 10)), (date(2027, 1, 25), date(2027, 2, 3))],
+        )
+        # Then the days around them, all inside the window and the allowed lengths.
+        self.assertGreater(len(outcome.trips), 2)
+        for depart, back in pairs(outcome.trips):
+            self.assertTrue(window[0] <= depart <= window[1])
+            self.assertIn((back - depart).days, range(7, 15))
+        self.assertLessEqual(len(FakeSerpApi.searches), 25)
 
     def test_when_explore_suggests_nothing_the_window_is_sampled_and_the_run_says_so(self):
         plan = scan.plan(request(strategy="explore", check=False), today=self.today)

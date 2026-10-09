@@ -469,10 +469,9 @@ class FollowUpParseTest(unittest.TestCase):
         self.assertEqual((london.airline, london.stops, london.duration_min), ("easyJet", 0, 70))
         self.assertEqual((paris.price, paris.end), (58, date(2026, 3, 12)))
 
-    def test_an_explore_reply_with_only_dates_still_gives_them(self):
-        raw = {"start_date": "2027-04-06", "end_date": "2027-04-20", "best_flights": [{"price": 512}, {"price": 498}]}
-        (place,) = destinations(Explore("MCO", destination="WAW"), raw)
-        self.assertEqual((place.airport, place.price, place.start, place.end), ("WAW", 498, date(2027, 4, 6), date(2027, 4, 20)))
+    def test_dates_with_no_flight_priced_are_still_given(self):
+        (place,) = destinations(Explore("MCO", destination="WAW"), {"start_date": "2027-04-06", "end_date": "2027-04-20"})
+        self.assertEqual((place.airport, place.price, place.start, place.end), ("WAW", None, date(2027, 4, 6), date(2027, 4, 20)))
 
     def test_an_empty_explore_reply_is_no_destinations(self):
         self.assertEqual(destinations(Explore("MCO"), {"search_metadata": {"status": "Success"}}), ())
@@ -480,6 +479,75 @@ class FollowUpParseTest(unittest.TestCase):
     def test_an_unfamiliar_explore_reply_is_reported_not_crashed_on(self):
         with self.assertRaises(SerpApiError):
             destinations(Explore("MCO"), {"destinations": [{"start_date": "next week"}]})
+
+
+class RecordedExploreTest(unittest.TestCase):
+    """Two real explore replies: BOS to WAW, about a week, asked for January and for February 2027.
+
+    They are the two calls the explore strategy sends for that route, made through the
+    `explore` command and copied out of the cache.
+    """
+
+    JANUARY = Explore("BOS", destination="WAW", month=1, duration="week")
+    FEBRUARY = Explore("BOS", destination="WAW", month=2, duration="week")
+
+    def test_real_requests_match_what_the_code_sends(self):
+        for trip, name in ((self.JANUARY, "explore_one_place_january.json"), (self.FEBRUARY, "explore_one_place_february.json")):
+            sent = recorded(name)["search_parameters"]
+            params = explore_params(trip)
+            self.assertEqual(set(params), set(sent) - {"gl"})  # SerpApi reports the `gl` it defaulted to
+            for key, value in params.items():
+                self.assertEqual(str(sent[key]).lower(), value.lower(), key)
+
+    def test_a_reply_for_one_place_has_dates_and_flights_and_no_list_of_places(self):
+        for name in ("explore_one_place_january.json", "explore_one_place_february.json"):
+            reply = recorded(name)
+            self.assertEqual(
+                sorted(set(reply) - {"search_metadata", "search_parameters"}),
+                ["end_date", "flights", "google_flights_link", "google_flights_serpapi_link", "start_date"],
+            )
+            self.assertEqual(reply["search_metadata"]["status"], "Success")
+            for flight in reply["flights"]:
+                self.assertEqual(
+                    set(flight) - {"cheapest_flight"},
+                    {"airline", "airline_code", "arrival_airport", "departure_airport", "duration", "number_of_stops", "price"},
+                )
+
+    def test_the_dates_are_usable_and_fall_in_the_month_asked_for(self):
+        january = destinations(self.JANUARY, recorded("explore_one_place_january.json"))
+        february = destinations(self.FEBRUARY, recorded("explore_one_place_february.json"))
+        self.assertEqual({(place.start, place.end) for place in january}, {(date(2027, 1, 25), date(2027, 2, 3))})
+        self.assertEqual({(place.start, place.end) for place in february}, {(date(2027, 2, 1), date(2027, 2, 10))})
+
+    def test_a_one_week_request_was_answered_with_nine_nights_both_times(self):
+        for trip, name in ((self.JANUARY, "explore_one_place_january.json"), (self.FEBRUARY, "explore_one_place_february.json")):
+            place = destinations(trip, recorded(name))[0]
+            self.assertEqual((place.end - place.start).days, 9)
+
+    def test_each_airlines_price_for_those_dates_comes_back_cheapest_first(self):
+        places = destinations(self.JANUARY, recorded("explore_one_place_january.json"))
+        self.assertEqual(
+            [(place.price, place.airline, place.stops, place.duration_min) for place in places],
+            [(611, "Tap Air Portugal", 1, 2215), (675, "Lufthansa", 1, 610), (683, "Air France", 1, 705), (694, "Delta, KLM", 1, 640)],
+        )
+        self.assertEqual({(place.name, place.airport, place.country) for place in places}, {("Warsaw Chopin Airport", "WAW", "")})
+        february = destinations(self.FEBRUARY, recorded("explore_one_place_february.json"))
+        self.assertEqual([(place.price, place.airline) for place in february], [(607, "Tap Air Portugal"), (656, "British Airways"), (675, "Lufthansa")])
+
+    def test_the_cheapest_flight_is_the_one_the_reply_marks(self):
+        flights = recorded("explore_one_place_january.json")["flights"]
+        self.assertEqual([flight["price"] for flight in flights if flight.get("cheapest_flight")], [611])
+        self.assertEqual(min(flight["price"] for flight in flights), 611)
+
+    def test_the_reply_links_to_those_dates_on_google_flights(self):
+        places = destinations(self.JANUARY, recorded("explore_one_place_january.json"))
+        self.assertEqual(len({place.url for place in places}), 1)
+        self.assertTrue(places[0].url.startswith("https://www.google.com/travel/flights?"))
+
+    def test_the_reply_says_when_it_was_fetched(self):
+        self.assertEqual(
+            fetched_at(recorded("explore_one_place_january.json")), datetime(2026, 10, 9, 2, 53, 49, tzinfo=timezone.utc)
+        )
 
 
 if __name__ == "__main__":

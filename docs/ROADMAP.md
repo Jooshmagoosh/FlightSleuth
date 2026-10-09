@@ -77,12 +77,16 @@ Where the gate stands:
   and `tests/test_commands.py` pin both.
 - **Waiting on the owner:** `bakeoff docs/routes.txt --dry-run` plans the six routes at up to 150
   live searches, and the report runs on what a bake-off records. The bake-off itself has not been
-  run, because no credits were spent in this phase. Nothing was fetched from SerpApi at all.
+  run; that is the owner's to start. `bakeoff docs/routes.txt --only N` runs one route first.
+
+Credits spent in this phase: two, on the owner's say-so, for the two explore replies in
+`tests/fixtures`. Monthly searches left went from 168 to 166.
 
 - [x] Departure window on `Request`; planner strategies reported through `Plan`
 - [x] Return flights and booking options (seller) through the token chain
 - [x] `gl` and `bags`; ranking by total cost with the catch stated
-- [x] `explore` command on `google_travel_explore` (built from the documentation; see "Not done")
+- [x] `explore` command on `google_travel_explore` (one named place is tested on real replies;
+      a region or anywhere is built from the documentation; see "Not done")
 - [x] Deep links to other sites, templates in one data file
 - [x] `flightsleuth bakeoff`
 - [x] Fetch time shown next to every price; the window brought up to date last
@@ -134,12 +138,16 @@ Still for the owner to confirm or overturn:
 
 ### Not done
 
-- **Nothing here has run against the live service.** Return flights, booking options and the
-  countries are tested on the recorded replies. `gl`, `bags` and both explore shapes are tested
-  only against the documentation.
-- **`explore` is unverified.** SerpApi's page documents a `destinations` list with a `start_date`
-  per place. It shows no `end_date` and no reply for a single `arrival_id`, which is what the
-  `explore` strategy sends. Two recorded replies, one of each kind, would settle it: two credits.
+- **The staged search and the closer look have not run against the live service.** Return
+  flights, booking options and the countries are tested on the recorded replies. `gl` and `bags`
+  are tested only against the documentation.
+- **Explore for a region or for anywhere is unverified.** That is what `explore --area` and a bare
+  `explore` send. SerpApi's page documents a `destinations` list with a `start_date` per place and
+  no `end_date`; the parser reads that from the documentation alone. Explore for one named place,
+  which is what the `explore` strategy sends, is settled: see "Found while building".
+- **The `explore` strategy has not been run end to end on a real route.** Its two explore calls for
+  BOS to WAW are recorded, and a test seeds a search from them; the dated searches that follow were
+  not paid for.
 - **The four site links were checked once, on 2026-10-08.** Momondo, Skiplagged and Kiwi.com
   opened the right search. Skyscanner named the right cities and then showed a robot check, so
   its dates were never seen. `links.json` records this per site.
@@ -147,6 +155,14 @@ Still for the owner to confirm or overturn:
 
 ### Found while building
 
+- **Explore gives usable dates for one named place.** The reply has `start_date`, `end_date` and
+  one price per airline, as the brief said and SerpApi's page does not show. `month` steers it:
+  January gave 25 Jan to 3 Feb 2027, February gave 1 Feb to 10 Feb.
+- **Explore's "one week" was nine nights both times**, so `planner.EXPLORE_NIGHTS` lets a one-week
+  request stand in for trips of six to nine nights.
+- **Explore's cheapest price can belong to a flight nobody would take.** January's $611 was a
+  37-hour trip out with one stop; the next fare, $675, took ten hours. Explore gives no flight
+  numbers, times or tokens, so its prices are leads for a dated search and nothing more.
 - **SerpApi accepts both `gb` and `uk` for `gl`**, so the country code from a reply can be used as it is.
 - **A `booking_token` request ignores the dates and filters sent with it**, according to the
   documentation. The code repeats the original search with the token, as the recorded request did.

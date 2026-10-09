@@ -478,4 +478,6 @@ def render_places(title: str, places: tuple[Destination, ...], currency: str, *,
         return f"{title}\n\nNo destinations found. Try another month, trip length or region."
     rows = [place_cells(place, currency) for place in places[:top]]
     note = "These are the prices explore suggests. Search the dates to confirm one before relying on it."
-    return "\n".join([title, "", *table(PLACE_HEADERS, rows), "", note])
+    # A search for one place comes with one link, to those dates on Google Flights.
+    links = dict.fromkeys(place.url for place in places[:top] if place.url.startswith("https://"))
+    return "\n".join([title, "", *table(PLACE_HEADERS, rows), "", note, *(f"Check these dates: {url}" for url in links)])
