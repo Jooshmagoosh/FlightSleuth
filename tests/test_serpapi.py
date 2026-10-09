@@ -24,6 +24,7 @@ def options(reply):
 FIXTURE = recorded("synthetic_roundtrip.json")
 TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
 REAL_TRIP = Query("JFK,EWR", "LHR", date(2026, 12, 8), date(2026, 12, 15))
+REAL_ONE_WAY = Query("LAX", "JFK", date(2026, 12, 8))
 
 
 class FakeOpener:
@@ -208,6 +209,54 @@ class RecordedReplyTest(unittest.TestCase):
         best = min(one_ticket, key=lambda together: together["price"])
         self.assertEqual((best["book_with"], best["price"], best["airline"]), ("United", 797, True))
         self.assertEqual([leg["flights"][0]["flight_number"] for leg in reply["selected_flights"]], ["UA 14", "LX 345"])
+
+    def test_one_way_request_matches_what_the_code_sends(self):
+        sent = recorded("oneway.json")["search_parameters"]
+        for name, value in search_params(REAL_ONE_WAY).items():
+            self.assertEqual(str(sent[name]).lower(), value.lower(), name)
+        self.assertNotIn("return_date", sent)
+
+    def test_one_way_options_carry_a_booking_token_straight_away(self):
+        found = options(recorded("oneway.json"))
+        self.assertEqual(len(found), 126)
+        for option in found:
+            self.assertTrue(option["booking_token"])
+            self.assertNotIn("departure_token", option)
+            self.assertEqual(option["type"], "One way")
+            self.assertEqual(option["extensions"], ["Checked baggage for a fee"])
+
+    def test_one_way_reply_parses_with_price_insights_despite_sorting_by_price(self):
+        result = parse(REAL_ONE_WAY, recorded("oneway.json"))
+        self.assertEqual(len(result.offers), 126)
+        cheapest = result.cheapest
+        self.assertEqual((cheapest.price, cheapest.origin, cheapest.destination, cheapest.stops), (129, "LAX", "JFK", 1))
+        self.assertEqual(cheapest.itinerary_key, "B6900@2026-12-08T23:35>B61702@2026-12-09T09:30")
+        self.assertEqual(len({offer.itinerary_key for offer in result.offers}), 126)
+        self.assertEqual((result.insights.lowest_price, result.insights.level), (129, "typical"))
+        self.assertEqual(result.insights.typical_range, (70, 205))
+        self.assertEqual(len(result.insights.price_history), 61)
+
+    def test_real_price_history_is_one_point_a_day_for_two_months(self):
+        history = parse(REAL_TRIP, recorded("roundtrip_outbound_unsorted.json")).insights.price_history
+        days = [when.date() for when, _ in history]
+        self.assertEqual((len(days), days[0], days[-1]), (61, date(2026, 8, 9), date(2026, 10, 8)))
+        self.assertEqual({(later - earlier).days for earlier, later in zip(days, days[1:])}, {1})
+        self.assertEqual((min(price for _, price in history), max(price for _, price in history)), (516, 706))
+
+    def test_leaving_out_sort_by_gains_the_price_rating_but_loses_the_cheapest_fares(self):
+        by_price = parse(REAL_TRIP, recorded("roundtrip_outbound.json"))
+        default = parse(REAL_TRIP, recorded("roundtrip_outbound_unsorted.json"))
+        self.assertIsNone(by_price.insights)
+        self.assertEqual((default.insights.lowest_price, default.insights.level), (693, "typical"))
+
+        listed = {offer.itinerary_key for offer in default.offers}
+        dropped = [offer for offer in by_price.offers if offer.itinerary_key not in listed]
+        self.assertEqual(len(dropped), 14)
+        self.assertEqual({offer.airlines for offer in dropped}, {("Scandinavian Airlines",)})
+        self.assertEqual(dropped[:10], list(by_price.offers[:10]))  # every one of the ten cheapest
+        self.assertEqual((by_price.cheapest.price, default.cheapest.price), (646, 693))
+        # Apart from those, both replies agree on the cheapest fare.
+        self.assertEqual(min(offer.price for offer in by_price.offers if offer not in dropped), 693)
 
     def test_no_recorded_reply_holds_an_api_key_or_an_account_link(self):
         for path in FIXTURES.glob("*.json"):
