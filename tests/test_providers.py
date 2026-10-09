@@ -8,7 +8,7 @@ from unittest import mock
 from flightsleuth import cli, config, providers, scan
 from flightsleuth.errors import UserError
 from flightsleuth.models import Offer, SearchResult, Segment
-from flightsleuth.providers import Capability, DataClass, Provider, SerpApiProvider
+from flightsleuth.providers import Allowance, Capability, DataClass, Provider, SerpApiProvider
 from tests.fakes import FakeSerpApi, install
 
 
@@ -113,6 +113,26 @@ class RegistryTest(unittest.TestCase):
     def test_unknown_source_is_said_plainly(self):
         with self.assertRaisesRegex(UserError, "no price source called 'nope'"):
             providers.load("nope")
+
+    def test_the_account_says_what_is_left_the_monthly_total_and_the_reset_day(self):
+        # The owner's free plan, as the real account endpoint reported it on 2026-10-09.
+        FakeSerpApi.account_reply.update(total_searches_left=31, searches_per_month=250, plan_renewal_date="2026-11-08")
+        self.assertEqual(providers.load("serpapi").allowance(), Allowance(31, 250, date(2026, 11, 8)))
+        self.assertEqual(FakeSerpApi.searches, [])  # asking is free
+
+    def test_another_plan_is_read_the_same_way_with_nothing_assumed(self):
+        FakeSerpApi.account_reply.update(
+            total_searches_left=4321, searches_per_month=5000, plan_renewal_date="2026-12-01T00:00:00Z"
+        )
+        self.assertEqual(providers.load("serpapi").allowance(), Allowance(4321, 5000, date(2026, 12, 1)))
+
+    def test_an_account_that_names_no_reset_day_has_none(self):
+        for said in (None, "", "soon"):
+            FakeSerpApi.account_reply.update(plan_renewal_date=said)
+            self.assertEqual(providers.load("serpapi").allowance(), Allowance(250, None, None), said)
+
+    def test_a_source_that_is_not_metered_has_no_allowance(self):
+        self.assertIsNone(CheapSource().allowance())
 
     def test_quota_command_asks_the_registry(self):
         FakeSerpApi.account_reply.update(plan_name="Free Plan", searches_per_month=250)

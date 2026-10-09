@@ -3,10 +3,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from . import links
 from .models import Alternative, Check, Destination, Insights, Offer, Query, SearchResult, Segment
 from .planner import one_way_legs
+
+if TYPE_CHECKING:  # watch words its alerts through this module, so it cannot be imported here for real
+    from . import watch
 
 NO_FARES = "No fares found. Try other dates, more airports, or fewer filters."
 UNCONFIRMED = "This is the listed price: its return flights have not been looked up."
@@ -375,6 +379,10 @@ def _insight(insights: Insights | None, currency: str) -> str | None:
     return note + "."
 
 
+def _most_stops(trip: Query) -> str:
+    return "nonstop only" if trip.stops == "nonstop" else f"{stops(int(trip.stops))} or fewer"
+
+
 def _unsent(trip: Query) -> list[str]:
     """What a search asked for that a link to another site does not carry."""
     asked = []
@@ -383,7 +391,7 @@ def _unsent(trip: Query) -> list[str]:
     if trip.cabin != "economy":
         asked.append("premium economy" if trip.cabin == "premium" else f"{trip.cabin} class")
     if trip.stops != "any":
-        asked.append("nonstop only" if trip.stops == "nonstop" else f"{stops(int(trip.stops))} or fewer")
+        asked.append(_most_stops(trip))
     if trip.bags:
         asked.append(f"{trip.bags} carry-on bag{'s' if trip.bags != 1 else ''} in the price")
     return asked
@@ -540,6 +548,226 @@ def render_text(summary: Summary, *, hint: str = "") -> str:
     lines += [f"{label}: {url}" for label, url in summary.links]
     lines += [f"Same dates on {label}: {url}" for label, url in summary.other_links]
     return "\n".join(lines)
+
+
+def watch_title(trip: Query) -> str:
+    """A watch in a few words: where and when."""
+    return f"{trip.origin} -> {trip.destination}, {_dates(trip)}"
+
+
+def _count(number: int, noun: str) -> str:
+    return f"{number} {noun}" if number == 1 else f"{number} {noun}{'es' if noun.endswith('ch') else 's'}"
+
+
+def why(found: watch.Fired, price: float, currency: str) -> str:
+    """One rule a price satisfied, as the alert says it."""
+    if found.rule == "below":
+        return f"below the {money(found.mark, currency)} you set"
+    if found.rule == "median":
+        under = (found.mark - price) / found.mark * 100
+        return f"{under:.0f}% under the {found.days}-day median of {money(found.mark, currency)}"
+    return f"below Google's typical range of {money(found.mark, currency)} to {money(found.top, currency)}"
+
+
+def _sold(check: Check, currency: str) -> str:
+    """Who sells the confirmed fare, and whether its price is for one ticket or two."""
+    sellers = [found for found in check.alternatives if found.kind == "seller"]
+    if not sellers:
+        return "Who sells it was not looked up."
+    cheapest = sellers[0]
+    offer = cheapest.offers[0]
+    if not offer.separate_tickets:
+        agency = ", an agency, not the airline" if offer.sold_by_airline is False else ""
+        return f"Sold on one ticket by {cheapest.name}{agency} at {money(cheapest.price, currency)}."
+    parts = " + ".join(f"{name} {money(price, currency)}" for name, price in cheapest.parts)
+    text = f"{money(cheapest.price, currency)} is two separate tickets" + (f" ({parts})." if parts else ".")
+    whole = next((found for found in sellers if not found.offers[0].separate_tickets), None)
+    if whole is None:
+        return f"{text} No seller listed it on one ticket."
+    agency = ", an agency, not the airline" if whole.offers[0].sold_by_airline is False else ""
+    return f"{text} On one ticket it is {money(whole.price, currency)} from {whole.name}{agency}."
+
+
+def alert(check: Check, reasons: list[str]) -> tuple[str, str, str]:
+    """A price alert: its title, its text and the address it opens.
+
+    Only ever built for a fare the closer look confirmed, so a round trip's return flights have
+    been fetched by the time anybody is told about it.
+    """
+    trip, fare = check.trip, check.confirmed
+    currency = trip.currency
+    closer = _closer(check, currency)
+    title = (
+        f"{trip.origin} to {trip.destination}: {money(fare.price, currency)} "
+        f"{'round trip' if trip.return_date else 'one way'}"
+    )
+    lines = [f"{_dates(trip)}. Why: {'; '.join(reasons)}."]
+    for label, route, when, stop_count, time, flights in closer.legs:
+        lines.append(f"{label.capitalize()}: {route} {when}, {', '.join(part for part in (stop_count, time, flights) if part)}.")
+    lines += closer.lines
+    lines.append(_sold(check, currency))
+    first = links.first_site(trip)
+    if first is not None:
+        lines.append(f"Tap to check it on {first.name}.")
+        asked = _unsent(trip)
+        if asked:
+            lines.append(UNSENT.format(what=", ".join(asked)))
+    return title, "\n".join(lines), first.url if first else ""
+
+
+def outage(trip: Query, last_day: date | None, due: date, last_said: str) -> tuple[str, str]:
+    """What to tell the owner, once, about a watch that has gone unchecked for too long."""
+    title = f"FlightSleuth has not checked {trip.origin} to {trip.destination}"
+    last = f"It was last checked on {day(last_day)}" if last_day else "It has never been checked"
+    lines = [f"{_dates(trip)}. {last}, and a check has been due since {day(due)}."]
+    if last_said:
+        lines.append(f"The last try: {last_said}")
+    lines.append('See where it stands with "py -m flightsleuth watch list". You will not be told again until it has been checked.')
+    return title, "\n".join(lines)
+
+
+TEST_ALERT = (
+    "FlightSleuth test alert",
+    "This is a test. No search was made and no price was fetched. A real alert names the route, the dates and "
+    "the price, says why it fired, and opens the site to check it on when tapped.",
+)
+SENT_LATE = "Sent late: ntfy could not be reached when this price was fetched."
+
+
+def checked(
+    outcome: str,
+    currency: str,
+    *,
+    price: float | None = None,
+    confirmed: float | None = None,
+    lowest: float | None = None,
+    bar: float | None = None,
+    reasons: list[str] | None = None,
+    error: str = "",
+) -> str:
+    """What one check of a watch came to, in a sentence or two, for the log and for `watch list`."""
+    listed = money(price, currency) if price is not None else ""
+    held = money(confirmed, currency) if confirmed is not None else ""
+    because = "; ".join(reasons or [])
+    if outcome == "no fares":
+        return "No fares were listed."
+    if outcome == "quiet":
+        return f"{listed} listed. No rule fired."
+    if outcome == "repeat":
+        shown = f"{held} confirmed" if held else f"{listed} listed"
+        return f"{shown}. Already alerted at {money(lowest, currency)}; a new alert needs {money(bar, currency)} or less."
+    if outcome == "no return flights":
+        return (
+            f"{listed} listed ({because}), but its return flights could not be found, so no alert. "
+            f"It will not be asked about again at that price."
+        )
+    if outcome == "known empty":
+        return (
+            f"{listed} listed, but every fare listed is one whose return flights could not be found before "
+            f"at the same price, so none was asked about again."
+        )
+    if outcome == "not confirmed":
+        return f"{listed} listed ({because}), but it could not be confirmed, so no alert: {error}."
+    if outcome == "rose":
+        return f"{listed} listed, but with its return flights it came to {held}, which fires no rule."
+    if outcome == "alerted":
+        return f"{held} confirmed. Alert sent: {because}."
+    if outcome == "alert not sent":
+        return f"{held} confirmed ({because}), but the alert did not go: {error}. The next run tries again."
+    if outcome == "skipped":
+        return f"Not checked: {error}. It stays due."
+    return f"Check failed: {error}. It stays due."
+
+
+def _rules(found: watch.Watch) -> str:
+    currency = found.trip.currency
+    rules = []
+    if found.below is not None:
+        rules.append(f"below {money(found.below, currency)}")
+    if found.drop_percent:
+        rules.append(f"{found.drop_percent:g}% under its {found.median_days}-day median")
+    if found.typical:
+        rules.append("below Google's typical range")
+    return ", or ".join(rules)
+
+
+def watch_lines(standing: watch.Standing, now: datetime, resend_hours: int) -> list[str]:
+    """One watch as `watch list` shows it: what it is, its rules, and where it stands."""
+    found, trip = standing.watch, standing.watch.trip
+    currency = trip.currency
+    people = f"{trip.adults} adult{'s' if trip.adults != 1 else ''}"
+    kind = "round trip" if trip.return_date else "one way"
+    limit = "" if trip.stops == "any" else f", {_most_stops(trip)}"
+    lines = [f"{found.id}. {watch_title(trip)}, {kind}, {people}, {trip.cabin}{limit}"]
+    lines.append(f"   Alert when it is {_rules(found)}. Checked every {_count(found.every_days, 'day')}.")
+    last = standing.last
+    if last is None:
+        lines.append("   Last check: none yet.")
+    else:
+        lines.append(f"   Last check: {fetched(datetime.fromisoformat(last['checked_at']), True)}. {last['detail']}")
+    priced = standing.priced
+    if priced is None:
+        lines.append("   Last price: none yet.")
+    else:
+        amount = priced["confirmed_price"] if priced["confirmed_price"] is not None else priced["price"]
+        state = "confirmed" if priced["confirmed_price"] is not None else "listed"
+        when = fetched(datetime.fromisoformat(priced["fetched_at"]), True) if priced["fetched_at"] else "time unknown"
+        lines.append(f"   Last price: {money(amount, currency)} {state}, fetched {when}.")
+    if standing.unsent is not None:
+        fresh = standing.unsent_since and (now - standing.unsent_since).total_seconds() <= resend_hours * 3600
+        about = f"An alert about {money(standing.unsent['price'], currency)}"
+        lines.append(f"   {about} has not reached ntfy. The next run tries again." if fresh else f"   {about} never reached ntfy.")
+    if standing.ended:
+        ending = "Removed." if standing.ended == "removed" else "Retired: its departure date has passed."
+        lines.append(f"   {ending} Searches used: {standing.searches}.")
+    else:
+        due = "now" if standing.due <= now.date() else day(standing.due)
+        lines.append(f"   Next due: {due}. Searches used: {standing.searches}.")
+    return lines
+
+
+def _span_lines(span: watch.Span, have: str) -> list[str]:
+    lines = [
+        f"  {watch_title(found.trip)}: {_count(count, 'check')}, one every {_count(found.every_days, 'day')}"
+        for found, count in span.checks
+    ]
+    cost = span.count * span.per_check
+    each = "1 search" if span.per_check == 1 else f"{span.per_check} searches"
+    lines.append(
+        f"  {_count(span.count, 'check')} at {each} each, and {span.hold} held back for each of "
+        f"{_count(span.watching, 'watch')} to confirm an alert: {cost} + {span.held} = {span.needed}"
+    )
+    verdict = f"so {span.spare} would be spare" if span.spare >= 0 else f"so that is {-span.spare} too many"
+    return [*lines, f"  {have}, {verdict}."]
+
+
+def budget_lines(budget: watch.Budget) -> list[str]:
+    """The sums behind accepting or refusing a watch, written out so the owner can check them."""
+    now, after = budget.now, budget.after
+    if budget.reset_known:
+        first = f"Until the searches reset on {day(now.end)}:"
+    else:
+        first = "In the next 30 days (the account did not say when its searches reset):"
+    room = budget.ceiling - budget.used
+    if budget.left <= room:
+        have = f"{_count(budget.left, 'search')} {'is' if budget.left == 1 else 'are'} left"
+    else:
+        have = (
+            f"Watches have used {budget.used} of the {budget.ceiling} searches a month they may, "
+            f"which leaves {max(room, 0)}"
+        )
+    if budget.per_month is None:
+        monthly = f"Watches may use {budget.ceiling} searches a month"
+    elif budget.ceiling <= budget.per_month:
+        monthly = f"Watches may use {budget.ceiling} of the plan's {budget.per_month} searches a month"
+    else:
+        monthly = f"The plan gives {budget.per_month} searches a month"
+    return [
+        first,
+        *_span_lines(now, have),
+        f"In the month after that, to {day(after.end)}:",
+        *_span_lines(after, monthly),
+    ]
 
 
 def place_cells(place: Destination, currency: str) -> list[str]:

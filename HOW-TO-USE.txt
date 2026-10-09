@@ -300,6 +300,68 @@ Save the price you found there (you can skip this)
     saves. It uses none of your searches and sends nothing anywhere.
 
 
+Watch this fare (be told when it gets cheaper)
+----------------------------------------------
+Next to the Search button is a button named "Watch this fare...". It is
+grey until a search has found a flight.
+
+A watch keeps an eye on the cheapest price for the days you searched.
+Once a day, or less often if you choose, Flightsleuth looks the price up
+again. If it has dropped, a message arrives on your phone.
+
+Two things have to be set up once on this computer before that works:
+the messages to your phone, and the daily check. Both are done by typing
+commands. The file named README explains them under "Watches and
+alerts". If somebody set Flightsleuth up for you, ask them whether they
+did this. Until it is done a watch is saved but nothing checks it, and
+the line next to the buttons says so.
+
+To add a watch:
+
+  1. Search for the trip as usual.
+  2. Click "Watch this fare...". A small window opens. Its first lines
+     name the days and the price you are looking at.
+  3. Say what you want to be told about. You can leave it all as it is.
+
+     "Tell me when it is below this price"
+         Type a price, like 450. Leave it empty if you have none in mind.
+
+     "or this many percent under its 30-day median"
+         The median is the middle price of the last 30 days. 15 means:
+         tell me when it is 15 percent cheaper than that. 0 turns this
+         off.
+
+     "or below Google's typical range for these dates"
+         Google says what these days usually cost. Leave this ticked to
+         be told when the price is under that.
+
+     "Check it every this many days"
+         1 means every day. A bigger number uses fewer of your searches.
+
+  4. Click Watch.
+
+Each check uses 1 of your searches, and up to 3 more on a day when the
+price is worth telling you about. Adding the watch uses none. You can
+have 3 watches at most.
+
+If your searches cannot cover the watch, a message says so and shows the
+sums. It also says how many days between checks would fit. Change the
+last box to that number and click Watch again.
+
+When the price drops, your phone shows the trip, the new price, why you
+are being told, and the flights. Tap the message and Momondo opens on
+those days. You are told once for each price. A second message comes only
+if it drops again, by at least $5 and at least 2 percent.
+
+Flightsleuth looks up the return flights before it tells you, so a price
+on your phone is one whose flights both ways were found. It is still a
+price from a few minutes ago: check it on the page before you pay.
+
+A watch stops by itself once the day you would leave has passed. Seeing
+your watches, and removing one, is done by typing a command. The README
+explains how.
+
+
 Booking the flight
 ------------------
 Flightsleuth only FINDS flights. It does not buy them.
@@ -376,6 +438,24 @@ and press Search again.
     No flights matched. Try different days, or set Stops back to
     "Any number of stops".
 
+"The searches cannot cover this watch"
+    Checking this watch as often as you asked would use more searches
+    than you have. The message shows the sums and says how many days
+    between checks would fit. Put that number in the last box.
+
+"There are already 3 watches, which is the most"
+    One has to be removed before another can be added. That is done by
+    typing a command; the README explains how.
+
+"A watch needs at least one rule"
+    You emptied the price, set the percent to 0 and unticked the box, so
+    there is nothing left to tell you about. Fill in one of the three.
+
+"Watching it, but alerts are not set up"
+    The watch is saved, but this computer cannot message your phone yet.
+    See "Watches and alerts" in the README, or ask the person who set
+    Flightsleuth up for you.
+
 Nothing opens when you double-click "Start Flightsleuth", or Windows asks
 which program to open it with
     The computer is missing a free program called Python that Flightsleuth
@@ -390,6 +470,8 @@ QUICK REMINDER CARD
   3. Type the airport codes, pick the dates, click Search
   4. Click "Check this fare on Momondo" to see if it is cheaper there
   5. Click "Check and book" to buy the flight in your web browser
+  6. Not ready to buy? Click "Watch this fare..." to be told on your
+     phone if it gets cheaper (this needs setting up once; see above)
 
 (There is also a way to run searches by typing commands. It is described
 in the file named README, for people comfortable with that.)

@@ -12,7 +12,7 @@ except ImportError:
     # Some Pythons ship without tkinter. The rest of the suite must still run there.
     raise unittest.SkipTest("tkinter is not installed, so the window cannot be tested") from None
 
-from flightsleuth import config, gui
+from flightsleuth import config, gui, watch
 from flightsleuth.history import History
 from tests.fakes import FakeSerpApi, install
 
@@ -616,6 +616,210 @@ class NextStepWindowTest(unittest.TestCase):
         self.assertEqual(self.app.found_price.get(), "")
         self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
         self.assertEqual(len(site_prices()), 1)
+
+
+TRIP = "JFK -> LHR, Tue 12 Mar - Tue 19 Mar"
+
+
+class WatchWindowTest(unittest.TestCase):
+    """What Phase 4 added to the window: one button, and a small window where a watch's rules are set."""
+
+    setUp = GuiTest.setUp
+    tearDown = GuiTest.tearDown
+    search = GuiTest.search
+
+    def open_watch(self):
+        self.app._watch_button.invoke()
+        self.root.update()
+        return self.app._watch_dialog
+
+    def add(self):
+        self.app._add_button.invoke()
+        deadline = time.monotonic() + 10
+        while self.app.adding:
+            self.assertLess(time.monotonic(), deadline, "the watch was never added")
+            self.root.update()
+            time.sleep(0.01)
+
+    def watches(self):
+        return [standing.watch for standing in watch.listed()]
+
+    def test_the_button_sits_beside_search_and_is_greyed_out_until_there_is_a_fare(self):
+        button = self.app._watch_button
+        self.assertEqual((button.cget("text"), str(button.cget("state"))), ("Watch this fare...", "disabled"))
+        self.assertIs(button.master, self.app._search_button.master)
+        self.assertIsNone(self.open_watch())
+        self.search()
+        self.assertEqual(str(button.cget("state")), "normal")
+
+    def test_it_adds_nothing_to_the_rows_under_the_headline_or_to_the_tabs(self):
+        self.search()
+        row = self.app._links.master
+        self.assertEqual(row.pack_slaves(), [self.app._next_buttons, self.app._links])
+        self.assertEqual(len(self.app.tabs.tabs()), 2)
+
+    def test_the_small_window_names_the_fare_with_its_fetch_time_and_asks_for_the_rules(self):
+        self.search()
+        dialog = self.open_watch()
+        self.assertEqual(dialog.title(), "Watch this fare")
+        (body,) = dialog.winfo_children()
+        labels = [widget.cget("text") for widget in body.winfo_children() if isinstance(widget, gui.ttk.Label)]
+        self.assertRegex(
+            labels[0],
+            rf"^{TRIP}: the cheapest fare on these dates, with any airline\.\n"
+            rf"Cheapest listed: \$520 round trip, Tue 12 Mar - Tue 19 Mar \(not yet confirmed\)\. Fetched {TIME}\.$",
+        )
+        self.assertEqual(
+            labels[1:],
+            [
+                "Tell me when it is below this price, in USD",
+                "or this many percent under its 30-day median (0 for never)",
+                "or below Google's typical range for these dates",
+                "Check it every this many days",
+                "A check uses one search, and up to 3 more when the price is worth an alert. Adding a watch uses none.\n"
+                "To see or remove your watches: py -m flightsleuth watch list",
+            ],
+        )
+        self.assertEqual(
+            (self.app.watch_below.get(), self.app.watch_drop.get(), self.app.watch_typical.get(), self.app.watch_every.get()),
+            ("", "15", True, "1"),
+        )
+        # Asking for it twice does not open a second one.
+        self.assertIs(self.open_watch(), dialog)
+
+    def test_adding_keeps_the_watch_with_its_rules_and_spends_no_search(self):
+        self.search()
+        self.open_watch()
+        self.app.watch_below.set(" $450 ")
+        self.app.watch_drop.set("20")
+        self.app.watch_typical.set(False)
+        self.app.watch_every.set("4")
+        self.add()
+
+        self.assertEqual(self.errors, [])
+        (found,) = self.watches()
+        self.assertEqual(found.trip, watch.trip("JFK", "LHR", date(2030, 3, 12), date(2030, 3, 19)))
+        self.assertEqual((found.below, found.drop_percent, found.typical, found.every_days), (450, 20, False, 4))
+        self.assertEqual(len(FakeSerpApi.searches), 1)  # the search that found the fare
+        self.assertIsNone(self.app._watch_dialog)
+        # No topic has been set up in this test, and that is what the owner most needs to hear.
+        self.assertEqual(self.app.status.get(), "Watching it, but alerts are not set up. Run: py -m flightsleuth watch setup")
+
+    def test_with_alerts_set_up_the_status_says_how_often_and_what_is_spare(self):
+        with mock.patch.dict(os.environ, {config.TOPIC_VAR: "flightsleuth-test-topic"}):
+            self.search()
+            self.open_watch()
+            self.add()
+            self.assertEqual(self.app.status.get(), "Watching this fare every 1 day. The searches cover it, with 117 to spare.")
+            self.open_watch()
+            self.app.watch_every.set("4")
+            self.add()
+            # The first watch's 33 and this one's 11, of the 150 a month watches may use.
+            self.assertEqual(self.app.status.get(), "Watching this fare every 4 days. The searches cover it, with 106 to spare.")
+
+    def test_left_as_it_opens_it_watches_daily_for_a_drop_under_the_median_or_the_typical_range(self):
+        self.search()
+        self.open_watch()
+        self.add()
+        (found,) = self.watches()
+        self.assertEqual((found.below, found.drop_percent, found.typical, found.every_days), (None, 15, True, 1))
+
+    def test_a_one_way_fare_can_be_watched(self):
+        self.app.round_trip.set(False)
+        self.app._trip_kind_changed()
+        self.search()
+        self.open_watch()
+        self.add()
+        self.assertEqual(self.watches()[0].trip, watch.trip("JFK", "LHR", date(2030, 3, 12)))
+
+    def test_a_watch_does_not_carry_the_bags_a_search_added_and_the_small_window_says_so(self):
+        self.app.bags.set("1")
+        self.search()
+        (body,) = self.open_watch().winfo_children()
+        self.assertIn("\nA watch prices the fare as an ordinary search does: no carry-on bags added", body.winfo_children()[0].cget("text"))
+        self.add()
+        self.assertEqual(self.watches()[0].trip.bags, 0)
+
+    def test_something_that_is_not_a_price_is_explained_and_nothing_is_added(self):
+        self.search()
+        self.open_watch()
+        self.app.watch_below.set("cheap")
+        self.add()
+        self.assertEqual(self.errors, ["'cheap' is not a price. Type a number such as 412, or leave it empty"])
+        self.assertEqual(self.watches(), [])
+        self.assertIsNotNone(self.app._watch_dialog)
+
+    def test_a_watch_with_every_rule_turned_off_is_explained(self):
+        self.search()
+        self.open_watch()
+        self.app.watch_drop.set("0")
+        self.app.watch_typical.set(False)
+        self.add()
+        self.assertEqual(len(self.errors), 1)
+        self.assertIn("A watch needs at least one rule", self.errors[0])
+        self.assertEqual(self.watches(), [])
+        self.assertEqual(str(self.app._add_button.cget("state")), "normal")
+
+    def test_a_watch_the_searches_cannot_cover_is_refused_with_the_sums(self):
+        self.search()
+        FakeSerpApi.account_reply["total_searches_left"] = 9
+        self.open_watch()
+        self.add()
+        (message,) = self.errors
+        self.assertEqual(
+            message.splitlines()[:6],
+            [
+                "The searches cannot cover this watch. Checked every 5 days it would fit.",
+                "",
+                "In the next 30 days (the account did not say when its searches reset):",
+                f"  {TRIP}: 30 checks, one every 1 day",
+                "  30 checks at 1 search each, and 3 held back for each of 1 watch to confirm an alert: 30 + 3 = 33",
+                "  9 searches are left, so that is 24 too many.",
+            ],
+        )
+        self.assertEqual(self.watches(), [])
+        # The small window stays open, so the interval can be changed and tried again.
+        self.app.watch_every.set("5")
+        self.add()
+        self.assertEqual([found.every_days for found in self.watches()], [5])
+
+    def test_a_fourth_watch_is_refused(self):
+        self.search()
+        for _ in range(3):
+            self.open_watch()
+            self.app.watch_every.set("10")
+            self.add()
+        self.open_watch()
+        self.add()
+        self.assertIn("There are already 3 watches, which is the most", self.errors[0])
+        self.assertEqual(len(self.watches()), 3)
+
+    def test_two_one_way_tickets_winning_leave_nothing_to_watch(self):
+        self.app.split.set(True)
+        self.search()
+        self.assertEqual(self.app.headline.get()[:38], "Cheapest: $400 as two one-way tickets,")
+        self.assertEqual(str(self.app._watch_button.cget("state")), "disabled")
+
+    def test_a_search_that_finds_no_fares_greys_the_button_out_again_and_closes_the_small_window(self):
+        self.search()
+        self.open_watch()
+        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        self.app.depart.set(date(2030, 3, 13))
+        with mock.patch.object(FakeSerpApi, "search", lambda fake, query: empty):
+            self.search()
+        self.assertIsNone(self.app._watch_dialog)
+        self.assertEqual(str(self.app._watch_button.cget("state")), "disabled")
+
+    def test_a_new_search_closes_the_small_window_and_the_next_one_is_about_the_new_fare(self):
+        self.search()
+        self.open_watch()
+        self.app.depart.set(date(2030, 3, 13))
+        self.app.back.set(date(2030, 3, 20))
+        self.search()
+        self.assertIsNone(self.app._watch_dialog)
+        self.open_watch()
+        self.add()
+        self.assertEqual(self.watches()[0].trip.depart_date, date(2030, 3, 13))
 
 
 if __name__ == "__main__":

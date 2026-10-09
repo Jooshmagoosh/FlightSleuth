@@ -1,10 +1,12 @@
-"""A stand-in for SerpApi, and the setup that keeps tests away from the real key and cache."""
+"""Stand-ins for SerpApi and ntfy, and the setup that keeps tests away from the real key, cache and phone."""
 import contextlib
+import io
+import json
 import os
 import tempfile
 from unittest import mock
 
-from flightsleuth import config, providers, scan
+from flightsleuth import config, notify, providers, scan
 from flightsleuth.models import Explore
 from flightsleuth.providers import SerpApiProvider
 from flightsleuth.serpapi import RateLimited
@@ -137,6 +139,9 @@ def rich_reply(query):
         # Google's own order drops the phantom fares and adds its rating, as the recorded reply did.
         body["other_flights"] = body["other_flights"][FakeSerpApi.phantoms :]
         body["price_insights"] = {"lowest_price": price, "price_level": "typical", "typical_price_range": [500, 800]}
+    if FakeSerpApi.insights is not None:
+        # What a test wants the listing to say about its price: daily lows, another range, or nothing at all.
+        body["price_insights"] = {**body.get("price_insights", {}), **FakeSerpApi.insights}
     return body
 
 
@@ -152,6 +157,7 @@ class FakeSerpApi:
     separate = False  # in rich replies: the cheapest seller sells two separate tickets
     return_surcharge = 0  # in rich replies: how much dearer the return lookup makes the fare
     market_savings = {}  # in rich replies: how much cheaper each other market is
+    insights = None  # in rich replies: laid over every listing's price_insights, as real one-way replies carry them
     countries = ("US", "GB")
     explore_reply = {"search_metadata": {"status": "Success"}, "destinations": []}
 
@@ -166,6 +172,22 @@ class FakeSerpApi:
             raise RateLimited("Your account has run out of searches.")
         FakeSerpApi.searches.append(query)
         return reply(query)
+
+
+class FakeNtfy:
+    """Stands where ntfy's server would: keeps what was posted to it, and can be told to fail."""
+
+    sent = []  # the body of every message accepted, as a dict
+    posts = []  # (address, headers) of every request, accepted or not
+    fail = None  # an exception to raise in place of accepting a message
+
+    @staticmethod
+    def urlopen(request, timeout=None):
+        FakeNtfy.posts.append((request.full_url, dict(request.header_items())))
+        if FakeNtfy.fail is not None:
+            raise FakeNtfy.fail
+        FakeNtfy.sent.append(json.loads(request.data))
+        return io.BytesIO(b'{"id": "abc", "time": 1, "event": "message"}')
 
 
 class FakeProvider(SerpApiProvider):
@@ -184,6 +206,7 @@ def install(test):
     FakeSerpApi.separate = False
     FakeSerpApi.return_surcharge = 0
     FakeSerpApi.market_savings = {}
+    FakeSerpApi.insights = None
     FakeSerpApi.countries = ("US", "GB")
     FakeSerpApi.explore_reply = {"search_metadata": {"status": "Success"}, "destinations": []}
     FakeSerpApi.account_reply = {
@@ -193,12 +216,20 @@ def install(test):
     }
     home = test.enterContext(tempfile.TemporaryDirectory())
     test.enterContext(mock.patch.dict(os.environ, {config.HOME_VAR: home, config.KEY_VAR: "test-key"}))
+    # Whatever this machine's environment says about alerts and the watch budget, a test starts without it.
+    for name in (config.TOPIC_VAR, config.NTFY_VAR, config.WATCH_MONTHLY_VAR):
+        os.environ.pop(name, None)
     providers.register(FakeProvider)  # takes the real one's place under the same name
     test.addCleanup(providers.register, SerpApiProvider)
     # One at a time, so "fails after N searches" means exactly N.
     test.enterContext(mock.patch.object(scan, "WORKERS", 1))
     # Run from the throwaway folder: a real .env in the project must never be read or overwritten.
     test.enterContext(contextlib.chdir(home))
+    # No test may send a real alert: whatever is posted to ntfy lands in FakeNtfy.sent.
+    FakeNtfy.sent = []
+    FakeNtfy.posts = []
+    FakeNtfy.fail = None
+    test.enterContext(mock.patch.object(notify, "urlopen", FakeNtfy.urlopen))
     # No test may open a real browser tab, or wait on a keyboard nobody is at.
     test.enterContext(mock.patch("webbrowser.open"))
     nobody = mock.Mock()

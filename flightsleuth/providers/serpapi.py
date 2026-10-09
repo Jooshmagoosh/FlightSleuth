@@ -1,11 +1,11 @@
 """SerpApi's Google Flights and Google Travel Explore engines, as a provider."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from .. import config, serpapi
 from ..models import Destination, Explore, Query, SearchResult
-from .base import Capability, DataClass, Provider
+from .base import Allowance, Capability, DataClass, Provider
 
 
 class SerpApiProvider(Provider):
@@ -64,6 +64,20 @@ class SerpApiProvider(Provider):
 
     def credits_left(self) -> int | None:
         return (self._account or {}).get("total_searches_left")
+
+    def allowance(self) -> Allowance | None:
+        # The account endpoint is free. `plan_renewal_date` is the day the searches reset: the
+        # owner's free plan reported 2026-11-08 on 2026-10-09. SerpApi documents it as null for
+        # an account with no monthly plan.
+        self._account = account = self._connect().account()
+        left = account.get("total_searches_left")
+        if left is None:
+            return None
+        try:
+            resets_on = date.fromisoformat(str(account.get("plan_renewal_date"))[:10])
+        except ValueError:
+            resets_on = None
+        return Allowance(left=left, per_month=account.get("searches_per_month"), resets_on=resets_on)
 
     def quota_lines(self) -> list[str]:
         account = self._connect().account()

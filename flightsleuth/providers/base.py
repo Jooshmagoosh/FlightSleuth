@@ -4,7 +4,8 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime
 from enum import Enum
 
 from ..models import Destination, Explore, Query, SearchResult
@@ -26,6 +27,15 @@ class DataClass(Enum):
     VENDOR = "vendor"  # a commercial API, paid for
     SANCTIONED = "sanctioned"  # offered by its owner for programs to call
     PERSONAL_ONLY = "personal_only"  # only ever from the user's own machine
+
+
+@dataclass(frozen=True)
+class Allowance:
+    """What a metered source's account says right now. Asked for afresh each time; nothing here is assumed."""
+
+    left: int  # calls left before the count starts again
+    per_month: int | None  # what the plan gives each month, if the account says
+    resets_on: date | None  # the day the count starts again, if the account says
 
 
 class Provider:
@@ -73,6 +83,10 @@ class Provider:
 
     def credits_left(self) -> int | None:
         """Credits left as of the last budget check; None if unknown or unmetered."""
+        return None
+
+    def allowance(self) -> Allowance | None:
+        """The account's count of calls left, its monthly total and its reset day. None for an unmetered source."""
         return None
 
     def quota_lines(self) -> list[str]:
