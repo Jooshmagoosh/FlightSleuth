@@ -1,0 +1,115 @@
+{
+  "search_metadata": {
+    "id": "6ac836f1bd173143458f4e58",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac836f1bd173143458f4e58.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac836f1bd173143458f4e58.md",
+    "created_at": "2026-10-09 00:36:01 UTC",
+    "processed_at": "2026-10-09 00:36:01 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhqKARIKMjAyNi0xMi0wOCIfCgNFV1ISCjIwMjYtMTItMDgaA0FSTioCU0syAzkwNCIfCgNBUk4SCjIwMjYtMTItMDkaA09TTCoCU0syAzQ5MSIfCgNPU0wSCjIwMjYtMTItMDkaA0xIUioCU0syAzgxNWoHCAESA0pGS2oHCAESA0VXUnIHCAESA0xIUhonEgoyMDI2LTEyLTE1agcIARIDTEhScgcIARIDSkZLcgcIARIDRVdSQAFIAXABmAEB&tfu=EgQIAhAB",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac836f1bd173143458f4e58.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac836f1bd173143458f4e58.prettify",
+    "total_time_taken": 5.27
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "JFK,EWR",
+    "arrival_id": "LHR",
+    "outbound_date": "2026-12-08",
+    "return_date": "2026-12-15",
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "departure_token": "WyJDalJJWWxwQkxWUkhYekZyZUUxQlFYWjBkR2RDUnkwdExTMHRMUzB0TFhscGJXa3hPRUZCUVVGQlIzSkpUblV3VG5SUFFqSkJFaEZUU3prd05IeFRTelE1TVh4VFN6Z3hOUm9MQ05QNEF4QUNHZ05WVTBRNEhIRFQrQU09IixbWyJFV1IiLCIyMDI2LTEyLTA4IiwiQVJOIixudWxsLCJTSyIsIjkwNCJdLFsiQVJOIiwiMjAyNi0xMi0wOSIsIk9TTCIsbnVsbCwiU0siLCI0OTEiXSxbIk9TTCIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlNLIiwiODE1Il1dXQ==",
+    "currency": "USD",
+    "show_hidden": true,
+    "sort_by": "2"
+  },
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ]
+    }
+  ],
+  "search_information": {
+    "flights_results_state": "Fully empty"
+  },
+  "error": "Google Flights hasn't returned any results for this query."
+}

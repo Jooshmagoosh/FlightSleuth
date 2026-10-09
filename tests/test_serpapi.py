@@ -9,8 +9,21 @@ from pathlib import Path
 from flightsleuth.models import Query
 from flightsleuth.serpapi import RateLimited, SerpApi, SerpApiError, cache_key, parse, search_params
 
-FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "roundtrip.json").read_text(encoding="utf-8"))
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def recorded(name):
+    return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+def options(reply):
+    return (reply.get("best_flights") or []) + (reply.get("other_flights") or [])
+
+
+# Hand-written from the documentation. The recorded_* tests below use real replies.
+FIXTURE = recorded("synthetic_roundtrip.json")
 TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
+REAL_TRIP = Query("JFK,EWR", "LHR", date(2026, 12, 8), date(2026, 12, 15))
 
 
 class FakeOpener:
@@ -102,6 +115,72 @@ class ParseTest(unittest.TestCase):
     def test_unfamiliar_shape_is_reported_not_crashed_on(self):
         with self.assertRaises(SerpApiError):
             parse(TRIP, {"other_flights": [{"price": 400, "flights": [{"airline": "X"}]}]})
+
+
+class RecordedReplyTest(unittest.TestCase):
+    """What real SerpApi replies look like. See tests/fixtures/README.md for how they were recorded."""
+
+    def test_real_request_matches_what_the_code_sends(self):
+        sent = recorded("roundtrip_outbound.json")["search_parameters"]
+        for name, value in search_params(REAL_TRIP).items():
+            self.assertEqual(str(sent[name]).lower(), value.lower(), name)
+
+    def test_outbound_reply_parses(self):
+        result = parse(REAL_TRIP, recorded("roundtrip_outbound.json"))
+        self.assertEqual(len(result.offers), 90)
+        cheapest = result.cheapest
+        self.assertEqual(cheapest.price, 646)
+        self.assertEqual((cheapest.origin, cheapest.destination, cheapest.stops), ("EWR", "LHR", 2))
+        self.assertEqual(cheapest.airlines, ("Scandinavian Airlines",))
+        self.assertTrue(result.url.startswith("https://www.google.com/travel/flights"))
+
+    def test_sorting_by_price_brings_no_best_flights_and_no_price_insights(self):
+        reply = recorded("roundtrip_outbound.json")
+        self.assertNotIn("best_flights", reply)
+        self.assertNotIn("price_insights", reply)
+        self.assertIsNone(parse(REAL_TRIP, reply).insights)
+
+    def test_outbound_options_carry_a_departure_token_and_no_booking_token(self):
+        for option in options(recorded("roundtrip_outbound.json")):
+            self.assertTrue(option["departure_token"])
+            self.assertNotIn("booking_token", option)
+
+    def test_a_departure_token_can_return_no_flights(self):
+        reply = recorded("roundtrip_return_empty.json")
+        self.assertEqual(reply["search_metadata"]["status"], "Success")
+        self.assertEqual(reply["error"], "Google Flights hasn't returned any results for this query.")
+        self.assertEqual(parse(REAL_TRIP, reply).offers, ())
+
+    def test_return_options_carry_a_booking_token_and_the_round_trip_total(self):
+        returns = options(recorded("roundtrip_return.json"))
+        self.assertEqual(len(returns), 54)
+        for option in returns:
+            self.assertTrue(option["booking_token"])
+            self.assertNotIn("departure_token", option)
+            self.assertEqual(option["flights"][0]["departure_airport"]["id"], "LHR")
+        # The outbound, UA 14, was listed at 695: the cheapest return completes it at that price.
+        self.assertEqual(min(option["price"] for option in returns), 695)
+
+    def test_booking_options_name_each_seller_and_flag_separate_tickets(self):
+        reply = recorded("roundtrip_booking.json")
+        sellers = reply["booking_options"]
+        self.assertEqual(len(sellers), 12)
+        cheapest = min(sellers, key=lambda seller: seller["together"]["price"])
+        self.assertEqual(cheapest["together"]["price"], 694)
+        self.assertTrue(cheapest["separate_tickets"])
+        self.assertEqual({"departing", "returning"} <= set(cheapest), True)
+        one_ticket = [seller["together"] for seller in sellers if not seller.get("separate_tickets")]
+        best = min(one_ticket, key=lambda together: together["price"])
+        self.assertEqual((best["book_with"], best["price"], best["airline"]), ("United", 797, True))
+        self.assertEqual([leg["flights"][0]["flight_number"] for leg in reply["selected_flights"]], ["UA 14", "LX 345"])
+
+    def test_no_recorded_reply_holds_an_api_key_or_an_account_link(self):
+        for path in FIXTURES.glob("*.json"):
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("api_key", text, path.name)
+            for link in ("json_endpoint", "raw_html_file"):
+                if f'"{link}"' in text:
+                    self.assertIn("https://serpapi.com/searches/REDACTED/", text, path.name)
 
 
 class HttpTest(unittest.TestCase):
