@@ -6,11 +6,11 @@ import re
 import sys
 from datetime import date
 
-from . import config, scan
+from . import config, providers, scan
 from .cache import Cache
 from .errors import UserError
 from .render import render_text, summarise
-from .serpapi import CABINS, STOPS, SerpApi
+from .serpapi import CABINS, STOPS
 
 
 def _airports(value: str) -> str:
@@ -122,11 +122,13 @@ def cmd_search(args: argparse.Namespace) -> int:
     )
     plan = scan.plan(request, max_age_hours=args.max_age, fresh=args.fresh)
     print(f"{_searches(plan.total)} needed: {plan.saved} saved, {plan.live} live.", file=sys.stderr)
-    if plan.live > args.max_searches:
+    try:
+        scan.check_cap(plan, args.max_searches)
+    except scan.OverCap as e:
         raise UserError(
-            f"that is over the limit of {args.max_searches} live searches per run. "
+            f"that is over the limit of {e.limit} live searches per run. "
             f"Narrow --flex or --nights, or raise --max-searches."
-        )
+        ) from None
     if args.dry_run:
         return 0
 
@@ -137,7 +139,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         dots.append(done)
 
     try:
-        outcome = scan.run(plan, on_search=dot)
+        outcome = scan.run(plan, max_searches=args.max_searches, on_search=dot)
     finally:
         if dots:
             print(file=sys.stderr)
@@ -149,20 +151,18 @@ def cmd_search(args: argparse.Namespace) -> int:
 
 
 def cmd_gui(args: argparse.Namespace) -> int:
-    from .gui import main as open_window  # imported late so the command line works without tkinter
-
+    try:
+        from .gui import main as open_window  # imported late so the command line works without tkinter
+    except ImportError:
+        raise UserError("the window needs tkinter, which this Python was installed without") from None
     open_window()
     return 0
 
 
 def cmd_quota(args: argparse.Namespace) -> int:
-    account = SerpApi(config.load_api_key()).account()
-    print(f"Plan: {account.get('plan_name')}")
-    print(f"This month: {account.get('total_searches_left')} of {account.get('searches_per_month')} searches left")
-    print(
-        f"This hour: {account.get('this_hour_searches')} used of "
-        f"{account.get('account_rate_limit_per_hour')} allowed"
-    )
+    for name in providers.names():
+        for line in providers.load(name).quota_lines():
+            print(line)
     return 0
 
 

@@ -307,11 +307,13 @@ def _work(request: scan.Request, post) -> None:
     """The search, run off the main thread. It reports through `post` and touches no widgets."""
     try:
         plan = scan.plan(request)
-        if plan.live > scan.DEFAULT_MAX_SEARCHES:
+        try:
+            scan.check_cap(plan)
+        except scan.OverCap as e:
             raise UserError(
-                f"that would use {plan.live} searches at once, and the limit is {scan.DEFAULT_MAX_SEARCHES}. "
+                f"that would use {e.live} searches at once, and the limit is {e.limit}. "
                 f"Check fewer days earlier and later, or untick the one-way option."
-            )
+            ) from None
         post(("plan", plan))
         outcome = scan.run(plan, on_search=lambda done, live: post(("progress", (done, live))))
         post(("done", (plan, outcome)))

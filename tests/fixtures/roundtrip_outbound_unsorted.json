@@ -1,0 +1,5382 @@
+{
+  "search_metadata": {
+    "id": "6ac83dac5fa7b719801c3345",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac83dac5fa7b719801c3345.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac83dac5fa7b719801c3345.md",
+    "created_at": "2026-10-09 01:04:44 UTC",
+    "processed_at": "2026-10-09 01:04:44 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhonEgoyMDI2LTEyLTA4agcIARIDSkZLagcIARIDRVdScgcIARIDTEhSGicSCjIwMjYtMTItMTVqBwgBEgNMSFJyBwgBEgNKRktyBwgBEgNFV1JAAUgBcAGYAQE&tfu=EgQIARAB",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac83dac5fa7b719801c3345.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac83dac5fa7b719801c3345.prettify",
+    "total_time_taken": 3.24
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "JFK,EWR",
+    "arrival_id": "LHR",
+    "outbound_date": "2026-12-08",
+    "return_date": "2026-12-15",
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "currency": "USD",
+    "show_hidden": true
+  },
+  "best_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 09:25"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 21:20"
+          },
+          "duration": 415,
+          "airplane": "Boeing 787",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 122",
+          "ticket_also_sold_by": [
+            "Austrian",
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 325 kg"
+          ]
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 326000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -25
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZWUVRFeU1ob0xDUHllQkJBQ0dnTlZVMFE0SEhEOG5nUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiMTIyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 08:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 20:10"
+          },
+          "duration": 430,
+          "airplane": "Airbus A330-900neo",
+          "airline": "Virgin Atlantic",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+          "travel_class": "Economy",
+          "flight_number": "VS 26",
+          "ticket_also_sold_by": [
+            "Delta",
+            "KLM",
+            "Air France"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 369 kg"
+          ]
+        }
+      ],
+      "total_duration": 430,
+      "carbon_emissions": {
+        "this_flight": 369000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -15
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1JXVXpJMkdnc0l1TDBFRUFJYUExVlRSRGdjY0xpOUJBPT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlZTIiwiMjYiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:25"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:20"
+          },
+          "duration": 415,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 100",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "British Airways"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 421 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 422000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -2
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZCUVRFd01Cb0xDTGk5QkJBQ0dnTlZVMFE0SEhDNHZRUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiMTAwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 20:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 425,
+          "airplane": "Boeing 767",
+          "airline": "Delta",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+          "travel_class": "Economy",
+          "flight_number": "DL 1",
+          "ticket_also_sold_by": [
+            "KLM",
+            "Virgin Atlantic"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 320 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 425,
+      "carbon_emissions": {
+        "this_flight": 321000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -26
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ05FVERFYUN3aTR2UVFRQWhvRFZWTkVPQnh3dUwwRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiREwiLCIxIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 23:20"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:10"
+          },
+          "duration": 410,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 182",
+          "ticket_also_sold_by": [
+            "American",
+            "Finnair",
+            "Iberia"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true,
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "total_duration": 410,
+      "carbon_emissions": {
+        "this_flight": 442000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFNE1ob0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTgyIl1dXQ=="
+    }
+  ],
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 17:00"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 04:30"
+          },
+          "duration": 390,
+          "airplane": "Airbus A330",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 104",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 339 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 06:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 152",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 125,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 605,
+      "carbon_emissions": {
+        "this_flight": 392000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -9
+      },
+      "price": 693,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd05IeEZTVEUxTWhvTENMU2RCQkFDR2dOVlUwUTRISEMwblFRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDQiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTUyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:25"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 07:00"
+          },
+          "duration": 395,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 108",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 376 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 08:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:10"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 156",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 105,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 585,
+      "carbon_emissions": {
+        "this_flight": 428000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -1
+      },
+      "price": 693,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd09IeEZTVEUxTmhvTENMU2RCQkFDR2dOVlUwUTRISEMwblFRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDgiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU2Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:25"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 07:00"
+          },
+          "duration": 395,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 108",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 376 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 10:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:25"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 158",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 180,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 660,
+      "carbon_emissions": {
+        "this_flight": 428000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -1
+      },
+      "price": 693,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd09IeEZTVEUxT0JvTENMU2RCQkFDR2dOVlUwUTRISEMwblFRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDgiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 08:20"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 20:35"
+          },
+          "duration": 435,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 934",
+          "ticket_also_sold_by": [
+            "Austrian",
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 415 kg"
+          ]
+        }
+      ],
+      "total_duration": 435,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -4
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZWUVRrek5Cb0xDUHllQkJBQ0dnTlZVMFE0SEhEOG5nUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiOTM0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:20"
+          },
+          "duration": 440,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 16",
+          "ticket_also_sold_by": [
+            "Austrian",
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 415 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 440,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -4
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1JWUVRFMkdnc0kvSjRFRUFJYUExVlRSRGdjY1B5ZUJBPT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiMTYiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 20:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:25"
+          },
+          "duration": 445,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 14",
+          "ticket_also_sold_by": [
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 415 kg"
+          ],
+          "overnight": true,
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "total_duration": 445,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -4
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1JWUVRFMEdnc0kvSjRFRUFJYUExVlRSRGdjY1B5ZUJBPT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiMTQiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 21:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:10"
+          },
+          "duration": 430,
+          "airplane": "Boeing 777",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 904",
+          "ticket_also_sold_by": [
+            "Austrian",
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 445 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 430,
+      "carbon_emissions": {
+        "this_flight": 446000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 3
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZWUVRrd05Cb0xDUHllQkJBQ0dnTlZVMFE0SEhEOG5nUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiOTA0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 22:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:25"
+          },
+          "duration": 445,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 940",
+          "ticket_also_sold_by": [
+            "Austrian",
+            "Lufthansa",
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 415 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 445,
+      "carbon_emissions": {
+        "this_flight": 416000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -4
+      },
+      "price": 695,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZWUVRrME1Cb0xDUHllQkJBQ0dnTlZVMFE0SEhEOG5nUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlVBIiwiOTQwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 00:45"
+          },
+          "arrival_airport": {
+            "name": "Francisco Sá Carneiro Airport",
+            "id": "OPO",
+            "time": "2026-12-08 12:25"
+          },
+          "duration": 400,
+          "airplane": "Airbus A321neo",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 212",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 531 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Francisco Sá Carneiro Airport",
+            "id": "OPO",
+            "time": "2026-12-08 16:00"
+          },
+          "arrival_airport": {
+            "name": "Humberto Delgado Airport",
+            "id": "LIS",
+            "time": "2026-12-08 17:00"
+          },
+          "duration": 60,
+          "airplane": "Airbus A319",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 1931",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 55 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Humberto Delgado Airport",
+            "id": "LIS",
+            "time": "2026-12-08 18:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 21:35"
+          },
+          "duration": 170,
+          "airplane": "Airbus A320neo",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 1358",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 123 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 215,
+          "name": "Francisco Sá Carneiro Airport",
+          "id": "OPO"
+        },
+        {
+          "duration": 105,
+          "name": "Humberto Delgado Airport",
+          "id": "LIS"
+        }
+      ],
+      "total_duration": 950,
+      "carbon_emissions": {
+        "this_flight": 710000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 64
+      },
+      "price": 706,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFaE5VVURJeE1ueFVVREU1TXpGOFZGQXhNelU0R2dzSWk2Y0VFQUlhQTFWVFJEZ2NjSXVuQkE9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIk9QTyIsbnVsbCwiVFAiLCIyMTIiXSxbIk9QTyIsIjIwMjYtMTItMDgiLCJMSVMiLG51bGwsIlRQIiwiMTkzMSJdLFsiTElTIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiVFAiLCIxMzU4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 00:45"
+          },
+          "arrival_airport": {
+            "name": "Francisco Sá Carneiro Airport",
+            "id": "OPO",
+            "time": "2026-12-08 12:25"
+          },
+          "duration": 400,
+          "airplane": "Airbus A321neo",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 212",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 531 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Francisco Sá Carneiro Airport",
+            "id": "OPO",
+            "time": "2026-12-08 14:30"
+          },
+          "arrival_airport": {
+            "name": "Humberto Delgado Airport",
+            "id": "LIS",
+            "time": "2026-12-08 15:30"
+          },
+          "duration": 60,
+          "airplane": "Embraer 190",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 1929",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Carbon emissions estimate: 60 kg"
+          ],
+          "often_delayed_by_over_30_min": true,
+          "plane_and_crew_by": "Portugalia - Companhia Portuguesa"
+        },
+        {
+          "departure_airport": {
+            "name": "Humberto Delgado Airport",
+            "id": "LIS",
+            "time": "2026-12-08 18:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 21:35"
+          },
+          "duration": 170,
+          "airplane": "Airbus A320neo",
+          "airline": "Tap Air Portugal",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+          "travel_class": "Economy",
+          "flight_number": "TP 1358",
+          "legroom": "28 in",
+          "extensions": [
+            "Below average legroom (28 in)",
+            "Carbon emissions estimate: 123 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 125,
+          "name": "Francisco Sá Carneiro Airport",
+          "id": "OPO"
+        },
+        {
+          "duration": 195,
+          "name": "Humberto Delgado Airport",
+          "id": "LIS"
+        }
+      ],
+      "total_duration": 950,
+      "carbon_emissions": {
+        "this_flight": 716000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 66
+      },
+      "price": 706,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/TP.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFaE5VVURJeE1ueFVVREU1TWpsOFZGQXhNelU0R2dzSWk2Y0VFQUlhQTFWVFJEZ2NjSXVuQkE9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIk9QTyIsbnVsbCwiVFAiLCIyMTIiXSxbIk9QTyIsIjIwMjYtMTItMDgiLCJMSVMiLG51bGwsIlRQIiwiMTkyOSJdLFsiTElTIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiVFAiLCIxMzU4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 10:10"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 22:10"
+          },
+          "duration": 420,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 142",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "British Airways"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 405 kg"
+          ]
+        }
+      ],
+      "total_duration": 420,
+      "carbon_emissions": {
+        "this_flight": 405000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -6
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZCUVRFME1ob0xDTGk5QkJBQ0dnTlZVMFE0SEhDNHZRUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiMTQyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:20"
+          },
+          "duration": 440,
+          "airplane": "Airbus A330-900neo",
+          "airline": "Virgin Atlantic",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+          "travel_class": "Economy",
+          "flight_number": "VS 4",
+          "ticket_also_sold_by": [
+            "Delta",
+            "KLM",
+            "Air France"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 369 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 440,
+      "carbon_emissions": {
+        "this_flight": 369000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -15
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ05XVXpRYUN3aTR2UVFRQWhvRFZWTkVPQnh3dUwwRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiVlMiLCI0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:01"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 07:15"
+          },
+          "duration": 434,
+          "airplane": "Airbus A330-900neo",
+          "airline": "Virgin Atlantic",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+          "travel_class": "Economy",
+          "flight_number": "VS 46",
+          "ticket_also_sold_by": [
+            "Delta",
+            "KLM",
+            "Air France"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 369 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 434,
+      "carbon_emissions": {
+        "this_flight": 369000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -15
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1JXVXpRMkdnc0l1TDBFRUFJYUExVlRSRGdjY0xpOUJBPT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlZTIiwiNDYiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 22:20"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:30"
+          },
+          "duration": 430,
+          "airplane": "Boeing 767",
+          "airline": "Delta",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+          "travel_class": "Economy",
+          "flight_number": "DL 3",
+          "ticket_also_sold_by": [
+            "KLM",
+            "Virgin Atlantic"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 320 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 430,
+      "carbon_emissions": {
+        "this_flight": 321000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -26
+      },
+      "price": 734,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/DL.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ05FVERNYUN3aTR2UVFRQWhvRFZWTkVPQnh3dUwwRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiREwiLCIzIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:50"
+          },
+          "arrival_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 06:10"
+          },
+          "duration": 380,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 110",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 362 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 07:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:15"
+          },
+          "duration": 85,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 380",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 66 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 100,
+          "name": "Shannon Airport",
+          "id": "SNN"
+        }
+      ],
+      "total_duration": 565,
+      "carbon_emissions": {
+        "this_flight": 429000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -1
+      },
+      "price": 782,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFeE1IeEZTVE00TUJvTENKL2lCQkFDR2dOVlUwUTRISENmNGdRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlNOTiIsbnVsbCwiRUkiLCIxMTAiXSxbIlNOTiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMzgwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "ticket_also_sold_by": [
+            "British Airways"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 06:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 152",
+          "ticket_also_sold_by": [
+            "British Airways"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 80,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 560,
+      "carbon_emissions": {
+        "this_flight": 465000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 8
+      },
+      "price": 791,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeEZTVEUxTWhvTENON3BCQkFDR2dOVlUwUTRISERlNlFRPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTUyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 07:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:05"
+          },
+          "duration": 90,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 154",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 57 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 140,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 620,
+      "carbon_emissions": {
+        "this_flight": 470000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 9
+      },
+      "price": 791,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeEZTVEUxTkJvTENON3BCQkFDR2dOVlUwUTRISERlNlFRPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 08:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:10"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 156",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 210,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 685,
+      "carbon_emissions": {
+        "this_flight": 465000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 8
+      },
+      "price": 791,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeEZTVEUxTmhvTENON3BCQkFDR2dOVlUwUTRISERlNlFRPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU2Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 10:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:25"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 158",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 285,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 760,
+      "carbon_emissions": {
+        "this_flight": 465000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 8
+      },
+      "price": 791,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeEZTVEUxT0JvTENON3BCQkFDR2dOVlUwUTRISERlNlFRPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:15"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 08:45"
+          },
+          "duration": 390,
+          "airplane": "Airbus A330",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 106",
+          "ticket_also_sold_by": [
+            "British Airways"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 339 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 10:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:25"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 158",
+          "ticket_also_sold_by": [
+            "British Airways"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 52 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 75,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 550,
+      "carbon_emissions": {
+        "this_flight": 392000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -9
+      },
+      "price": 791,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd05ueEZTVEUxT0JvTENON3BCQkFDR2dOVlUwUTRISERlNlFRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDYiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMTU4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 12:25"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 14:34"
+          },
+          "duration": 129,
+          "airplane": "Boeing 737",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 627",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 100 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 18:25"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 07:20"
+          },
+          "duration": 475,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 730",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 513 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 231,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 835,
+      "carbon_emissions": {
+        "this_flight": 614000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 42
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCUVRZeU4zeEJRVGN6TUJvTENKdnJCQkFDR2dOVlUwUTRISENiNndRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCI2MjciXSxbIkNMVCIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiNzMwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 14:54"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 17:06"
+          },
+          "duration": 132,
+          "airplane": "Airbus A319",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 560",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 115 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 18:25"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 07:20"
+          },
+          "duration": 475,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 730",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 513 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 79,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 686,
+      "carbon_emissions": {
+        "this_flight": 628000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 45
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCUVRVMk1IeEJRVGN6TUJvTENKdnJCQkFDR2dOVlUwUTRISENiNndRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCI1NjAiXSxbIkNMVCIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiNzMwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 14:54"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 17:06"
+          },
+          "duration": 132,
+          "airplane": "Airbus A319",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 560",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 115 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 20:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:40"
+          },
+          "duration": 470,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 732",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 492 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 224,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 826,
+      "carbon_emissions": {
+        "this_flight": 608000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCUVRVMk1IeEJRVGN6TWhvTENKdnJCQkFDR2dOVlUwUTRISENiNndRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCI1NjAiXSxbIkNMVCIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiNzMyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 14:54"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 17:06"
+          },
+          "duration": 132,
+          "airplane": "Airbus A319",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 560",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 115 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 23:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 12:00"
+          },
+          "duration": 475,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 734",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 492 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 359,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 966,
+      "carbon_emissions": {
+        "this_flight": 608000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCUVRVMk1IeEJRVGN6TkJvTENKdnJCQkFDR2dOVlUwUTRISENiNndRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCI1NjAiXSxbIkNMVCIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiNzM0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 17:20"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 19:34"
+          },
+          "duration": 134,
+          "airplane": "Airbus A319",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 2062",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 115 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 20:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:40"
+          },
+          "duration": 470,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 732",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 492 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 76,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 680,
+      "carbon_emissions": {
+        "this_flight": 608000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hCUVRJd05qSjhRVUUzTXpJYUN3aWI2d1FRQWhvRFZWTkVPQnh3bStzRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCIyMDYyIl0sWyJDTFQiLCIyMDI2LTEyLTA4IiwiTEhSIixudWxsLCJBQSIsIjczMiJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 17:20"
+          },
+          "arrival_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 19:34"
+          },
+          "duration": 134,
+          "airplane": "Airbus A319",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 2062",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 115 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Charlotte Douglas International Airport",
+            "id": "CLT",
+            "time": "2026-12-08 23:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 12:00"
+          },
+          "duration": 475,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 734",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 492 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 211,
+          "name": "Charlotte Douglas International Airport",
+          "id": "CLT"
+        }
+      ],
+      "total_duration": 820,
+      "carbon_emissions": {
+        "this_flight": 608000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hCUVRJd05qSjhRVUUzTXpRYUN3aWI2d1FRQWhvRFZWTkVPQnh3bStzRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkNMVCIsbnVsbCwiQUEiLCIyMDYyIl0sWyJDTFQiLCIyMDI2LTEyLTA4IiwiTEhSIixudWxsLCJBQSIsIjczNCJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 22:00"
+          },
+          "arrival_airport": {
+            "name": "Boston Logan International Airport",
+            "id": "BOS",
+            "time": "2026-12-08 23:21"
+          },
+          "duration": 81,
+          "airplane": "Embraer 175",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 4397",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 89 kg"
+          ],
+          "often_delayed_by_over_30_min": true,
+          "plane_and_crew_by": "Republic as American Eagle for American Airlines"
+        },
+        {
+          "departure_airport": {
+            "name": "Boston Logan International Airport",
+            "id": "BOS",
+            "time": "2026-12-09 07:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 19:00"
+          },
+          "duration": 390,
+          "airplane": "Boeing 787-10",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 238",
+          "ticket_also_sold_by": [
+            "Finnair"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 348 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 489,
+          "name": "Boston Logan International Airport",
+          "id": "BOS"
+        }
+      ],
+      "total_duration": 960,
+      "carbon_emissions": {
+        "this_flight": 438000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 1
+      },
+      "price": 793,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hCUVRRek9UZDhRa0V5TXpnYUN3aWI2d1FRQWhvRFZWTkVPQnh3bStzRSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkJPUyIsbnVsbCwiQUEiLCI0Mzk3Il0sWyJCT1MiLCIyMDI2LTEyLTA5IiwiTEhSIixudWxsLCJCQSIsIjIzOCJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:10"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:25"
+          },
+          "duration": 435,
+          "airplane": "Airbus A330-900neo",
+          "airline": "Virgin Atlantic",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+          "travel_class": "Economy",
+          "flight_number": "VS 10",
+          "ticket_also_sold_by": [
+            "Delta",
+            "KLM",
+            "Air France"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 369 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 435,
+      "carbon_emissions": {
+        "this_flight": 369000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -15
+      },
+      "price": 794,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VS.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1JXVXpFd0dnc0lxT3dFRUFJYUExVlRSRGdjY0tqc0JBPT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIlZTIiwiMTAiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:50"
+          },
+          "arrival_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 06:10"
+          },
+          "duration": 380,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 110",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 362 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 17:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 18:55"
+          },
+          "duration": 85,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 386",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 59 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 680,
+          "name": "Shannon Airport",
+          "id": "SNN"
+        }
+      ],
+      "total_duration": 1145,
+      "carbon_emissions": {
+        "this_flight": 422000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -2
+      },
+      "price": 795,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFeE1IeEZTVE00TmhvTENObnNCQkFDR2dOVlUwUTRISERaN0FRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlNOTiIsbnVsbCwiRUkiLCIxMTAiXSxbIlNOTiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMzg2Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:50"
+          },
+          "arrival_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 06:10"
+          },
+          "duration": 380,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 110",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 362 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Shannon Airport",
+            "id": "SNN",
+            "time": "2026-12-09 20:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 21:25"
+          },
+          "duration": 80,
+          "airplane": "Airbus A320neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 388",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 59 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 835,
+          "name": "Shannon Airport",
+          "id": "SNN"
+        }
+      ],
+      "total_duration": 1295,
+      "carbon_emissions": {
+        "this_flight": 422000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -2
+      },
+      "price": 795,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFeE1IeEZTVE00T0JvTENObnNCQkFDR2dOVlUwUTRISERaN0FRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlNOTiIsbnVsbCwiRUkiLCIxMTAiXSxbIlNOTiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkVJIiwiMzg4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 22:45"
+          },
+          "arrival_airport": {
+            "name": "Helsinki Airport",
+            "id": "HEL",
+            "time": "2026-12-09 13:55"
+          },
+          "duration": 490,
+          "airplane": "Airbus A330",
+          "airline": "Finnair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+          "travel_class": "Economy",
+          "flight_number": "AY 16",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 440 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Helsinki Airport",
+            "id": "HEL",
+            "time": "2026-12-09 16:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 17:00"
+          },
+          "duration": 180,
+          "airplane": "Airbus A321 (Sharklets)",
+          "airline": "Finnair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+          "travel_class": "Economy",
+          "flight_number": "AY 1337",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "Carbon emissions estimate: 190 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 125,
+          "name": "Helsinki Airport",
+          "id": "HEL"
+        }
+      ],
+      "total_duration": 795,
+      "carbon_emissions": {
+        "this_flight": 631000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 46
+      },
+      "price": 796,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCV1RFMmZFRlpNVE16TnhvTENPL3RCQkFDR2dOVlUwUTRISER2N1FRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkhFTCIsbnVsbCwiQVkiLCIxNiJdLFsiSEVMIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiQVkiLCIxMzM3Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 22:45"
+          },
+          "arrival_airport": {
+            "name": "Helsinki Airport",
+            "id": "HEL",
+            "time": "2026-12-09 13:55"
+          },
+          "duration": 490,
+          "airplane": "Airbus A330",
+          "airline": "Finnair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+          "travel_class": "Economy",
+          "flight_number": "AY 16",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 440 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Helsinki Airport",
+            "id": "HEL",
+            "time": "2026-12-09 19:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 20:40"
+          },
+          "duration": 185,
+          "airplane": "Airbus A321 (Sharklets)",
+          "airline": "Finnair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+          "travel_class": "Economy",
+          "flight_number": "AY 1339",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "Carbon emissions estimate: 190 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 340,
+          "name": "Helsinki Airport",
+          "id": "HEL"
+        }
+      ],
+      "total_duration": 1015,
+      "carbon_emissions": {
+        "this_flight": 631000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 46
+      },
+      "price": 796,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AY.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RCV1RFMmZFRlpNVE16T1JvTENPL3RCQkFDR2dOVlUwUTRISER2N1FRPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkhFTCIsbnVsbCwiQVkiLCIxNiJdLFsiSEVMIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiQVkiLCIxMzM5Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:15"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:15"
+          },
+          "duration": 420,
+          "airplane": "Boeing 787",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 104",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "British Airways"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 311 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 420,
+      "carbon_emissions": {
+        "this_flight": 311000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -28
+      },
+      "price": 797,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZCUVRFd05Cb0xDS0h1QkJBQ0dnTlZVMFE0SEhDaDdnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkFBIiwiMTA0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 09:26"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 21:40"
+          },
+          "duration": 434,
+          "airplane": "Airbus A321neo",
+          "airline": "JetBlue",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+          "travel_class": "Economy",
+          "flight_number": "B6 1107",
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 588 kg"
+          ]
+        }
+      ],
+      "total_duration": 434,
+      "carbon_emissions": {
+        "this_flight": 588000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 36
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1pDTmpFeE1EY2FDd2k4OWdRUUFob0RWVk5FT0J4d3ZQWUUiLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkI2IiwiMTEwNyJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:10"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:15"
+          },
+          "duration": 425,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 112",
+          "ticket_also_sold_by": [
+            "American",
+            "Finnair",
+            "Iberia"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 425,
+      "carbon_emissions": {
+        "this_flight": 442000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFeE1ob0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTEyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:30"
+          },
+          "duration": 420,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 184",
+          "ticket_also_sold_by": [
+            "American",
+            "Finnair",
+            "Iberia"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 469 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 420,
+      "carbon_emissions": {
+        "this_flight": 469000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 9
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFNE5Cb0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTg0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 18:40"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 06:40"
+          },
+          "duration": 420,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 174",
+          "ticket_also_sold_by": [
+            "American",
+            "Finnair",
+            "Iberia"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 402 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 420,
+      "carbon_emissions": {
+        "this_flight": 403000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -7
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFM05Cb0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTc0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 07:05"
+          },
+          "duration": 420,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 176",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "American"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 420,
+      "carbon_emissions": {
+        "this_flight": 442000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFM05ob0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTc2Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 20:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:10"
+          },
+          "duration": 425,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 116",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "American"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 402 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 425,
+      "carbon_emissions": {
+        "this_flight": 403000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -7
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFeE5ob0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTE2Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 20:40"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:35"
+          },
+          "duration": 415,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 172",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "American"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 442000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFM01ob0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTcyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 21:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:30"
+          },
+          "duration": 415,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 188",
+          "ticket_also_sold_by": [
+            "American",
+            "Finnair",
+            "Iberia"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 469 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 469000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 9
+      },
+      "price": 807,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFNE9Cb0xDTHoyQkJBQ0dnTlZVMFE0SEhDODlnUT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTg4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:35"
+          },
+          "arrival_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 09:20"
+          },
+          "duration": 465,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 23",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 516 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 12:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 13:40"
+          },
+          "duration": 110,
+          "airplane": "Airbus A220-300 Passenger",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 354",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 93 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 210,
+          "name": "Geneva Airport",
+          "id": "GVA"
+        }
+      ],
+      "total_duration": 785,
+      "carbon_emissions": {
+        "this_flight": 610000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 830,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RJemZFeFlNelUwR2dzSW1ZZ0ZFQUlhQTFWVFJEZ2NjSm1JQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkdWQSIsbnVsbCwiTFgiLCIyMyJdLFsiR1ZBIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzNTQiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:35"
+          },
+          "arrival_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 09:20"
+          },
+          "duration": 465,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 23",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 516 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 15:55"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 16:40"
+          },
+          "duration": 105,
+          "airplane": "Airbus A220-300 Passenger",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 348",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 93 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 395,
+          "name": "Geneva Airport",
+          "id": "GVA"
+        }
+      ],
+      "total_duration": 965,
+      "carbon_emissions": {
+        "this_flight": 610000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 41
+      },
+      "price": 830,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RJemZFeFlNelE0R2dzSW1ZZ0ZFQUlhQTFWVFJEZ2NjSm1JQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkdWQSIsbnVsbCwiTFgiLCIyMyJdLFsiR1ZBIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzNDgiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 16:25"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 06:15"
+          },
+          "duration": 470,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 17",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 335 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 07:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 120,
+          "airplane": "Airbus A321neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 316",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 73 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 50,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 640,
+      "carbon_emissions": {
+        "this_flight": 408000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -6
+      },
+      "price": 864,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFM2ZFeFlNekUyR2dzSTY2SUZFQUlhQTFWVFJEZ2NjT3VpQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxNyJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMTYiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 10:50"
+          },
+          "duration": 470,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 15",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 335 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 12:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 13:00"
+          },
+          "duration": 120,
+          "airplane": "Airbus A321neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 332",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 73 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 70,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 660,
+      "carbon_emissions": {
+        "this_flight": 408000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -6
+      },
+      "price": 864,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFMWZFeFlNek15R2dzSTY2SUZFQUlhQTFWVFJEZ2NjT3VpQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxNSJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMzIiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 10:50"
+          },
+          "duration": 470,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 15",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 335 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 15:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 16:20"
+          },
+          "duration": 110,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 324",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 74 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 280,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 860,
+      "carbon_emissions": {
+        "this_flight": 410000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -5
+      },
+      "price": 864,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFMWZFeFlNekkwR2dzSTY2SUZFQUlhQTFWVFJEZ2NjT3VpQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxNSJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMjQiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:03"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:30"
+          },
+          "duration": 447,
+          "airplane": "Airbus A321neo",
+          "airline": "JetBlue",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+          "travel_class": "Economy",
+          "flight_number": "B6 7",
+          "ticket_also_sold_by": [
+            "Tap Air Portugal"
+          ],
+          "legroom": "32 in",
+          "extensions": [
+            "Above average legroom (32 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 588 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 447,
+      "carbon_emissions": {
+        "this_flight": 588000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 36
+      },
+      "price": 864,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/B6.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ05DTmpjYUN3aUFvd1VRQWhvRFZWTkVPQnh3Z0tNRiIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkxIUiIsbnVsbCwiQjYiLCI3Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 08:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-08 20:00"
+          },
+          "duration": 415,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 178",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "American"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ]
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 442000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 866,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFM09Cb0xDTWlrQlJBQ0dnTlZVMFE0SEhESXBBVT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTc4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 09:45"
+          },
+          "duration": 415,
+          "airplane": "Boeing 787-10",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 114",
+          "ticket_also_sold_by": [
+            "Iberia",
+            "Finnair",
+            "American"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 310 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "total_duration": 415,
+      "carbon_emissions": {
+        "this_flight": 311000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -28
+      },
+      "price": 866,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ1ZDUVRFeE5Cb0xDTWlrQlJBQ0dnTlZVMFE0SEhESXBBVT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJMSFIiLG51bGwsIkJBIiwiMTE0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 16:25"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 06:15"
+          },
+          "duration": 470,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 17",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 335 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 10:15"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:15"
+          },
+          "duration": 120,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 318",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 74 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 240,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 830,
+      "carbon_emissions": {
+        "this_flight": 410000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -5
+      },
+      "price": 914,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFM2ZFeFlNekU0R2dzSTg4a0ZFQUlhQTFWVFJEZ2NjUFBKQlE9PSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxNyJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMTgiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 10:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 12:00"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 829",
+          "ticket_also_sold_by": [
+            "Aer Lingus"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 64 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 315,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 795,
+      "carbon_emissions": {
+        "this_flight": 477000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 10
+      },
+      "price": 936,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeENRVGd5T1JvTENJTGJCUkFDR2dOVlUwUTRISENDMndVPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkJBIiwiODI5Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 21:15"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 08:45"
+          },
+          "duration": 390,
+          "airplane": "Airbus A330",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 106",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 339 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 10:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 12:00"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 829",
+          "ticket_also_sold_by": [
+            "Aer Lingus"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 64 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 105,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 585,
+      "carbon_emissions": {
+        "this_flight": 404000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -6
+      },
+      "price": 936,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd05ueENRVGd5T1JvTENJTGJCUkFDR2dOVlUwUTRISENDMndVPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDYiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkJBIiwiODI5Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 20:50"
+          },
+          "arrival_airport": {
+            "name": "Munich International Airport",
+            "id": "MUC",
+            "time": "2026-12-09 10:20"
+          },
+          "duration": 450,
+          "airplane": "Airbus A350",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 413",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 393 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Munich International Airport",
+            "id": "MUC",
+            "time": "2026-12-09 12:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 13:00"
+          },
+          "duration": 120,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa City Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VL.png",
+          "travel_class": "Economy",
+          "flight_number": "VL 2474",
+          "ticket_also_sold_by": [
+            "Lufthansa"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 83 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 100,
+          "name": "Munich International Airport",
+          "id": "MUC"
+        }
+      ],
+      "total_duration": 670,
+      "carbon_emissions": {
+        "this_flight": 477000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 10
+      },
+      "price": 951,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hNU0RReE0zeFdUREkwTnpRYUN3aWg1Z1VRQWhvRFZWTkVPQnh3b2VZRiIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIk1VQyIsbnVsbCwiTEgiLCI0MTMiXSxbIk1VQyIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlZMIiwiMjQ3NCJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:45"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 390,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 100",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 412 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 09:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:30"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320neo",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 825",
+          "ticket_also_sold_by": [
+            "Aer Lingus"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 64 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 225,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 705,
+      "carbon_emissions": {
+        "this_flight": 477000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 10
+      },
+      "price": 973,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd01IeENRVGd5TlJvTENNVDNCUkFDR2dOVlUwUTRISERFOXdVPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDAiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkJBIiwiODI1Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 19:25"
+          },
+          "arrival_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 07:00"
+          },
+          "duration": 395,
+          "airplane": "Airbus A321neo",
+          "airline": "Aer Lingus",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/EI.png",
+          "travel_class": "Economy",
+          "flight_number": "EI 108",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 376 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Dublin Airport",
+            "id": "DUB",
+            "time": "2026-12-09 09:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:30"
+          },
+          "duration": 90,
+          "airplane": "Airbus A320neo",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 825",
+          "ticket_also_sold_by": [
+            "Aer Lingus"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 64 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 120,
+          "name": "Dublin Airport",
+          "id": "DUB"
+        }
+      ],
+      "total_duration": 605,
+      "carbon_emissions": {
+        "this_flight": 440000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 973,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RGU1RFd09IeENRVGd5TlJvTENNVDNCUkFDR2dOVlUwUTRISERFOXdVPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkRVQiIsbnVsbCwiRUkiLCIxMDgiXSxbIkRVQiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkJBIiwiODI1Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 23:45"
+          },
+          "arrival_airport": {
+            "name": "Josep Tarradellas Barcelona-El Prat Airport",
+            "id": "BCN",
+            "time": "2026-12-09 13:10"
+          },
+          "duration": 445,
+          "airline": "LEVEL",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LL.png",
+          "travel_class": "Economy",
+          "flight_number": "LL 2628",
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Josep Tarradellas Barcelona-El Prat Airport",
+            "id": "BCN",
+            "time": "2026-12-09 18:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 20:05"
+          },
+          "duration": 140,
+          "airline": "Vueling",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+          "travel_class": "Economy",
+          "flight_number": "VY 7642",
+          "ticket_also_sold_by": [
+            "LEVEL"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Stream media to your device",
+            "Carbon emissions estimate: 105 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 335,
+          "name": "Josep Tarradellas Barcelona-El Prat Airport",
+          "id": "BCN"
+        }
+      ],
+      "total_duration": 920,
+      "carbon_emissions": {
+        "typical_for_this_route": 432000
+      },
+      "price": 1009,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZzFNVERJMk1qaDhWbGszTmpReUdnc0lvNVFHRUFJYUExVlRSRGdjY0tPVUJnPT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJCQ04iLG51bGwsIkxMIiwiMjYyOCJdLFsiQkNOIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiVlkiLCI3NjQyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 23:45"
+          },
+          "arrival_airport": {
+            "name": "Josep Tarradellas Barcelona-El Prat Airport",
+            "id": "BCN",
+            "time": "2026-12-09 13:10"
+          },
+          "duration": 445,
+          "airline": "LEVEL",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LL.png",
+          "travel_class": "Economy",
+          "flight_number": "LL 2628",
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Josep Tarradellas Barcelona-El Prat Airport",
+            "id": "BCN",
+            "time": "2026-12-10 07:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-10 09:10"
+          },
+          "duration": 160,
+          "airline": "Vueling",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+          "travel_class": "Economy",
+          "flight_number": "VY 7640",
+          "ticket_also_sold_by": [
+            "LEVEL"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Stream media to your device",
+            "Carbon emissions estimate: 112 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 1100,
+          "name": "Josep Tarradellas Barcelona-El Prat Airport",
+          "id": "BCN"
+        }
+      ],
+      "total_duration": 1705,
+      "carbon_emissions": {
+        "typical_for_this_route": 432000
+      },
+      "price": 1049,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZzFNVERJMk1qaDhWbGszTmpRd0dnc0kvYklHRUFJYUExVlRSRGdjY1AyeUJnPT0iLFtbIkpGSyIsIjIwMjYtMTItMDgiLCJCQ04iLG51bGwsIkxMIiwiMjYyOCJdLFsiQkNOIiwiMjAyNi0xMi0xMCIsIkxIUiIsbnVsbCwiVlkiLCI3NjQwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:09"
+          },
+          "arrival_airport": {
+            "name": "Denver International Airport",
+            "id": "DEN",
+            "time": "2026-12-08 19:44"
+          },
+          "duration": 275,
+          "airplane": "Boeing 757",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 1197",
+          "ticket_also_sold_by": [
+            "Brussels Airlines"
+          ],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 298 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Denver International Airport",
+            "id": "DEN",
+            "time": "2026-12-09 17:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-10 09:40"
+          },
+          "duration": 545,
+          "airplane": "Boeing 787",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 27",
+          "ticket_also_sold_by": [
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 493 kg"
+          ],
+          "overnight": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 1311,
+          "name": "Denver International Airport",
+          "id": "DEN"
+        }
+      ],
+      "total_duration": 2131,
+      "carbon_emissions": {
+        "this_flight": 791000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 83
+      },
+      "price": 1075,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RWUVRFeE9UZDhWVUV5TnhvTENNN0hCaEFDR2dOVlUwUTRISERPeHdZPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkRFTiIsbnVsbCwiVUEiLCIxMTk3Il0sWyJERU4iLCIyMDI2LTEyLTA5IiwiTEhSIixudWxsLCJVQSIsIjI3Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 17:30"
+          },
+          "arrival_airport": {
+            "name": "Munich International Airport",
+            "id": "MUC",
+            "time": "2026-12-09 07:05"
+          },
+          "duration": 455,
+          "airplane": "Airbus A350",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 411",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 401 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Munich International Airport",
+            "id": "MUC",
+            "time": "2026-12-09 09:25"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:25"
+          },
+          "duration": 120,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 2472",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 87 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 140,
+          "name": "Munich International Airport",
+          "id": "MUC"
+        }
+      ],
+      "total_duration": 715,
+      "carbon_emissions": {
+        "this_flight": 489000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 13
+      },
+      "price": 1147,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hNU0RReE1YeE1TREkwTnpJYUN3amovd1lRQWhvRFZWTkVPQnh3NC84RyIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIk1VQyIsbnVsbCwiTEgiLCI0MTEiXSxbIk1VQyIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxIIiwiMjQ3MiJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 15:55"
+          },
+          "arrival_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 440,
+          "airplane": "Airbus A350",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 401",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 372 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 07:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 07:45"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa City Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VL.png",
+          "travel_class": "Economy",
+          "flight_number": "VL 924",
+          "ticket_also_sold_by": [
+            "Lufthansa"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 67 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 110,
+          "name": "Frankfurt Airport",
+          "id": "FRA"
+        }
+      ],
+      "total_duration": 650,
+      "carbon_emissions": {
+        "this_flight": 440000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 1157,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RNU0RRd01YeFdURGt5TkJvTENQT0hCeEFDR2dOVlUwUTRISER6aHdjPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkZSQSIsbnVsbCwiTEgiLCI0MDEiXSxbIkZSQSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlZMIiwiOTI0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 19:30"
+          },
+          "arrival_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 09:10"
+          },
+          "duration": 460,
+          "airplane": "Boeing 777",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 42",
+          "ticket_also_sold_by": [
+            "Lufthansa"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 374 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 10:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:45"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa City Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VL.png",
+          "travel_class": "Economy",
+          "flight_number": "VL 904",
+          "ticket_also_sold_by": [
+            "Lufthansa"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 67 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 55,
+          "name": "Frankfurt Airport",
+          "id": "FRA"
+        }
+      ],
+      "total_duration": 615,
+      "carbon_emissions": {
+        "this_flight": 441000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 1203,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BWUVRReWZGWk1PVEEwR2dzSTY2c0hFQUlhQTFWVFJEZ2NjT3VyQnc9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkZSQSIsbnVsbCwiVUEiLCI0MiJdLFsiRlJBIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiVkwiLCI5MDQiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 15:55"
+          },
+          "arrival_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 440,
+          "airplane": "Airbus A350",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 401",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 372 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 08:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 08:45"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 900",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 69 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 170,
+          "name": "Frankfurt Airport",
+          "id": "FRA"
+        }
+      ],
+      "total_duration": 710,
+      "carbon_emissions": {
+        "this_flight": 443000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 3
+      },
+      "price": 1239,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RNU0RRd01YeE1TRGt3TUJvTENOM0hCeEFDR2dOVlUwUTRISERkeHdjPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkZSQSIsbnVsbCwiTEgiLCI0MDEiXSxbIkZSQSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxIIiwiOTAwIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2026-12-08 15:55"
+          },
+          "arrival_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 05:15"
+          },
+          "duration": 440,
+          "airplane": "Airbus A350",
+          "airline": "Lufthansa",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LH.png",
+          "travel_class": "Economy",
+          "flight_number": "LH 401",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 372 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Frankfurt Airport",
+            "id": "FRA",
+            "time": "2026-12-09 10:05"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:45"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "Lufthansa City Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/VL.png",
+          "travel_class": "Economy",
+          "flight_number": "VL 904",
+          "ticket_also_sold_by": [
+            "Lufthansa"
+          ],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 67 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 290,
+          "name": "Frankfurt Airport",
+          "id": "FRA"
+        }
+      ],
+      "total_duration": 830,
+      "carbon_emissions": {
+        "this_flight": 440000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 1239,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RNU0RRd01YeFdURGt3TkJvTENOM0hCeEFDR2dOVlUwUTRISERkeHdjPSIsW1siSkZLIiwiMjAyNi0xMi0wOCIsIkZSQSIsbnVsbCwiTEgiLCI0MDEiXSxbIkZSQSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlZMIiwiOTA0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:55"
+          },
+          "arrival_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 430,
+          "airplane": "Boeing 787-10",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 994",
+          "ticket_also_sold_by": [
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 292 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 09:45"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:05"
+          },
+          "duration": 80,
+          "airplane": "Airbus A320neo",
+          "airline": "Brussels Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SN.png",
+          "travel_class": "Economy",
+          "flight_number": "SN 2093",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 50 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 100,
+          "name": "Brussels Airport",
+          "id": "BRU"
+        }
+      ],
+      "total_duration": 610,
+      "carbon_emissions": {
+        "this_flight": 343000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -21
+      },
+      "price": 1273,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hWUVRrNU5IeFRUakl3T1RNYUN3akU0Z2NRQWhvRFZWTkVPQnh3eE9JSCIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkJSVSIsbnVsbCwiVUEiLCI5OTQiXSxbIkJSVSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlNOIiwiMjA5MyJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:55"
+          },
+          "arrival_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 08:05"
+          },
+          "duration": 430,
+          "airplane": "Boeing 787-10",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 994",
+          "ticket_also_sold_by": [
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 292 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 16:55"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 17:05"
+          },
+          "duration": 70,
+          "airplane": "Airbus A320neo",
+          "airline": "Brussels Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SN.png",
+          "travel_class": "Economy",
+          "flight_number": "SN 2095",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 50 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 530,
+          "name": "Brussels Airport",
+          "id": "BRU"
+        }
+      ],
+      "total_duration": 1030,
+      "carbon_emissions": {
+        "this_flight": 343000,
+        "typical_for_this_route": 432000,
+        "difference_percent": -21
+      },
+      "price": 1273,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3hWUVRrNU5IeFRUakl3T1RVYUN3akU0Z2NRQWhvRFZWTkVPQnh3eE9JSCIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkJSVSIsbnVsbCwiVUEiLCI5OTQiXSxbIkJSVSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlNOIiwiMjA5NSJdXV0="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:35"
+          },
+          "arrival_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 07:25"
+          },
+          "duration": 470,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 956",
+          "ticket_also_sold_by": [
+            "SWISS"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 12:50"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 13:40"
+          },
+          "duration": 110,
+          "airplane": "Airbus A220-300 Passenger",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 354",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 93 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 325,
+          "name": "Geneva Airport",
+          "id": "GVA"
+        }
+      ],
+      "total_duration": 905,
+      "carbon_emissions": {
+        "this_flight": 535000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 24
+      },
+      "price": 1317,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RWUVRrMU5ueE1XRE0xTkJvTENOV0VDQkFDR2dOVlUwUTRISERWaEFnPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkdWQSIsbnVsbCwiVUEiLCI5NTYiXSxbIkdWQSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxYIiwiMzU0Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 17:35"
+          },
+          "arrival_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 07:25"
+          },
+          "duration": 470,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 956",
+          "ticket_also_sold_by": [
+            "SWISS"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 442 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Geneva Airport",
+            "id": "GVA",
+            "time": "2026-12-09 15:55"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 16:40"
+          },
+          "duration": 105,
+          "airplane": "Airbus A220-300 Passenger",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 348",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 93 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 510,
+          "name": "Geneva Airport",
+          "id": "GVA"
+        }
+      ],
+      "total_duration": 1085,
+      "carbon_emissions": {
+        "this_flight": 535000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 24
+      },
+      "price": 1317,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RWUVRrMU5ueE1XRE0wT0JvTENOV0VDQkFDR2dOVlUwUTRISERWaEFnPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIkdWQSIsbnVsbCwiVUEiLCI5NTYiXSxbIkdWQSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxYIiwiMzQ4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 22:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 11:35"
+          },
+          "duration": 455,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 19",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 368 kg"
+          ],
+          "overnight": true,
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 15:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 16:20"
+          },
+          "duration": 110,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 324",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 74 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 235,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 800,
+      "carbon_emissions": {
+        "this_flight": 443000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 3
+      },
+      "price": 1473,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFNWZFeFlNekkwR2dzSXovNElFQUlhQTFWVFJEZ2NjTS8rQ0E9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxOSJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMjQiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 22:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 11:35"
+          },
+          "duration": 455,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 19",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 368 kg"
+          ],
+          "overnight": true,
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 17:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 17:50"
+          },
+          "duration": 110,
+          "airplane": "Airbus A321neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 326",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 73 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 325,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 890,
+      "carbon_emissions": {
+        "this_flight": 441000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 2
+      },
+      "price": 1473,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3BNV0RFNWZFeFlNekkyR2dzSXovNElFQUlhQTFWVFJEZ2NjTS8rQ0E9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiTFgiLCIxOSJdLFsiWlJIIiwiMjAyNi0xMi0wOSIsIkxIUiIsbnVsbCwiTFgiLCIzMjYiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:25"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 08:20"
+          },
+          "duration": 475,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 134",
+          "ticket_also_sold_by": [
+            "SWISS"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 423 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 10:15"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 11:15"
+          },
+          "duration": 120,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 318",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 74 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 115,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 710,
+      "carbon_emissions": {
+        "this_flight": 499000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 16
+      },
+      "price": 1548,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RWUVRFek5IeE1XRE14T0JvTENKdTVDUkFDR2dOVlUwUTRISENidVFrPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiVUEiLCIxMzQiXSxbIlpSSCIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxYIiwiMzE4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 18:25"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 08:20"
+          },
+          "duration": 475,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 134",
+          "ticket_also_sold_by": [
+            "SWISS"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 423 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-09 12:00"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 13:00"
+          },
+          "duration": 120,
+          "airplane": "Airbus A321neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 332",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 73 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 220,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 815,
+      "carbon_emissions": {
+        "this_flight": 497000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 15
+      },
+      "price": 1548,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFZ3RWUVRFek5IeE1XRE16TWhvTENKdTVDUkFDR2dOVlUwUTRISENidVFrPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIlpSSCIsbnVsbCwiVUEiLCIxMzQiXSxbIlpSSCIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkxYIiwiMzMyIl1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 20:00"
+          },
+          "arrival_airport": {
+            "name": "Adolfo Suárez Madrid-Barajas Airport",
+            "id": "MAD",
+            "time": "2026-12-09 09:30"
+          },
+          "duration": 450,
+          "airplane": "Boeing 767",
+          "airline": "United",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/UA.png",
+          "travel_class": "Economy",
+          "flight_number": "UA 51",
+          "ticket_also_sold_by": [
+            "Brussels Airlines"
+          ],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 380 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Adolfo Suárez Madrid-Barajas Airport",
+            "id": "MAD",
+            "time": "2026-12-09 12:35"
+          },
+          "arrival_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 14:50"
+          },
+          "duration": 135,
+          "airplane": "Airbus A320",
+          "airline": "Brussels Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SN.png",
+          "travel_class": "Economy",
+          "flight_number": "SN 3722",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 133 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Brussels Airport",
+            "id": "BRU",
+            "time": "2026-12-09 16:55"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 17:05"
+          },
+          "duration": 70,
+          "airplane": "Airbus A320neo",
+          "airline": "Brussels Airlines",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/SN.png",
+          "travel_class": "Economy",
+          "flight_number": "SN 2095",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Carbon emissions estimate: 50 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 185,
+          "name": "Adolfo Suárez Madrid-Barajas Airport",
+          "id": "MAD"
+        },
+        {
+          "duration": 125,
+          "name": "Brussels Airport",
+          "id": "BRU"
+        }
+      ],
+      "total_duration": 965,
+      "carbon_emissions": {
+        "this_flight": 564000,
+        "typical_for_this_route": 432000,
+        "difference_percent": 31
+      },
+      "price": 1785,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "departure_token": "WyJDalJJTW5GNU9IWk9SaTFOVW5kQlFuaHBWbWRDUnkwdExTMHRMUzB0ZG5kaVpXOHhOVUZCUVVGQlIzSkpVR0V3UlVoUWREWkJFaEpWUVRVeGZGTk9NemN5TW54VFRqSXdPVFVhQ3dpNjhnb1FBaG9EVlZORU9CeHd1dklLIixbWyJFV1IiLCIyMDI2LTEyLTA4IiwiTUFEIixudWxsLCJVQSIsIjUxIl0sWyJNQUQiLCIyMDI2LTEyLTA5IiwiQlJVIixudWxsLCJTTiIsIjM3MjIiXSxbIkJSVSIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIlNOIiwiMjA5NSJdXV0="
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 693,
+    "price_level": "typical",
+    "typical_price_range": [
+      480,
+      830
+    ],
+    "price_history": [
+      [
+        1786248000,
+        603
+      ],
+      [
+        1786334400,
+        603
+      ],
+      [
+        1786420800,
+        603
+      ],
+      [
+        1786507200,
+        603
+      ],
+      [
+        1786593600,
+        603
+      ],
+      [
+        1786680000,
+        603
+      ],
+      [
+        1786766400,
+        604
+      ],
+      [
+        1786852800,
+        604
+      ],
+      [
+        1786939200,
+        604
+      ],
+      [
+        1787025600,
+        579
+      ],
+      [
+        1787112000,
+        579
+      ],
+      [
+        1787198400,
+        579
+      ],
+      [
+        1787284800,
+        657
+      ],
+      [
+        1787371200,
+        580
+      ],
+      [
+        1787457600,
+        580
+      ],
+      [
+        1787544000,
+        580
+      ],
+      [
+        1787630400,
+        580
+      ],
+      [
+        1787716800,
+        580
+      ],
+      [
+        1787803200,
+        580
+      ],
+      [
+        1787889600,
+        580
+      ],
+      [
+        1787976000,
+        580
+      ],
+      [
+        1788062400,
+        580
+      ],
+      [
+        1788148800,
+        580
+      ],
+      [
+        1788235200,
+        607
+      ],
+      [
+        1788321600,
+        605
+      ],
+      [
+        1788408000,
+        545
+      ],
+      [
+        1788494400,
+        516
+      ],
+      [
+        1788580800,
+        516
+      ],
+      [
+        1788667200,
+        516
+      ],
+      [
+        1788753600,
+        516
+      ],
+      [
+        1788840000,
+        637
+      ],
+      [
+        1788926400,
+        562
+      ],
+      [
+        1789012800,
+        562
+      ],
+      [
+        1789099200,
+        632
+      ],
+      [
+        1789185600,
+        632
+      ],
+      [
+        1789272000,
+        632
+      ],
+      [
+        1789358400,
+        632
+      ],
+      [
+        1789444800,
+        632
+      ],
+      [
+        1789531200,
+        632
+      ],
+      [
+        1789617600,
+        605
+      ],
+      [
+        1789704000,
+        610
+      ],
+      [
+        1789790400,
+        563
+      ],
+      [
+        1789876800,
+        605
+      ],
+      [
+        1789963200,
+        605
+      ],
+      [
+        1790049600,
+        555
+      ],
+      [
+        1790136000,
+        555
+      ],
+      [
+        1790222400,
+        633
+      ],
+      [
+        1790308800,
+        693
+      ],
+      [
+        1790395200,
+        695
+      ],
+      [
+        1790481600,
+        694
+      ],
+      [
+        1790568000,
+        694
+      ],
+      [
+        1790654400,
+        693
+      ],
+      [
+        1790740800,
+        694
+      ],
+      [
+        1790827200,
+        693
+      ],
+      [
+        1790913600,
+        693
+      ],
+      [
+        1791000000,
+        706
+      ],
+      [
+        1791086400,
+        706
+      ],
+      [
+        1791172800,
+        706
+      ],
+      [
+        1791259200,
+        694
+      ],
+      [
+        1791345600,
+        692
+      ],
+      [
+        1791432000,
+        693
+      ]
+    ]
+  },
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ]
+    }
+  ]
+}

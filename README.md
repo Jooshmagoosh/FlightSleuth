@@ -60,6 +60,9 @@ py -m flightsleuth search JFK LHR --depart 2026-12-10 --nights 6-8 --flex 3 --dr
 Other commands: `py -m flightsleuth quota` shows searches left, `py -m flightsleuth cache`
 shows saved results and `--clear` empties them. `py -m flightsleuth search --help` lists every option.
 
+To type `flightsleuth` instead of `py -m flightsleuth`, install it once from this folder with
+`py -m pip install -e .`. This is optional and adds no other packages.
+
 ## What a scan costs
 
 Each date pair is one search. Listing several airports is free: they go into the same search.
@@ -76,12 +79,36 @@ Each date pair is one search. Listing several airports is free: they go into the
 - A run that needs more than 25 live searches is refused (`--max-searches` on the command line; fixed in the window).
 - Before searching it asks SerpApi how many searches are left this month and this hour, and refuses a scan the account cannot cover.
 - Searches run three at a time. A server error is retried twice with a growing wait.
-- A "too many requests" reply is never retried. The run stops, and what already finished stays saved.
+- A "too many requests" reply is never retried. The run stops, no further search is sent, and what already finished stays saved.
+
+## What it keeps on disk
+
+Two files, in `%LOCALAPPDATA%\flightsleuth` on Windows and `~/.cache/flightsleuth` elsewhere
+(set `FLIGHTSLEUTH_HOME` to move them):
+
+- `cache.db` holds the saved replies. It is disposable; `cache --clear` empties it.
+- `history.db` holds one price point for every search fetched live (route, dates, fare, source,
+  fetch time) and a log of every call. Nothing in flightsleuth clears it, and its tables reject
+  changes and deletions. Reusing a saved reply adds no price point.
+
+## Price sources
+
+Every source sits behind one interface in `flightsleuth/providers` and is labelled by how it may
+be used: `vendor` (a paid API), `sanctioned` (offered by its owner for programs to call) or
+`personal_only` (only ever from your own machine). SerpApi, labelled `vendor`, is the only source
+today.
+
+`FLIGHTSLEUTH_MODE` is `personal` by default. Set it to `hosted` when running flightsleuth for
+other people: `personal_only` sources then refuse to load.
 
 ## Limits
 
 - It sees what Google Flights sees. Airlines that do not list there will be missing.
 - A round-trip price is the total, but only the outbound flight is shown. Use the printed link to pick the return.
+- The cheapest round-trip price Google lists is sometimes only available as two separate tickets.
+  Flightsleuth does not show that yet; the booking page behind the link does.
+- A listed round-trip fare is not confirmed until its return flights are looked up, which
+  flightsleuth does not do yet. In one recorded search the cheapest fare listed had no return flights.
 - Fares move. Treat a saved price as a lead and confirm it on the link before booking.
 
 ## Tests
@@ -91,5 +118,8 @@ py -m unittest discover -s tests -t .
 ```
 
 The tests fake SerpApi's replies, so they need no key and spend no searches. They also run
-from a throwaway folder, so your real `.env` and saved results are never touched. The window
-tests open a hidden window and are skipped where there is no display.
+from a throwaway folder, so your real `.env`, saved results and history are never touched. The
+window tests open a hidden window and are skipped where tkinter is missing or there is no display.
+
+`tests/fixtures` holds real SerpApi replies recorded in October 2026, and one hand-written one
+that is labelled synthetic. Its README says how each was recorded and what it showed.

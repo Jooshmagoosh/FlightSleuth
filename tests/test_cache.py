@@ -18,6 +18,11 @@ class CacheTest(unittest.TestCase):
         self.cache.put("k", {"price": 438}, now=1000)
         self.assertEqual(self.cache.get("k", max_age_s=60, now=1030), {"price": 438})
 
+    def test_lookup_also_says_when_the_reply_was_fetched(self):
+        self.cache.put("k", {"price": 438}, now=1000)
+        self.assertEqual(self.cache.lookup("k", max_age_s=60, now=1030), ({"price": 438}, 1000))
+        self.assertIsNone(self.cache.lookup("k", max_age_s=60, now=1061))
+
     def test_expired_entries_are_misses(self):
         self.cache.put("k", {"price": 438}, now=1000)
         self.assertIsNone(self.cache.get("k", max_age_s=60, now=1061))

@@ -2,16 +2,19 @@
 from __future__ import annotations
 
 import re
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, replace
-from datetime import date
+from datetime import date, datetime, timezone
 
-from . import config
+from . import config, providers
 from .cache import Cache
 from .errors import UserError
+from .history import History
 from .models import Query, SearchResult
 from .planner import date_pairs, one_way_legs
-from .serpapi import SerpApi, SerpApiError, cache_key, parse
+from .providers import Capability, Provider
 
 DEFAULT_MAX_SEARCHES = 25
 DEFAULT_MAX_AGE_HOURS = 6
@@ -44,26 +47,48 @@ class Request:
     deep: bool = False
 
 
+@dataclass(frozen=True)
+class Call:
+    """One search sent to one price source."""
+
+    provider: str
+    query: Query
+
+
+@dataclass(frozen=True)
+class Reply:
+    """A source's raw answer to one call."""
+
+    body: dict
+    fetched_at: datetime  # when it reached this machine, in UTC
+    live: bool  # fetched during this run rather than read back from the cache
+
+
 @dataclass
 class Plan:
-    """A request broken into searches, split by whether a saved reply already covers each."""
+    """A request broken into calls, split by whether a saved reply already covers each."""
 
     trips: list[Query]  # the date pairs being compared
     split: bool  # each trip is also priced as two one-ways
-    raw: dict[Query, dict]  # saved replies
-    missing: list[Query]  # searches that have to be paid for
+    calls: list[Call]  # every call the request needs, in order
+    replies: dict[Call, Reply]  # the calls a saved reply already answers
+
+    @property
+    def missing(self) -> list[Call]:
+        """The calls that have to be made, and paid for where the source charges."""
+        return [call for call in self.calls if call not in self.replies]
 
     @property
     def saved(self) -> int:
-        return len(self.raw)
+        return len(self.replies)
 
     @property
     def live(self) -> int:
-        return len(self.missing)
+        return len(self.calls) - len(self.replies)
 
     @property
     def total(self) -> int:
-        return self.saved + self.live
+        return len(self.calls)
 
 
 @dataclass
@@ -71,7 +96,7 @@ class Outcome:
     trips: list[Query]
     results: dict[Query, SearchResult]
     split: bool
-    searches_left: int | None  # unknown when nothing live was needed
+    searches_left: int | None  # the fewest credits left at any metered source; unknown if nothing was fetched
 
 
 def plan(
@@ -81,7 +106,7 @@ def plan(
     fresh: bool = False,
     today: date | None = None,
 ) -> Plan:
-    """Work out every search the request needs and which of them are already saved. Costs nothing."""
+    """Work out every call the request needs and which of them are already saved. Costs nothing."""
     today = today or date.today()
     if request.depart < today:
         raise UserError("the departure date is in the past")
@@ -109,89 +134,182 @@ def plan(
             wanted.extend(one_way_legs(trip))
     wanted = list(dict.fromkeys(wanted))  # one-way legs repeat across date pairs
 
-    raw = {}
+    sources = providers.offering(Capability.LIVE_SEARCH)
+    if not sources:
+        raise UserError("no price source is available")
+    keys = {Call(source.name, query): source.cache_key(query) for query in wanted for source in sources}
+
+    replies = {}
     if not fresh:
         cache = Cache(config.cache_path())
         try:
-            for query in wanted:
-                saved = cache.get(cache_key(query), max_age_hours * 3600)
+            for call, key in keys.items():
+                saved = cache.lookup(key, max_age_hours * 3600)
                 if saved is not None:
-                    raw[query] = saved
+                    body, when = saved
+                    replies[call] = Reply(body, datetime.fromtimestamp(when, timezone.utc), live=False)
         finally:
             cache.close()
-    return Plan(trips, split, raw, [query for query in wanted if query not in raw])
+    return Plan(trips, split, list(keys), replies)
 
 
-def run(plan: Plan, *, on_search=None) -> Outcome:
-    """Pay for the plan's missing searches, save them, and parse everything.
+class OverCap(UserError):
+    """A plan needs more live searches than one run may make."""
 
+    def __init__(self, live: int, limit: int):
+        super().__init__(f"this needs {live} live searches, which is over the limit of {limit} per run")
+        self.live = live
+        self.limit = limit
+
+
+def check_cap(plan: Plan, max_searches: int = DEFAULT_MAX_SEARCHES) -> None:
+    """Refuse a plan that is too big. Front ends call this early so they can word the refusal themselves."""
+    if plan.live > max_searches:
+        raise OverCap(plan.live, max_searches)
+
+
+def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None) -> Outcome:
+    """Make the plan's missing calls, save the replies, and parse everything.
+
+    Nothing is spent on a plan over `max_searches`, whoever the caller is.
     `on_search(done, live)` is called after each live search lands.
     """
-    raw = dict(plan.raw)
+    check_cap(plan, max_searches)
+    sources = {name: providers.load(name) for name in dict.fromkeys(call.provider for call in plan.calls)}
+    replies = dict(plan.replies)
+    missing = plan.missing
+    digested: dict[Call, SearchResult] = {}
     searches_left = None
-    if plan.missing:
-        client = SerpApi(config.load_api_key())
-        account = client.account()
-        problem = budget_problem(plan.live, account)
+
+    def digest(call: Call) -> SearchResult:
+        source, reply = sources[call.provider], replies[call]
+        result = source.parse(call.query, reply.body)
+        when = source.fetched_at(reply.body) or reply.fetched_at
+        return _stamp(result, source.name, when, reply.live)
+
+    needed: dict[str, int] = {}
+    for call in missing:
+        needed[call.provider] = needed.get(call.provider, 0) + 1
+    for name, count in needed.items():
+        problem = sources[name].budget_problem(count)
         if problem:
             raise UserError(problem)
 
-        cache = Cache(config.cache_path())
+    history = History(config.history_path())
+    try:
+        for call in plan.replies:
+            history.add_call(call.provider, "search", live=False, cost=0, latency_ms=None, status="ok")
 
-        def store(query: Query, body: dict) -> None:
-            cache.put(cache_key(query), body)
-            raw[query] = body
-            if on_search:
-                on_search(len(raw) - plan.saved, plan.live)
+        if missing:
+            cache = Cache(config.cache_path())
 
-        try:
-            error = fetch_all(client, plan.missing, store)
-        finally:
-            cache.close()
-        if error:
-            raise UserError(
-                f"stopped after {len(raw) - plan.saved} of {plan.live} live searches: {error}. "
-                f"Finished searches are saved, so running this again picks up where it left off."
-            )
-        if account.get("total_searches_left") is not None:
-            searches_left = account["total_searches_left"] - plan.live
+            def landed(call: Call, body: dict | None, error: UserError | None, latency_ms: int) -> None:
+                source = sources[call.provider]
+                history.add_call(
+                    call.provider,
+                    "search",
+                    live=True,
+                    cost=0 if error else source.cost_per_call,
+                    latency_ms=latency_ms,
+                    status=type(error).__name__ if error else "ok",
+                )
+                if error:
+                    return
+                now = time.time()
+                cache.put(source.cache_key(call.query), body, now=now)
+                replies[call] = Reply(body, datetime.fromtimestamp(now, timezone.utc), live=True)
+                # The price point is written now, not after the run: if a later call fails, this
+                # reply comes back from the cache next time and would never count as live again.
+                try:
+                    digested[call] = digest(call)
+                except UserError:
+                    pass  # an unreadable reply is reported below, once every call has landed
+                else:
+                    cheapest = digested[call].cheapest
+                    if cheapest:
+                        history.add_price_point(cheapest)
+                if on_search:
+                    on_search(len(replies) - plan.saved, plan.live)
 
-    results = {query: parse(query, body) for query, body in raw.items()}
+            try:
+                error = fetch_all(sources, missing, landed)
+            finally:
+                cache.close()
+            if error:
+                raise UserError(
+                    f"stopped after {len(replies) - plan.saved} of {plan.live} live searches: {error}. "
+                    f"Finished searches are saved, so running this again picks up where it left off."
+                )
+            left = []
+            for name, count in needed.items():
+                credits = sources[name].credits_left()
+                if credits is not None:
+                    left.append(credits - count)
+            searches_left = min(left, default=None)
+    finally:
+        history.close()
+
+    parts: dict[Query, list[SearchResult]] = {}
+    for call in plan.calls:
+        parts.setdefault(call.query, []).append(digested.get(call) or digest(call))
+    results = {query: _merge(found) for query, found in parts.items()}
     return Outcome(plan.trips, results, plan.split, searches_left)
 
 
-def budget_problem(needed: int, account: dict) -> str | None:
-    """Why the account cannot afford `needed` live searches right now, if it can't."""
-    month_left = account.get("total_searches_left")
-    if month_left is not None and needed > month_left:
-        return f"this scan needs {needed} live searches but only {month_left} are left this month"
-    hourly_cap = account.get("account_rate_limit_per_hour")
-    if hourly_cap is not None:
-        hour_left = hourly_cap - account.get("this_hour_searches", 0)
-        if needed > hour_left:
-            return f"this scan needs {needed} live searches but only {hour_left} more are allowed this hour"
-    return None
+def _stamp(result: SearchResult, source: str, fetched_at: datetime, live: bool) -> SearchResult:
+    """Mark every offer with where and when its price came from, so no source can leave that out."""
+    offers = tuple(
+        replace(offer, source=source, fetched_at=fetched_at, verified_live=live) for offer in result.offers
+    )
+    return replace(result, offers=offers)
 
 
-def fetch_all(client: SerpApi, queries: list[Query], on_result) -> SerpApiError | None:
-    """Run the live searches a few at a time, handing each reply to `on_result` as it lands.
+def _merge(parts: list[SearchResult]) -> SearchResult:
+    """One result for a search that several sources answered, cheapest offer first."""
+    if len(parts) == 1:
+        return parts[0]
+    offers = sorted((offer for part in parts for offer in part.offers), key=lambda o: (o.price, o.duration_min))
+    return SearchResult(
+        query=parts[0].query,
+        offers=tuple(offers),
+        insights=next((part.insights for part in parts if part.insights), None),
+        url=next((part.url for part in parts if part.url), None),
+    )
 
-    The first failure cancels everything not yet started and is returned. Searches
-    already in flight still finish and are handed over, so no paid result is thrown away.
+
+def fetch_all(sources: dict[str, Provider], calls: list[Call], on_done) -> UserError | None:
+    """Make the live calls a few at a time, reporting each as it finishes.
+
+    `on_done(call, body, error, latency_ms)` gets the reply or the error, never both.
+    The first failure is returned, and no call that has not started yet is sent after it.
+    Calls already in flight still finish and are reported, so no paid result is thrown away.
     """
-    error = None
+    failed = threading.Event()
+
+    def attempt(call: Call) -> tuple[dict | None, UserError | None, int] | None:
+        # Checked on the worker itself: it would otherwise take the next call off the
+        # queue before the main thread had heard about the failure.
+        if failed.is_set():
+            return None
+        started = time.monotonic()
+        try:
+            body, error = sources[call.provider].search(call.query), None
+        except UserError as e:
+            failed.set()
+            body, error = None, e
+        return body, error, round((time.monotonic() - started) * 1000)
+
+    first_error = None
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futures = {pool.submit(client.search, query): query for query in queries}
+        futures = {pool.submit(attempt, call): call for call in calls}
         for future in as_completed(futures):
-            if future.cancelled():
+            attempted = future.result()
+            if attempted is None:
                 continue
-            try:
-                raw = future.result()
-            except SerpApiError as e:
-                if error is None:
-                    error = e
-                    for pending in futures:
-                        pending.cancel()
-                continue
-            on_result(futures[future], raw)
-    return error
+            body, error, latency_ms = attempted
+            on_done(futures[future], body, error, latency_ms)
+            if error and first_error is None:
+                first_error = error
+    return first_error
+
+
