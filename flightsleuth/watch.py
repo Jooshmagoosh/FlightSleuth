@@ -761,9 +761,9 @@ def _look(
     record.update(
         confirmed_price=confirmed.price, itinerary_key=confirmed.itinerary_key, fetched_at=confirmed.fetched_at
     )
-    if insights is None:
-        insights = outcome.results[check.trip].insights  # the sellers' reply rates the price too
-        record["typical_range"] = insights.typical_range if insights else None
+    # Still the listing's own rating. The sellers' reply carries a typical range too, but in both
+    # recorded pairs it was a different one ($540 to $1,850 against $480 to $830), so it is not
+    # borrowed for a listing that came with none.
     rules = fired(found, confirmed.price, insights, today)
     record["reasons"] = tuple(rule.rule for rule in rules)
     reasons = [render.why(rule, confirmed.price, currency) for rule in rules]

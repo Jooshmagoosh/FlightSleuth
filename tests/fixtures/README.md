@@ -12,6 +12,9 @@
 | `roundtrip_booking.json` | Real | Follow-up with the `booking_token` of the cheapest return (LX 345 / LX 18). |
 | `roundtrip_outbound_unsorted.json` | Real | The same round trip 29 minutes later, with `sort_by` left out. |
 | `oneway.json` | Real | One way LAX to JFK, 2026-12-08, fetched by `py -m flightsleuth search LAX JFK --depart 2026-12-08 --one-way` and copied out of the cache. The first paid search through the Phase 1 code. |
+| `watch_listing_unsorted.json` | Real | Round trip JFK,EWR to LHR, 2026-12-08 to 2026-12-15, with `sort_by` left out: the listing a watch check fetches. Fetched by `py -m flightsleuth watch run --max-searches 3` and copied out of the cache, as the next two were. |
+| `watch_return.json` | Real | The follow-up that check made with the `departure_token` of the listing's cheapest fare ($754, FI 622 / FI 450). |
+| `watch_booking.json` | Real | The follow-up it then made with the `booking_token` of the cheapest return (LX 345 / LX 18). |
 
 The Google Flights replies were recorded on 2026-10-09 between 00:35 and 01:06 UTC, with `engine=google_flights`,
 `show_hidden=true`, `hl=en`, `currency=USD`, and `sort_by=2` except where noted. Each follow-up
@@ -75,6 +78,31 @@ from 168 to 166). Each request named one destination, `arrival_id=WAW`, as the `
 - **`search_metadata` has `google_travel_explore_url`** in place of `google_flights_url`, and the
   same `processed_at`.
 
+## What the watch check showed
+
+Recorded on 2026-10-09 between 07:28:29 and 07:28:35 UTC (`processed_at`), by the one real check
+Phase 4 made: a watch with a price set far above the fare so that it would fire. Three requests,
+three searches billed (monthly searches left went from 31 to 28). These three belong together:
+each follow-up used a token from the reply before it.
+
+- **A `departure_token` from an unsorted listing fetches return flights.** Nothing recorded
+  before had shown it. The first lookup worked, so the spare was not needed.
+- **The listing**: 69 fares, 3 in `best_flights` and 66 in `other_flights`, every one with a
+  `departure_token`. `price_insights` had `typical_price_range` 480 to 830 and a `price_history`
+  of 62 daily lows.
+- **Its cheapest fare was again the price Google calls its lowest**: $754 both, as $693 was both
+  in `roundtrip_outbound_unsorted.json`. That is two unsorted replies out of two.
+- **The same search priced $61 higher than six and a half hours earlier.** The earlier unsorted
+  reply's cheapest was $693 (Aer Lingus); this one's was $754 (Icelandair).
+- **The return reply** had 4 options, and the cheapest total was $754, the listed price.
+- **The booking reply** had 3 sellers. The cheapest, $742 from "AranGrant, SWISS", was two
+  separate tickets ($342 and $400). On one ticket it was $753 from Expedia and from Orbitz, both
+  agencies; no airline sold it on one ticket. So one fare had three prices in three replies:
+  $754 listed and confirmed, $742 as two tickets, $753 as one.
+- **The booking reply's `price_insights`** gave a typical range of 540 to 1,850, not the
+  listing's 480 to 830, and no `price_history`. The same was true of `roundtrip_booking.json`.
+- **The booking lookup took 25 seconds**; the other two took under 3 each.
+
 ## What has not been recorded
 
 - **No explore reply for a region or for anywhere**, which is what `flightsleuth explore --area`
@@ -91,4 +119,4 @@ from 168 to 166). Each request named one destination, `arrival_id=WAW`, as the `
 
 The account path in `search_metadata`'s archive links (`https://serpapi.com/searches/<path>/...`) was
 replaced with `REDACTED`. Nothing else was changed. The files were checked for the API key before
-they were committed. The two explore replies were treated the same way.
+they were committed. The two explore replies and the three watch replies were treated the same way.

@@ -1,0 +1,403 @@
+{
+  "search_metadata": {
+    "id": "6ac897a05c9301b6d15d6479",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac897a05c9301b6d15d6479.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac897a05c9301b6d15d6479.md",
+    "created_at": "2026-10-09 07:28:32 UTC",
+    "processed_at": "2026-10-09 07:28:32 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhppEgoyMDI2LTEyLTA4Ih8KA0VXUhIKMjAyNi0xMi0wOBoDS0VGKgJGSTIDNjIyIh8KA0tFRhIKMjAyNi0xMi0wORoDTEhSKgJGSTIDNDUwagcIARIDSkZLagcIARIDRVdScgcIARIDTEhSGicSCjIwMjYtMTItMTVqBwgBEgNMSFJyBwgBEgNKRktyBwgBEgNFV1JAAUgBcAGYAQE&tfu=EgQIARAB",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac897a05c9301b6d15d6479.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac897a05c9301b6d15d6479.prettify",
+    "total_time_taken": 2.27
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "JFK,EWR",
+    "arrival_id": "LHR",
+    "outbound_date": "2026-12-08",
+    "return_date": "2026-12-15",
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "departure_token": "WyJDalJJUzJKMmRrNXlObWN3Y0dOQlFrdzJTMUZDUnkwdExTMHRMUzE1YkdzeE1pMXVNa0ZCUVVGQlIzSkpiRFUwUmtwRkxWZEJFZ3RHU1RZeU1ueEdTVFExTUJvTENJak5CQkFDR2dOVlUwUTRISENJelFRPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIktFRiIsbnVsbCwiRkkiLCI2MjIiXSxbIktFRiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkZJIiwiNDUwIl1dXQ==",
+    "currency": "USD",
+    "show_hidden": true
+  },
+  "other_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-15 06:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-15 08:40"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 345",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 75 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-15 17:15"
+          },
+          "arrival_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-15 20:30"
+          },
+          "duration": 555,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 18",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 323 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 515,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 1170,
+      "carbon_emissions": {
+        "this_flight": 399000,
+        "typical_for_this_route": 327000,
+        "difference_percent": 22
+      },
+      "price": 754,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+      "booking_token": "WyJDalJJZEhFNFZTMDRTREZwY21kQlJHMTVlRUZDUnkwdExTMHRMUzB0TFMxdmVXZDVNa0ZCUVVGQlIzSkpiRFpGUzJvMVJrbEJFZ3BNV0RNME5YeE1XREU0R2dzSWlNMEVFQUlhQTFWVFJEZ2NjSWpOQkE9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIktFRiIsbnVsbCwiRkkiLCI2MjIiXSxbIktFRiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkZJIiwiNDUwIl1dLFtbIkxIUiIsIjIwMjYtMTItMTUiLCJaUkgiLG51bGwsIkxYIiwiMzQ1Il0sWyJaUkgiLCIyMDI2LTEyLTE1IiwiRVdSIixudWxsLCJMWCIsIjE4Il1dXQ=="
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-15 20:35"
+          },
+          "arrival_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-15 23:50"
+          },
+          "duration": 195,
+          "airplane": "Boeing 737MAX 8 Passenger",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 455",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 163 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-16 17:00"
+          },
+          "arrival_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-16 18:25"
+          },
+          "duration": 385,
+          "airplane": "Boeing 737MAX 9 Passenger",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 623",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 290 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 1030,
+          "name": "Keflavík International Airport",
+          "id": "KEF"
+        }
+      ],
+      "total_duration": 1610,
+      "carbon_emissions": {
+        "this_flight": 455000,
+        "typical_for_this_route": 327000,
+        "difference_percent": 39
+      },
+      "price": 780,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+      "booking_token": "WyJDalJJZEhFNFZTMDRTREZwY21kQlJHMTVlRUZDUnkwdExTMHRMUzB0TFMxdmVXZDVNa0ZCUVVGQlIzSkpiRFpGUzJvMVJrbEJFZzFHU1RRMU5YeEdTVFl5TXlNeEdnc0kzT0FFRUFJYUExVlRSRGdjY056Z0JBPT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJLRUYiLG51bGwsIkZJIiwiNjIyIl0sWyJLRUYiLCIyMDI2LTEyLTA5IiwiTEhSIixudWxsLCJGSSIsIjQ1MCJdXSxbWyJMSFIiLCIyMDI2LTEyLTE1IiwiS0VGIixudWxsLCJGSSIsIjQ1NSJdLFsiS0VGIiwiMjAyNi0xMi0xNiIsIkVXUiIsbnVsbCwiRkkiLCI2MjMiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-15 12:15"
+          },
+          "arrival_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-15 15:30"
+          },
+          "duration": 195,
+          "airplane": "Airbus A321neo",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 451",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 160 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-16 17:00"
+          },
+          "arrival_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-16 18:25"
+          },
+          "duration": 385,
+          "airplane": "Boeing 737MAX 9 Passenger",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 623",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 290 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 1530,
+          "name": "Keflavík International Airport",
+          "id": "KEF"
+        }
+      ],
+      "total_duration": 2110,
+      "carbon_emissions": {
+        "this_flight": 452000,
+        "typical_for_this_route": 327000,
+        "difference_percent": 38
+      },
+      "price": 835,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+      "booking_token": "WyJDalJJZEhFNFZTMDRTREZwY21kQlJHMTVlRUZDUnkwdExTMHRMUzB0TFMxdmVXZDVNa0ZCUVVGQlIzSkpiRFpGUzJvMVJrbEJFZzFHU1RRMU1YeEdTVFl5TXlNekdnc0lvSXdGRUFJYUExVlRSRGdjY0tDTUJRPT0iLFtbIkVXUiIsIjIwMjYtMTItMDgiLCJLRUYiLG51bGwsIkZJIiwiNjIyIl0sWyJLRUYiLCIyMDI2LTEyLTA5IiwiTEhSIixudWxsLCJGSSIsIjQ1MCJdXSxbWyJMSFIiLCIyMDI2LTEyLTE1IiwiS0VGIixudWxsLCJGSSIsIjQ1MSJdLFsiS0VGIiwiMjAyNi0xMi0xNiIsIkVXUiIsbnVsbCwiRkkiLCI2MjMiXV1d"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-15 12:15"
+          },
+          "arrival_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-15 15:30"
+          },
+          "duration": 195,
+          "airplane": "Airbus A321neo",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 451",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 160 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-15 17:00"
+          },
+          "arrival_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-15 18:25"
+          },
+          "duration": 385,
+          "airplane": "Boeing 737MAX 9 Passenger",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 623",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 290 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 90,
+          "name": "Keflavík International Airport",
+          "id": "KEF"
+        }
+      ],
+      "total_duration": 670,
+      "carbon_emissions": {
+        "this_flight": 452000,
+        "typical_for_this_route": 327000,
+        "difference_percent": 38
+      },
+      "price": 858,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+      "booking_token": "WyJDalJJZEhFNFZTMDRTREZwY21kQlJHMTVlRUZDUnkwdExTMHRMUzB0TFMxdmVXZDVNa0ZCUVVGQlIzSkpiRFpGUzJvMVJrbEJFZ3RHU1RRMU1YeEdTVFl5TXhvTENQV2RCUkFDR2dOVlUwUTRISEQxblFVPSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIktFRiIsbnVsbCwiRkkiLCI2MjIiXSxbIktFRiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkZJIiwiNDUwIl1dLFtbIkxIUiIsIjIwMjYtMTItMTUiLCJLRUYiLG51bGwsIkZJIiwiNDUxIl0sWyJLRUYiLCIyMDI2LTEyLTE1IiwiRVdSIixudWxsLCJGSSIsIjYyMyJdXV0="
+    }
+  ],
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "LHR",
+            "name": "Heathrow Airport"
+          },
+          "city": "London",
+          "country": "United Kingdom",
+          "country_code": "GB",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRpN9RbtOSTDqKIPxWc_D6rdSysaWVh6d-NW7yz7yFXKRwh5RN5BpNIoXEwH1XVcFdLWqn6Sm8_Y_zmeg",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQYH83YXny8hR4M7k5BMFq4vUT6LNtVABQzgs2pg-hcpSZq3oMBOQK3xh591AAJv2Qx4uvFZUGqOVt4kuoCUOklISunmndJleOoSef_7QE"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "JFK",
+            "name": "John F. Kennedy International Airport"
+          },
+          "city": "New York",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRa1dwH1NZQk4dsbPiyA9Vrq2RX75jXSZ-OkHn7NkLHl-11HercqDXoZ4p2cDxJkH6vca2degawrCzHEQ",
+          "thumbnail": "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQEaUa9NsdPWGpAUGkTApkZDT_4M6_6V8wTcC0v1b1wJAJX-BuMSiipXbsoznGgcI1xLOc5QiTcR_xovexgjdOz0gqQe0tRQ9h0bUkZ07Q"
+        },
+        {
+          "airport": {
+            "id": "EWR",
+            "name": "Newark Liberty International Airport"
+          },
+          "city": "Newark",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSVSHJRQUacgXbljJliEfJExMDrajiLyrcqBpTDrFTtTWEhRRBMAEO76FQqrFPU2swFT3Q3cWcbeO8Tw",
+          "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9KX68DZATrjpYLwlFuQnsmKfJm83iKCU4RTdjv2smpe3tVA1YxHO0Km6xxwD3wnL3-ZI3zci1P1l7bhflFCeqnfmxbEUMppLOK-BiaaQ"
+        }
+      ]
+    }
+  ]
+}

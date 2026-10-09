@@ -1,0 +1,288 @@
+{
+  "search_metadata": {
+    "id": "6ac897a320703705e999df6f",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/REDACTED/6ac897a320703705e999df6f.json",
+    "markdown_endpoint": "https://serpapi.com/searches/REDACTED/6ac897a320703705e999df6f.md",
+    "created_at": "2026-10-09 07:28:35 UTC",
+    "processed_at": "2026-10-09 07:28:35 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhppEgoyMDI2LTEyLTA4Ih8KA0VXUhIKMjAyNi0xMi0wOBoDS0VGKgJGSTIDNjIyIh8KA0tFRhIKMjAyNi0xMi0wORoDTEhSKgJGSTIDNDUwagcIARIDSkZLagcIARIDRVdScgcIARIDTEhSGmgSCjIwMjYtMTItMTUiHwoDTEhSEgoyMDI2LTEyLTE1GgNaUkgqAkxYMgMzNDUiHgoDWlJIEgoyMDI2LTEyLTE1GgNFV1IqAkxYMgIxOGoHCAESA0xIUnIHCAESA0pGS3IHCAESA0VXUkABSAFwAZgBAQ&tfu=EgQIARAB",
+    "raw_html_file": "https://serpapi.com/searches/REDACTED/6ac897a320703705e999df6f.html",
+    "prettify_html_file": "https://serpapi.com/searches/REDACTED/6ac897a320703705e999df6f.prettify",
+    "total_time_taken": 25.18
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "type": "1",
+    "departure_id": "JFK,EWR",
+    "arrival_id": "LHR",
+    "outbound_date": "2026-12-08",
+    "return_date": "2026-12-15",
+    "travel_class": 1,
+    "adults": 1,
+    "stops": 0,
+    "booking_token": "WyJDalJJZEhFNFZTMDRTREZwY21kQlJHMTVlRUZDUnkwdExTMHRMUzB0TFMxdmVXZDVNa0ZCUVVGQlIzSkpiRFpGUzJvMVJrbEJFZ3BNV0RNME5YeE1XREU0R2dzSWlNMEVFQUlhQTFWVFJEZ2NjSWpOQkE9PSIsW1siRVdSIiwiMjAyNi0xMi0wOCIsIktFRiIsbnVsbCwiRkkiLCI2MjIiXSxbIktFRiIsIjIwMjYtMTItMDkiLCJMSFIiLG51bGwsIkZJIiwiNDUwIl1dLFtbIkxIUiIsIjIwMjYtMTItMTUiLCJaUkgiLG51bGwsIkxYIiwiMzQ1Il0sWyJaUkgiLCIyMDI2LTEyLTE1IiwiRVdSIixudWxsLCJMWCIsIjE4Il1dXQ==",
+    "currency": "USD",
+    "show_hidden": true
+  },
+  "selected_flights": [
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-08 19:35"
+          },
+          "arrival_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-09 06:15"
+          },
+          "duration": 340,
+          "airplane": "Boeing 737MAX 9 Passenger",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 622",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 293 kg"
+          ],
+          "overnight": true
+        },
+        {
+          "departure_airport": {
+            "name": "Keflavík International Airport",
+            "id": "KEF",
+            "time": "2026-12-09 07:35"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-09 10:50"
+          },
+          "duration": 195,
+          "airplane": "Boeing 767",
+          "airline": "Icelandair",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png",
+          "travel_class": "Economy",
+          "flight_number": "FI 450",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 154 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 80,
+          "name": "Keflavík International Airport",
+          "id": "KEF"
+        }
+      ],
+      "total_duration": 615,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/FI.png"
+    },
+    {
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2026-12-15 06:00"
+          },
+          "arrival_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-15 08:40"
+          },
+          "duration": 100,
+          "airplane": "Airbus A320neo",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 345",
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 75 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Zurich Airport",
+            "id": "ZRH",
+            "time": "2026-12-15 17:15"
+          },
+          "arrival_airport": {
+            "name": "Newark Liberty International Airport",
+            "id": "EWR",
+            "time": "2026-12-15 20:30"
+          },
+          "duration": 555,
+          "airplane": "Airbus A330",
+          "airline": "SWISS",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png",
+          "travel_class": "Economy",
+          "flight_number": "LX 18",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 323 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 515,
+          "name": "Zurich Airport",
+          "id": "ZRH"
+        }
+      ],
+      "total_duration": 1170,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/LX.png"
+    }
+  ],
+  "baggage_prices": {
+    "departing": [
+      "1 free carry-on",
+      "1st checked bag: 130"
+    ],
+    "returning": [
+      "1 free carry-on"
+    ]
+  },
+  "booking_options": [
+    {
+      "separate_tickets": true,
+      "together": {
+        "book_with": "AranGrant, SWISS",
+        "airline_logos": [
+          "https://www.gstatic.com/flights/partner_logos/70px/ARANGRANT.png",
+          "https://www.gstatic.com/flights/airline_logos/70px/LX.png"
+        ],
+        "marketed_as": [
+          "FI 622",
+          "FI 450",
+          "LX 345",
+          "LX 18"
+        ],
+        "price": 742
+      },
+      "departing": {
+        "book_with": "AranGrant",
+        "airline_logos": [
+          "https://www.gstatic.com/flights/partner_logos/70px/ARANGRANT.png"
+        ],
+        "marketed_as": [
+          "FI 622",
+          "FI 450"
+        ],
+        "price": 342,
+        "baggage_prices": [
+          "1 free carry-on",
+          "1st checked bag: 130"
+        ],
+        "booking_request": {
+          "url": "https://www.google.com/travel/clk/f",
+          "post_data": "u=ADowPOLiWjMlIMaamtxmk9JftFAOq1_NvF9FQjLkQ2gvi_XmJYdHOXTPMCVfJSYK9QxbIcVClTO5YdN8nIwaxlQ7K-i4Pjol2aNhea-_t4ll7dYy59mmuywb0mGHXHgXQXtC5by0tbwZLbiPNWx9prLdTXrlJpCjEOhpzE3X4_jqDzFR2EXV_7MN5tIv8H9T8E2PibPjfS6-tK_jOFwaeZAr4YEs4yqnzvxe8-GqYMfYGr-Hv0o4ff8sdIqUyU2YiJoKVyVy-UOKqyNyKyEyvvHFn8X4sm2HsRX5lmdIGPPzxgKEWI93t_cCk18OoQl-4CdbNYRbJdoUXpO4p0MdZBot-5I2r6qrv-BD03o8JlUAzIylX31WSxnnE0aTHRNJ_hYEeF6A9beq9NfQSjV4_nEz2M4fcYcqe1GmnxyDUlyMtB6zNKg2_4p7tNSNo0UzZZ97No6xQkYP_myg3XnYiM9Wq4ewdFAQ6z-KKlmNYnGn-Al_LPXgthL3GWvfSTvdOg5RT1iNkrX2Xu2mSrD4sOrJ2eLNxW7KZwMsGH5v5e8HLrTz2dAiVWpXBHr13VP_C4mT7k2DmMCtGTkuEbJkx-tCPmwXE0363iKzrxZxTW30iF7W1Q27nH2MiCYfuqtE4WoJzqk5oLs03uKYKsoNjmPIlT6AAxFVbEws0TN2IwRqU6Jm-t13xeEI2m0apO6HviuGea1snzVJgZRztRSef8Ynu1H0WzB2ofmT-LHi8AHD-vTknCB4nPFOGsd7fbzKv11p7bpcfDGqz4UKJii5PnMXQidJPLImjAJKOlPU9NH7mTE-9dEJwJ-4eS-HZyfJn47dWKa5U-HPi51Z8JzZxwqynoYAVHmDJrPynEJUbATezKTFxbQkxr08dUBkve_RxDQDIHoluLt_ayNdSeJ6lp1oXLynKjiAGC-b-c8kySIM6RTpDSN3hehd_x57FlJfZOI1LvuEcZL7IJ3KmzhDcImza3aEQaaG1eXPtxdOtwO6rBXom-QLD71DM-SzKMadvYOsH9Ou7pSXqtjTRO9YG70k4JExjgQOtHaa9FgmcaviI-kjj-Fc1RQZubqcg-yJ9xsL8yggawyEattdS1mZZlqSwPHX1CMa4IWrTrdw9_qLNvn2UDJHEnFKAWsMJYDm8WIvJBF5P5bHiZ-q8hhmqQ-Y9qWWZspsDsxGY9zULRsA6_jUmhYzSHQ32BMq_5wzLFrWoItN6krm5GA3kFqRBjn1SPXrp2PJqbB2wO5PWcGBR_Ekzp7JIl5tJneYz_J2LgUucMjhPX3TOEacZPbdAZQjQmxYQGHZbjyhDKy6xj1fSd1Ata1Znhtdd2SQ0HHBLWJH4Ro_zO_KAjTzl2KcEWVROoZxO0UgC0pU_rLNTYuEB_uW5wVNQNNliy8y0MR3fe6iqwqbbJ7gN80QuiFxz6seDWXZjU1RJSFX0y_tjil55Flv1QgJ-OKQEJVd_EQukqEyjtYDc4GkVrFGD1a88tigTt-fiKT7ZXvUqSynt0zSv4KVLBsa_gCwillqsdmo_ZvF0b6MBWKKc7Vhj4IiJWXi1lXaVxxmXKtzXvm_2sEmd6XzpMNIncnaZFaxPnPEmox9GYwuNpB8Qud9lqnjAW-iFV7LXklsJzP3o-1gxmEqYFzM-lBX67lEsGfIyqI_czsWJPfWNJb2WPSmUpDHf3E2H11MxNwwQcefTem5sBY-uLfjz2GyPJgorFQR2NgUy0mSMT2dHHWcQQhXK0NnUF4zScQZhdFe4mExQv_KoQSN8DP5fbYNrldCMG7L3uME4Hwe6-RodJeeBfXNo8JnQD-WCl8fQpmQM1pdJCaTrex1IXr5h58IMtohPWq4AX0yCgV0kLGvkiNNCJb1AF1HK21OZrA72B9xUjgP65IcBxyiNPnoPtQBLQiaj70l72FFQ326WOBFM0z-L9D43SwqpCi3RvEYg0Zvr9gOpEGpKEGVKFQL5l-GVKXT1RxyYKnVd99Xg7A754xTce8HVZvktLe9dTLUvdh7xpFnRACfp1vAGmyvchjjYizW9tUWa94W-mGUY2XvB2tNrP_1om-2kyoid9U4YEDfeisiDc2zbK1vWJljedJPcaPYHAC9WFOQ6VoGA7cgMlZgRgOZRR_jhYsL_joJ55kSe0j5pNvf_ds5jkVfhbSx-ioEI-C2Xzr07M2V1pmMg8Hv3oGw1wBL9suCRysm3RKP63-0KtrWhaX-YsuOvdOP9i7w8f8yZqPPRMg_T_v75uvp8tFjPgmM7uRij_kbfpZZIHcaXXm3sKeHwjcgGeYdTu4hYsBEKezpVPtHo6DM2GeNbm4hn1Hkh0XR9EZHkqBZzdzr_7m3M-rsWD7ZzoetyRmigP0r08-g43frkDx0IOCKt5nF1hcaVaQA_W2dmE8s3Sqf-VoAhChkUPt0p2ufJPR4dePQadeEvcU4xgX4nevZObgT8XI4oFeSR0kdMYQ_CDhA5UiSK--6kqN0Hpy8Y2NcAHHpzei7vwaAiMOPbmhykmYGZ8HlTZypb5bTk8haYbs6K9HDT5tcGP9Xm7u4pKsQGWrrJmvnB-NHAfcqDe-AnUxe5_ywizj7IpYOrb7_zo1JxNU3eef1gaN3fOz75uGqnWc9ILKZwTifse7LowbUavYnTnO3AqUGGaH1N6tYbO9whbwaJ9WBJX2UfVYEbWwdOcvn1TM-uuijqjydUc3q_rZnMPAvYBisXDgYcGZZZT1owlAk3FxdT1MITXWPNShOXQT7A4FoKvrp4mK_yhc95XclJl3k7hlR4NkOSYgmuzKEqsMCi73gtWsgc-xC7n0rEEzCyQ_01KZ0evPGWvleO1UabAVUDCJE2joetshXAceRJt-P6sYWQC7Nmz67FyasR3RsFDSQizCfNCYXujqTKWzkm4G6htcuf3OccmYRu4aiArSx4pMQmNVW1J54s5rxIm7rydk3WM3JtL9gnBF-8Fnt1MDbmqlFLFoZ4c0Tji3QOM0udNefVUL8nllyywGg7sKCSgqQP3psN4QEBbgxXO-smOegtC_sg_bCZak1lpoXs2HxoFPXURoM1LHspAx2esjMhY6eQCSXv0T1f1MfAaybriYodP68DvQSHZFbKDIh1Vj2Vj_tMnhd-KtX2lbLIZxEu1Eo5T1gSBZ34VXKl5yy-nxmxyA29IFrMKRqiV5M4ef_451E_-LKlQWQtwwa5zcZLuOrt0r5r9Z7ud4yw1Yv2f942IMQjapuAJs07jn7XwoHAKVUB-bz96EqCEp-Qzb2ScLm583sV4wAB-o_BFYvbmBXTcICKZ8LgwuMsFXSTrv08xPvGkCQ467iMv6eEgxJOsCpSRLalK2IwyFoF0ARe0Q0Gxc38nqBDjuZ9XR2-KTNKyudD3YTaZ20hTQf-nXjqkp5dmuC2SMusb816tKOTjkO6O0gkwxosKz32djGsrJFYkd1MdQG7RLT9rmCYluJy5GGAKDlTSUbdcPUzVDqBVcWOsupxE4TENvzKa9cpY_5VLmxJtoOSQN2bheQCkgI9sL4omXLIG4F0RHdQv095s10abIqAtWZKlmBYxlBKNQqh9tBOogNtC1meH4ZB0ZHAuxcIkUKTf5DfaNXB_n4Ql8I94ffKvJnGmOGO5opVJmO_8nTGcdG3IrGWIkaOc1E_7ylrLlYzmmOeAwS20FcfFYjeM-8Z14lF18FtZBEkCk0eU2r7uSd6ro-cD-zqGSg8vg3cxH_Ylx2AyWXzDM8xADpk5yvx2AnXlnz28L1-d5e9bZ216wCNX7qZ-U4ZJ3Ixc_-0IZx2n_rcHh7O21b4XvnFSykTUH0b6Fk1AZGBuHuq9_sFE2bsRxkbJcf_vdl7ZiP8hlS60CRe4VtCID0a9cNwNA_ziPLTtYYvs8NbMvxflVQOh4_EQPL1rSKR3WHo9dRm03tDha2oaDguvFR6oCC2wH89ayomhQqPFkGxS-d2UEVHHMPPf5Anzpe3Hcb_fcedQSYmCVuSmQ6b2evdhpIeg6Xd6-6RiR6ZyWdWsSNi9p1Izvw5q8RtoVDutBY1AsrbHy4dv203EnsgBkpAyUgT4gIJzVisW6acZtpjvAaaAB3fcZJUFRkmzuY_PDedw6DBPkzs0bE1BavgaP8kAKb4eJTrrlMluhsQ6auql6HM5eyNGzm7grzgEIHuu25QhXzBCAZHb-67r7Wk0d0i_bQs0AtCBbhSq5Ghiiz7gm8dZ5XUnEhiJFbkvk9GTshXCkpJxWA_GRqUINrcQJVzXt0aVjkX0Y2kLDHEQa2QwyqwE99wDXIjve2VpfWh75KBn1eqvQvwXN4ZW_cTtTWu-MI5C5phqImqDyWCky8a495qbhDfZPAcypCx8UVnfCn-jLZvmCj3b-91oBHyD6WB0gKvKkors5l58ESeeHl0qEGauGOPdkAyY4JC1HuYssRQFrOzfVlTIBsGh2hNlRzeVDwwZjhVzydQCQFdV7EiyPYyymoUcy882hmtj6WSboYjNMGIpnJfgThq7_bASiEqWxfeNRkVqt2oVyUySYX_2wkiw6KrYt0eS0NIIcVkAwg4rorHS9kGPyVDWXqLJC025ET9MYfyLKRGOUgdALptWuTg7StSYHj4bhLe6DKWkibTNAQ_x4BpueNtga-CUWJNPgX_6cz1ZapEMp6cL8whwgVl8dkxyyxcsOm3HgJRLeOxYzX4F6f-evBk8lK2r8SbPHogbr9QdwSxRjzAQ4J9rGkZEifYnWBHXfZ0HSEn6w7Bw3jldbYs9UNHKYy6eO0JihCnAxRY9WGdM2O0uYe4tBW9judcdYLG9GWNrsnkPXjO7GC0m6NJtSMuonedrxUVKTnMxqmNGXDad7l7wrfW7Qk4saJd0wr1jsEbzcf1QwB22IVgn_zlNsmb1lWWqKWEbJgz00XvXZ7kmmsRFnU8786WNrL-2_9LRWzmnL-LqMt60QBCUr56mAgtUFn81gvLgL5SHqtMyFXNkOo70CE321qRJFoJFdp_G89ABdkoGsa5u0XNEJ7x0z8P2fjnr6koyrOZLRnFpCB1PV0BkYMVjsX8L0_ORsv_CNg4fC1FTH79eOxRw5Eh8ZjG1MyUhJGsaPinqDIBuPsr44B6l51cS2oL90zvPneACjHbI5Kuy_R-XJ0RiqJL9IjnlmlR7jSxtOvXUyrBmzqProFCvoVB2FCgvS4xXhWPOvRtLPpbw44ffl0h9h5z1Uvz2Rx0Xq8h5Tt1Aum1D_OA75hLLOHv8VWEKwdSU0GMeq9ozb6gISSh2dIlUH_sXz7IkAugGt084jV2u0ZGElRzHjvPLtuSF_kPhd7rxnicv53k2_m3TKOVF7_SJnUVYuUPnB7tgVvTy_s23ifN9o11upIxeHBxTenOWTk8TraupbDwQ44YDVsVG53B8tdeQh_9vEQ79qOOKlPKFf68NK17Wd5ruA1RD2jJO0UPVz_Bqf1hhgempg0TX1WiBT2Lz8GrryKvHPawUzNEtOouuLM6r69UNSKXnR9BQKZ8wSmreeSmZzEepBsrhZwi-ZAssGGx0L0FQNqefwtaZsdr43owN0PbV8WkERdRrvCN_JXjJL6MVN8AsUWiOGV6bSC-cx1ju2noQ-DzbIfH879UOJ8LFcZu2_u9mkZXQW6DCCrOGh-UrLnFGyAcZwoz9G_9jzl6GUOGcDY_2ZKXl-ER7JyliAgTau9y-iqpEIwjwCPdhMhHPToNcUkQBWwHgjc40VNVWof8xFM2U8Wo_NOZgK6Fu0W7Ut0YmOtNA3AvRkpqjp20nHaZt6djLyOqnBkWs-KzdjPXW3TL0yDHforERgd35QtMiBnqixMdVAmV78P1x58fLA3oXR_iGmv-u9kXUn_hd2bgIiV9lf1Zzb_2450jTCe-fGE0HWoZudIUrfVyw6_Rf3frEK9n4QQ_dKYv8pcrSVPpuhZMVhNJnJXNoGJkAHzfaYXcUZhW8LIXVgpvaITsNnmJm0ZbidPHOWTA7uuvvjExcy7uiYbvA8VAcNdoEjt04BPW4ke2NG0A50kW6_4_WbNfiqQ-QDwcvZYfZLQKs5dPw5dFHPVGqGr4Mp-Y_ir5qCQV-tlq85TyPCD9EELTBgXUthyJrDWy2LQYvCWN5CU671lAt2Z2w"
+        }
+      },
+      "returning": {
+        "book_with": "SWISS",
+        "airline": true,
+        "airline_logos": [
+          "https://www.gstatic.com/flights/airline_logos/70px/LX.png"
+        ],
+        "marketed_as": [
+          "LX 345",
+          "LX 18"
+        ],
+        "price": 400,
+        "local_prices": [
+          {
+            "currency": "GBP",
+            "price": 302
+          }
+        ],
+        "baggage_prices": [
+          "1 free carry-on"
+        ],
+        "booking_request": {
+          "url": "https://www.google.com/travel/clk/f",
+          "post_data": "u=ADowPOL4KHwAMcLBwdD7DjAQ_MWcwFj-xk-WkFTEkzuodP1KiMLah6WWoyI3_KXc71DnNCoLpoTR0ySsV6zIPRvJzFVue0BefcE5WNCl9RXTzqdNqskvLEf3mmGEygueuxI4V9emBHrcwNmyGfAZFZfg96jjTDKPEw2QvMDg3pzFAn860sbxr6CLb20T0fmSmXuVqXAo-A_Xet0EvYBKVFoF7pBWrEeEKim06QZ7AI68GnFDEhHfuDZr9xbd0O1SM1--Fbj6ZHxPR1CJFn0GOg0OuAb1wtaXiFF87Z_1I9luQ0AVOkoElcpjdfGtN7up7wrKkj6k9hp1yizrdNRzbRav78harDYcsR0dN7ckb7xUuMAxdlTwLLaUjHBRIUdIcDbr8yIbC4JSi4AmPF2uhWDBKdM7MayuB7psFm40DoiUWsTKzjd8KHnRmQzi26hNAyGj7O7EoQFM4l9jZOhacjPoVL4BWqBZpSyFNtj89D0kfBCLWiaed_gZghbFPRGB6VOIGAMAGaIVqH3wOQuUBcqK_EIYUnJlJqtUFLJeiJwB5-YQZDdfguxL1KmhUL9h3n38Y_6wOxbcLgEB-4ClQnUXwxLpdEGAWbszAlNSHm3kR5A8WcmeqlIammTaoHwuy3HfudUvwqF7yNIjjFo7UFDRM7JwGDIPlZruruZ9XcLxxPUmNYRaJwurpZkQeXqK_ZlMy8RM8y-tJ-HFolRK5aIIr2JYA8ZMACoSVWbzM9fxHDOQVMrzAnhWxJS_JKJma50b8UEiAhJTPbOlV225shQ9OrzitR8ivS0xAYRNGsjRapvBSoFxMalplUASIq0l26joYOPOsZ6W_1299WwfePFRibyByPLAsFEpuXUFjk8k9JP8ru5FaLuzFwPyXtiD2LqbzyGlDXLFrk_KzFMA7ZWUmOU7dIB8DefJrQkOBbRkNziT9uD1TNIQx6ED1nbCwY_mu9FTttAmUc0mr9YzL79Z5BWMPswuWQU99J8z6CA9m597-fobgLB6H-b7Hjn1kVgabgTE8gBe9J4H_2T2IzRNb_1iidWBgeqLdb-I0xckzjA_J8hXnHg1scSHm0mN8IYakwJuxS2zUM00PXPC9JhkdD8FZnorerC4dqM_gtBN8o0L5wr6wzul8JR9p5rt5m2ycNQW1akAc_gbevQz5T_P-CoUFFH3RPpyMczw8sGSu0P0ImeCkuXuDSsKkHR2jauVfvOs4MAS-bJScG5LoM0fz9Pdu_c3p1c9b_P4r8mLTcJEJe4chVxZteHwVNJwFunPhiFv58zRBHSixp6ghnCFaS1ML-Pzc7fZmicuVN_Ji2okAhlT4HF4raTPPdtIVLYdz6iwA-13L6RIeGyec9XhoE35pdL3CHI7XpKAnjsdXDtCteD2_QEJmL8ysam5QzMxUklT78nLxFkQ4w7joyJPpNFJX7nSUzyIGTjdFN4IQ3TfEHK5wlbvZ0zuqAxb5eT5lvsVawvrHJidwR5W2JzD_iDso-ozRvCiirCziNSJuNzy4Hb2jHLKo8NVpEKO4rpFfFm3i2HPgZkhWU_bnxf7q85dGFBDvW4Kjhznh3OljLZKT0EKfquPXLgYaJtR_cZwXwpKROZU0ZmcBzD2YXKwSpoHpeYc1MuecQ81q9cF0qtIcGHia-pi9KySWFAk4hyf0fZCSCY2ne5sa8bAVpujdM1KxsP2yMT8KHn70gYT-Iw-3FeG6VInMonDRSzCFtCEPF7gjYAnxr8A0kF9AC0MfA23dQNLcNsJ9tLPn9iKKV89kvk9c6CSC3eyDuxlyfJJSMNL6Rm4DKeEq4Cm_Guah6gZj3uo5YU6VRijnDLwarEHO8Ai5LjruAaizMZDYksJpU_P7DFgX3TnFFMyZ01ly0udkB16fT3Q-2L06VNj6Avjo315o1zNhN6yrl3I3lKwAXRgFgSDsYFTN3b5caAkMkbSKYwGdEuh49Yg8ahfFURaWtcburnpYlTUgNzgNhlIdFORTcPFWDp-lWUs52QDkFEBtT6FkSyLj_F4WM_1wg3Z8lUKZ3q_TXCqKF9kwp9vt9AE4N-dmAfT0iE82esI83OYqs_u-tSV1842rArnaZ-igp9qqzS_A4C25RLQnIOlesOcUGP0n1YEftv7JtF1eKhcHhaiaAYJzu2D6JVLo5np-v5-0S4DRDsZpC4q1bwlvsp-8L7bOideM86Zc570tHzqdRpIglCiyad39G80PbjvIiCwVPQ9DFAm6n3RAakc5UZxQjrddDIaoIev_kzYdy6uYNkwENO5bSe4OqyJ_54bRGikHckV7tEk_NVv9t5hYJgrBI2iVsK2OTer35p8AFLIysf8rFBe76TKAC2ZM9V_cWPxtiGPGv8oV9KO5wUZ_4B1hq1QYlIiwaatWAs86F6HJ2mCW4Z8EkS9CFNYugU0p3Onsb2Y-WbgoSp7wmOObfEzHm1jZmarrPZ78bORePhqoK0JBaX1i_5KLl6yu_Idufwt8MWUOq-n9fUG_CwLM5ii6-zRK4RIl1m2HvtIzqEXwFkrDSZ-Q8NOgdD7Kv_U9mNKV8Lyrdt3iQhkrHT-_wAl52FskrzQBGrGr-unLJOj24FLpfKZ97twk7yqFwdJLwdRqQrFrfKlRCdsJOtrdqeTaSnktLhShDnKsNQWP9QHA9e9Pzy-97SjCEZzoU04iredLKUdnSbdlg44LpDL72JMh6MEsM01r-KN2DxnF-hHd9rZ01NZeT0Yuq0jAaYIg0Ala8n1DuiE_ePRFUZDyn6yBCxhFCBSSkFgNKfEiJJI3RHPADOMoXrDFaKpmfPT05-GCF_kR8jIc7Vbsqu-WllHuKF452aCGa2-ipj0vOYMJRSI7OnqnDq0h8upAcQfiMznZQIurjli3yfbvVUWmcUuh-otH7hY6N6Y8DYmFiZ6ggh7T_uTqoOStWcUwHN86P2kQv9ACsqJKRcFtXaJy8Qbq79n60vDm8tRbfIwLHs7OpqWodHqSR8EiJfp_4gts0XnioDQ1w91afDf4yrW11MMvVnmx5sgzEIXs9YlM9h3lqiaNNqz-SZrEyo8jmU-ku95tOGvQ9I6ZB_HqueMKuvUsuKvWp3_bBi2UcUtv35UZg-WJTgzE79wXrWJ4I3FryFi9WoevXTmg1JbL5lmrwgtLOavUaiUZnxFK8LiTlEzOXF5rlDzqYFmqS6lTELrL9FcZvkb0q4c-qJaiHhDE9IBLiaNyf54OyyLT7wRNATUGFDW_-EUdPGTvNMXZqAwg2TxedHSK-7cdEYFcvEyRNqDDRyOScOVvxV53McGth70ZSXKUwEUQX8DNdhCM6ZrfjVSAbxLGVLqVP-vRqclQq8I3m1qQE-4guPApEh51iUXoYIusQD6dXQwKBpSjUAQb5MMaBte_jq59b_IaGl0P7xuDwLb_7E8zABoFZMabPzPt-FxSRjgA4pRffNLmvDGiDFWiHMdtq_fP9GncSaNrW0i9jb7_HxiQGBZR7wG74Hsfw8KqjW48DSp6eIPbmczXrBCBW7EWSNrt9RCYLj7IcWCpgXrEZJwT1AIdVtmG04h9tnFDc4iyN3TGmv-wwIpWRxs2k4ZadEzsIEdg4z0ITHWpZdWtZUSzgLTSsfig3LaV_COEYWXOy4bbqUln-7qFEig8hun9xArbsPCtcNETnIF5F4lxkVnk-QUpAuabdCf2xQfuhxMzwxHhdiLLSJuvMsBxQCVQfJR7KhhDMgBqZ8pYHAJiWyOi9dD7kU_061f-P8ieC4Wcijv4UtJhYK94al333qbKy60L0bmXuSb8Uu08i0KIBvFSnY4i2Fmg9-YtrRdJ0Ja7TML0ipOfnUnOL_hBAdQKBTnDzrR1cNRqt4zgY7zn1MZokqsGcuapa0ewTy19584PJJeLxBPuAhpSDePh5Y0M1SROHz5_wN6U3rZw1-AnehIjPUobKt4hT_Rg67WmmiMc9uJlzmY17DCS2ymic4nDrCoN2fj3jKsFaVKRb_EiEGjG3jd9Wiqt8JeCTqZW1kXFQndbW9rKI0Ic5_ulD1RMHssXbbvVBC3zzE8VujoL-uXYeJaGlb4yOX0FLY-Xogl53Z70Mh084VWgOhPV7JOxFhgIX12ipBBB5OPFNCPrhAF10eE42bKt9Y8PYpPonuYjbCSv4-Z2OxuSbNhdVe707P1IdFJ9rTa8NxQfQWm5JeScqxVZFOec5Mku9oTBshmVMbbZM6uWaUXRCjZ-6CohxW5f3MtVCt_DXS0HN8U1-lwhP8HZFloc6dEZqbaPCU6rqQKwF-Ln8rkf_wxsl5gI7_M5hnmm1gEYNNPs9CTAi7_YgnD8rc1GWoNxp04k-iV_b_xlSrcxav3ips0KzTM-Y1sU_4nwiAQQp2OMkhSUtDsGnzRZpNQYvVjcOP4dYjxT2gxY774oXcnlPviR1VcGG01FMWdAwocpVhtGQi4tGZvyuMm-GnTTlL-GA00TEPkCji0dStSlwrehFZDZfeP4JUpLVBf00ojp6f30Feek4CSrQABRw1l2Q7U45exjHaCfNLp8V9TcOoh8uwsy0jxSVAl7fpfJPzbuf1ZoFliiz4ChB3u5P1qL2yFoMwqmqNvYl_PSvahGSK3ZXkqvby2ovOXCxykPydWmuY3L73dxA3IwSZLz1OJ66SswAJsIrxanlyk-ONM4FWQ7zP5YyR4oVMESoyw7YHgYsNWZ1KVsZIuWvdhFCBrhdsfE6xSL7kXXJ47YIWhSk_lmVMMNi8wXPPgNBVWUv-RKqykI73Wwl9Vqgor6UxZDgoxzFuwwc4PFNldFVTgrsLaAijs6xMF66QQCjoBDfzVFi_Tfwr4FLv6K0A72tRrhYNjFGMxPVRkizWEojPj2teSuR3E2dd3Ep1xTZpydSiOhLzYhp53milYMhxa0loXUgIrjzjodnAoBFpsDzN0-YSrKdPYAoFYdM0VqsLpXQxK3TsJ5OydUWR1esQEpcQ3HocNWpja3oww6hW3ausSiygP2NBGB4SJW4uXxRGWvgxjMVKEarcccOlEYR8rfAxORACLYMHk4X61qR5ja_pCePUfv5CwIw7VXTkgG73pyhUcz8_YId9f24ZQYsSrJaUrgjuqFvERoZSdB9lPU2K71k6rav0vcWmwME86qZ0e7pGALaZS68879eaK6fjZHYIfUbGy6oes24b8KNIlZbc8RQYpbHRQOW8V2BKRvPyplMIMLVL7mOxNr2XMPfmYLMRg2-lNsiz_6DzrsBjl56xdi3g4kQfgl4EkxSjlscA0XI-hm9rfSoSwsuFivl47fx6oo0vQEAWE73iYoe7dkUc7rVmLAFHyBwOqTl0awjofqTqs8jnEff9Piy7YZxHfhlyXJ93DeMDSfEZ6W37V3raXlX-M5XidtipKiFm-Vnt0c0V_0C6I0-pLO2nEgA2S9j6S8xMiI0eJtwMKyL-m6zluXvU-mzEC_NiVT0pEE-TWynkaBbsi-zdd5mVGGRn65BMFeQ41Pu2vv8W2bdXTWrkiAloIPUONfoaCJuq5-6hC-4vKLa0SsMs87G2CCcwiUoikvgbtUCtRRnRC_loXWGhfpRok8fd6oZb7ZaCJgyY3xLDc5Tb6MGD_557BxoPw9sqLTK98LQzwRVgWy4EHMW8b7Xsz0jTUJ1velUsIPQ0kHeii-nO8LjRXqKpNIQc3VRl6BIzXmNXAh0D9CqC9iW2DLXIM2n4_VkITrvY0LJFsMNygpcq_CK0PJPG5237OG3h3J_WoaEusqA5Pn8pswR7wsKibb61yFk7jGyb9l3SiEeJRQ-Y5142L0YWs_lkWV5wrh8PTvQbt4yZKobDfAIkOWPUyuVNTXv7ppM47pVz1xzIjYBPjFqFw0K2vK0vGGAVprRPOXfejv8Espp4bCsU6J9Z1icjM1j8zDKW8QrQIrdmzyLgfVw4dazHv25UfV1Xnja24H2hP-CNZqfoccxTca5iTgrZ6pL3CXJxWGe6Vrj-8pO4QPn9XyJ8Xzyg1I00wVcH2ww"
+        }
+      }
+    },
+    {
+      "together": {
+        "book_with": "Expedia",
+        "airline_logos": [
+          "https://www.gstatic.com/flights/partner_logos/70px/EXPEDIA.png"
+        ],
+        "marketed_as": [
+          "FI 622",
+          "FI 450",
+          "LX 345",
+          "LX 18"
+        ],
+        "price": 753,
+        "baggage_prices": [
+          "1 free carry-on"
+        ],
+        "booking_request": {
+          "url": "https://www.google.com/travel/clk/f",
+          "post_data": "u=ADowPOK8AcqRILq0lDejj_x_HQrJ3D30XvO3Ag6Okyxr6x0bclT78SvYDn0gOqjENlaSiyI9b9h5ejAU6lSdlZ5E-ocIRuK_pkJf7fBl8jTcHrW5CzSq_yF29yZQiR0hAdVKrGHejpBKxSm7AWeTm8CTFM0y0ALgzagcdyjC3SlnbBOkrN5QlsMgk11Eeq71SB0DSm8Z-A0UA-vHVRkgOkoIqU8GIk0S2dtp8FG-ZUJUZB2h4fP7kT2y3Tmhu7tizWDUdKyZzpAn8nwED_5tRFw6qVb5hvbpf6XQmK4tHK4_WWgUepYeoDryaSCA_CMBcjozFS6xlxV2N3FHS35eSY8cMrnKTCDBuYzI4kWHruceUwxIqfaV0BQrYdNGomnHf2Ew-T_eLVVOal4_3TuuvfEShzZ4jxDSC8qXZL87s85kcn44Itg1IMf2oBronSXBcNACM8mjvNIGHa_l98n0IeMhCEjq27TkoM7UAPbWJw9Arx5WWiOdJidTgFpfJrIShmgbsQWEX8yoyiK5Nu593NpJTqPx8bibzcRQHGWmtiI3jDIrzeijYJUdhP7vB_fR1Y4iGMn1WMFhIWDx9u_8EmFTO4XUZ4M-Jf10t8XXdmRoV4IvxkFsmtHoQIS7dnGTmYDE3uKrbfPkN8d8wsl7wKvr1uUf_UpO1bKZUX6v7YtXpBOEFB2PrYo8XjAlJCuU4TDNfmBzTBXkmbZVGegvQOxyEdFIKXrL2NLvU-fQpfUN8SP2sib8BBkIfPEP_mUu_bZ8wVK-skL9_qEHdeOU7CdJmGnA_B5X0m9tS2yvk4XlP88sraa_guq4MuxBgFwMiflnjrpqayQBIxjD5nuc1oCaZ5o1rJ4l5T65bEMkSWgVYzzSgUzCqGxRN7B8jQ7p7RDCZJRz5U--GtnGY8HdKCNPbIqWpD-BHgFCfJ1RNH6W6FIJkV6g8cmtOSMbMM_S_PiSPeajz682uhAVLgQZrul5GeQxk8pnRvDsMDXVqDTxfnBjRRWitqqiy7ReSvtppNi_fS1X6Qk2QqEElVTpVdiBt0cSmQxEFiSZ93Wn4RdPo0OxNA34dtkW8zrpzH0VpM8UMHq1xaRuKpn_puXKiFE-IHr-DYLFBtmfW8SxY2lOAe7nXhqbsWS508qCR4XGIjMkLAdCg5eD7KKpH76FqmBUdWMvYiZZDaJm00U4LOzo6MKnbTL-KGW6J1APgHfYzpdHawyK7xWvZ8w_toVSE5ctM6IdmRKiAvcWxT-GRprvxaAh_OpFY-B3_-ONQmUnSCazAZK_grtasWhnZn2gddmpRoppsAMvaPPSgrrA2UNsyPqjf4T_Gf4LAqw_njbq_FcXyb81xqcoGJntZz4ETVf_v8DTq96snUGG2pKXtO-CpDZXqKZ_fdhW9kTNWRz7HqXKir5fXgTanXeTyDxeRWlkENJBNlhetT-Q_6wjimGheIexsRWWpfQzN7j7Vv_MzrfttKEcxL0WDMh-OKPSEpztzqTTalrObjJhaH3TpXJKAyZl_RkQfcxBWehHrbmer3PRc6QciR56n_aMbJDmlaegVqkK4q_EKiNAsITNINxuEeEsoCi3yPce1g1E-I2abicXh4D-oCBB-YMvfGXSYk9Z6C2KeteMnqD5EV6Ns_c32gWATlkgL94dClXito1HLgzNUAB5bkDRPNtQX7sw8O7KpprNbaJBGbHiwMniq6plU295qO42f_Ms90Do9ERSXn3gXExVUFPcfPRCg69BhODnpjJZd3ygVa-vPCHQgg4nGnf7rnJJJsAb8XQJvW-ppcJH0Od3EzhJamJ5S4j3KpTpbaunjCZ8QCOrSCTpZRlLY4EWVVAVPUr9y5NQGcAYwIU3mZnnMGA6VrmXEE8SK64Z4QW9iHgSLER8TjgU5of_KIzh1sswyeo5pAOwRPI-93oPEdsXF4t8lOb2JFbU_HnGPKIFsHseijxRA_AjHIExaYsxKa5p_ZMgP8a9e-gPPChOIP4KrQBiJHjP2NGkRolNaumlPsWbe7T6T_Pu5oNu0QZ3oGGPWtt0iQYzZM8i4k0tSDq32pwHGaiEdsuZfS-0Ubjai8wMElT2FRxWQbZyquONwF0cgznxlT-2CDADFeetvdGnZegYsdnImuoaey7oWjWhy3tx7yRdC017D9lnuVUkZSpdUtDmlVpc4AGPqZF5VCIDeXETRHqoXximNl7Sosm2Tc3qfKOq_jS1AzJ1HaFEN28pWdQfsTovhDX6t0jis8Gbw_rIiinxrJakSKQPHOeibb8MjtDpofDolUw7igRkmSZygMG4T6U194WQ-iM-zzsvwpD75BKDWs5f3al29l6UtMJm7-LAthgJ3Tw5APuF12_ijZlgeGAgAgRjCRlDE1xk_su30J0dUHyQuvHQOf-lyCbipsVvp973WeSdbZCraLKbbZtLa6PgGFE45ClBNQzkuEt4d9a9NlC-4hW8RfeAoqw67CtH9i0ZQarMQA1vyNL8gQ3NHxwy7Cv-av8LhLUiTTQoOp5KX9kfb-VpCh3rj500Q50MjnXM_5psaBb-YzNQR_89OUrcjaFqF9URp1I7anFsEeBoOM66h2ein-QZjDjHE1PHPYafhuG923YWRMbcRwKVzJib7aEIBODA48kIC49Qh34SJEz9HWuCvOaofFXeX5tid041NR7speb7ls17uZiAdF3unfv87pp8IrfkODoCNlP1zooEjs3gIo1yNKwrKhoFB51N2mqQd28bEm6JPNqO-1bdNbC_eZeIRUIu4MU8_FcEeDh0Xxisx2hJhBYqjy7qEUFDF_9AVQHKDzxFC_17xxlvjJasYslqp6LrQxGktZ2evCqi9iBfM-tDoJPDKT6D797CextFTFVDtY1qfW-cP1HXLSbequj2GNePqgCOfQnNqxB3mW1fL583FwXlaXIh11jYQtdwOcccXXkvn2-bPRQL6lxk2OxyMfJ3Yiuyj-dDEm7Ma13Deu0XO9MSFMnw_rKv5AbJwqAD8StF0-c1j1BDcpd1AphtMQ5WMwyDJ3LgGV2aGfeCpUsa0q6aQiK8L8ItTpSWyRIseV8cD6mFmkV6k0Pg2WQqLNsc1v_4Qop2ex9-uIrVwd3JYtwlzfyrDaz5kidgKpq4VdrnCmSDwGf9hdmpMjinhkRxw54IGo5SDY22aWE9syjiPLq5WVCtHG246V7WPSjw7CeOnT6rE0BtA9u9PG39dFSCaa37yFfTapXQh_5-NOr2o4ESiB7feidZbbCBMqxu1Ovz98WQcMqKYrYYO0jD45n0jaSwS41Ys1nJDnFZHzyeFt225YHaDO-Sfq5rrxSZbECVXcEqYOMNsU-X9DRjN74PT66PAjgPJgNIgh93UBaKoZMVOKfnlsDI49Zwzy9Tz4c5xrKSstYMVvAkaoGr8fx90LAqqaobw0F0BNVc21w1r39_XrZnnWq-zFVsRRMqO6T8RAiFnUxbUL0M9juS53CdKybmW1qnISkXBZnl1Q8OE92YbkSLR6h1gtIUytlClkdgmZ8Pe-E6S983_dSqsP01XfLMgEucen89J-Gs2CE6pOu0ZLqoJrjQlbiLzOkdXTCouQ2j3CWybMMbXvy9QSRoVdCZ1i7NvZPOognMvUvVSo6pf6CCuJzoDfShhD3YlDz4pMqjfx9rFLklKBpBeqT44gY3LDSKOv2gThUxyScyjRm3c1e_g-uN2eagneI0FWiXnsjiBh6Oq1dI9juIIyjTHJcxSd4wBkKYcnGWgr9B7e1qyZpLPbGFXQlIpK6sMqHYJBNPmCpFj0snaXFdXZOcdFv4fp4diFu320ukwNnVMV-VEWP2cDbseslE2sJD9WRBnTt5izkAmTVIyClrwjSuASC2W4nHeVupVrSa9-dt1DSyG2YCLOc5ljGdkvRIV2iHHWEMCO4AsCUKSnytN7H_admS28P8bdsiT9C9M13HjswdljMCr7fhOAkg2Z6YlSQ5C7wiaeXFSUDGMBo3eDefPM8fw25lDfZcEXGjzemzDWpzEppY1gEVpTRaS72CUBrRmb-4KewvYRL3ui2ZLUcMKZ0uTmu-U4yROSQ1pOgY2gKkgOdDFGHi7gF5hH1Dzrim3LUuAByvBCkZp7IdsRc5Z7VYC7Iw-rVQEUNxvZzbcIy15CpLmz6ByrHhpKkAlKNKCIEbLFldAJaalHJHz1FiU8N6_RzbqyRwL1x6aKw64fIk6dOYi9uYLInkL-zlCVhEcYBDCt_rHA3mTmjjLXVOHcxVjN8cneYBnV0gFXLv2AAr3HcYuZ77V52omRcBUi0_E8QNe69TY8xL_qYAA5ZGGWGTCvHEtn-x6MGlFiZvfJa0Ke4PaRDsR8BBcWQjmzB0cqnIWrbqVicDdp17UuJ7tvpPkHvm24E0uoI-4uf_AMXoOQUzhFxQrPFsYl641bheKkMAL1ViQvBApDjX84ZVtVFzMNMUnazIMjzwVXD6JjIumcglragRHv1wJvI3qhoY-ESxAGPOKoVn5QUSEamieOYhIsoic_DRrxG7okjV1yUwb1zwoCFyQtMfvnYPXDhDVDbuMChisq02eDRNUDXukcgWX4BZZpYxQMRessIwXFNKlcUDQJ5vHv1ksGhZkM9ivUAqpltwfUpfngiRdGZAAGmvE452WhyHBh1GTIDpOeQPU5A_-EdBaikqJP8dTeynm_zqtDWhkJd81cYfVNJxe7fYWN8uwYtEOJwqiP8NRMYranL1Xtt1gLymU7H1W8ni-ncJ2J-a7Hjb8cv-u7fMgAZ8mDUQMebHiafNKKSS6nD7rvHMfvw8mFrAbb0uAQecWIwYtrf0wQN5OFAiYb_kWSOmoMATR9rJ9kBG1-OfKskByn3EImXnWYH3dlOUZdW3Bu1RwFV29R6fKeTI29ABxOA2JhaCtfBwx79qT2oJMMlm6oVYfy3-c_W2RCTaL6WF94e19c79o_jWqCole3rftJ1PH5VkDZDF9RAwTYLzxTckD-c8vMH5m7DSGbZpJBtEBL6amM3kDPduMaxvmgnHJjyWwHRbuyGOgWQtpY_TCO6iZWLQnCRQoiFJ7AS1SYjHMm8xIzt3BxWzY1ZiXmX2LAm7ue0ZR_O1AEXKI--ntAaUYULhcYdZvrgFMh109xefL1KQegPP6upstgMhunX6__61flhSxJsP_2aT73kCX_Vvd5lXOBQB6JHztXr7wMGsde0Z003ydxgk-_Z2sxEAKJDNoDOBXT7opOM5Frl2CGB-DltgO6x80QgN8JzqIvEXVzl_fFJ0C_2J0TqwF0kwVveO1YycLUNtqs8pAVElfeq3_64P2ONJPew-WML1nBnz0eweSA9Vfv9a2gtU1rjNgCftwdW9_W3FmMvTAKXZ1yPoKAfnAwrRvtzSWN9V6udBWS-8Lbf5Gyxm2JBDCZD9ZYbA5Kiz9DOA61DH-e9bb1Ju5iemw1AjZ_cbNovexAqVOToqPJotewI1OWPRdUMJNUrDDqT45BN8zyc10Ba8UvRjwuuA4t3wInV6uf9IPAeFXzI354gD97ofVfPtAn8lh9k4f8PsOLrrn-0qJW4rc_5lQAAb9prZyNnlxh29SuexpyqznSdnLGMutMPZ3MgA3-38I2NkokJc0lkeu8eC7zyC5l1wxDoNE_Knwau_Ppd153CQv41Z79X_kWIPJp0T4kYNLoaoQ8O7-x9JBfaWbiKL_fj6bK9aY0whTQVS6vGalBU7EUCmp9HrKWhw5NrGyuCQdmmOjf8Y6CSdXYUJn8Iz4vNlEyWABxSKgdzmnFKg4tp1pNcsSJB-YNnRhS7Jrn-90vle1UhB3AT8EXDj6e9oQGek3gjXin3kHyNF5gNRK6TDog167eOvukV0tNA_AhPY-g_GeHrHEXx4t9NZlBKem69ZlzlpnUHT8HiQVkpqpv1wk3QuapYMpaUZlM29MRJ2U_Y1KtjsmdRulz8Nz9096DTvYrg-Ub2FALNFMD4LsEf-ciMcrPon6bHAJ7o5q6377T5gEL6JEr4-D9U1ZURLFcXoJMQATYgipi4h8r1__emkeBJeSBLNJHDUXlBhP9WpWK4qSmzHGc4ov7sq09UUKmKqZaKb0J-7CxuZPBu55BcwC7EkAyrflaee-FW7"
+        }
+      }
+    },
+    {
+      "together": {
+        "book_with": "Orbitz",
+        "airline_logos": [
+          "https://www.gstatic.com/flights/partner_logos/70px/ORBITZ.png"
+        ],
+        "marketed_as": [
+          "FI 622",
+          "FI 450",
+          "LX 345",
+          "LX 18"
+        ],
+        "price": 753,
+        "baggage_prices": [
+          "1 free carry-on"
+        ],
+        "booking_request": {
+          "url": "https://www.google.com/travel/clk/f",
+          "post_data": "u=ADowPOJwLrB4siBLtyfk12k2O4ofQXyDwAtS5KKKtqjN8wD971jqWaE1cC_1nHnngk61bKhTND1vi_b-n8s6_YRA805MIWLN9sA9JkuSJxyx5scBTupmWG6TA_0wAweMdZLZQeTjd8m0nEh99uDsZpRLVR9bX-cqpTjQ2FZlEnJq98Bp1Evr6xkbH1fB0bcNGgzBRVg7-Nt_qTg27F1pMoB2-CAizHtyoat7nPyGG2VtLWRkq4hKkiCVf0PlBB51bucUmsLLqIV142IFK9BCUZA8ikpwfc99Lts4Hm66WkK0C_tdbrZqstQA72RQL5abKcJRkOmeONK7DCeTkUBgrRp_d71omlVPUGcX5ArN22x7sZ9TOL-LfBHFpdrA-1NeJMAdq0TqX1h4HqEhxhO9O4P4p1NVKIDxQfYZB5WJ1cuWg9S8eJjaYugfQsXMAIolUQlu4KUCm5TslfRGywX6947DYRGamOIaGH-YhvN7TttM9LNogwGoIOUewfUdDEoYvnW2V75Lt_ipgF0hH-lDBlwS3TxfpzPkcfURpO_GL7rEX6RdCErOit_bPW1ys_J_5jY3LT3vHPdvVi4iFZ_AI8xrcve580WFprQQ-tlwvjj_Q3fuAYBteqHNufEkKuRvfCVR6zIqbbiE2SpHZonZYA3geqyZOvlLWjJ1kY4yHmAG3cQd8sCYO_i9yu1CUrUbSzHymbWN_YNuslO_iPsyl0ngO6bY7nhPqVeN4F5peVNDmh6Nd3JPSOuhldrjzLTxbXSy-pfco2cGH3eD4L3EZvQue4OR6N2xS82g_EZAXd_9jzUcWlFym4BWKJd53UHgbGsNYKGXVcW0cZqc1ZV21FjImNk24v4j15cyZsT7S4q8o_zNytJppJbzk5P2cgPbqJJWyNE3NI7mrkVCeZEx-nwjHlhnPpPqXTVz_8SO_aOF4LTYr1uqBM0tOcfNoWC8iE-rqLSwsZWuG-TPbwXm8ABYEsaApXI1jZdlLHmhx_9xYJWA3JGdLc8KUXwzDxVVHFwzXN0mDjpzgoziQX95Kx0ntYqTmO6ff0Mtz0h26H0HrfBSXC34jXVb-LocyfcdnQ6CQJvMZFODKsvzrnRe5A_WDUZdYVDKWKb-SGG9t6L5Q9qGhQzjROX4p4sj5ANLyqSicYge3PmQWGunByZBw-lMRxMYTejPNSE6hrcs1wJ6SQYGCVVpmfYLLqh3aAW2jq4g6v47lN7_ZaUkCSQpmK4nnHABrBP9bsIZyUCJzcEqWOLFQrfMR2o8T1C4QbE__uWW50JTwad4Yi4xXqknf4QHjWvX2HAUUX5MuPY6prVIyFRF8NmiyBwUrOLnwEJhxdgUrspcpuNUrjLMJACSTpWinC6WmuHsgLVzzlw15whGlo0e91ig7aDy7TIcY2ltKx7cBWnaQoyS_dQH_dSeWnjTcaN3iHpn_XAU9QRa7g6S_8EDEngJ-X7IAJHRW8MUeheIuhVZM2UmkIAEyC5zh00UW5hg2cwiI5mSzmJx68zFEYrsbfx-mGVypUL6GmGtO3tAYoba041kmGz_pLjr9n1UMhOqUqE9Wi7HCDXqqY2uYCcIfJnygdn4d-upBEH-OWH4YNbHy7X9xapfWdatE3TehxHYvHAqZCxC-XuthuFP6DF1wHNyeE0eDHEe1W15WEU2mwGsxlH16EWGgEn8FlcuMkf2rFETrvBG8Im2cI0W9fZuaOkBO-C4zz4sNxG1-BIK7b5K-WqINW72NOuzPSvKvdRPsar-MyvDd4l3YtR8wcWC1jS8eou_MQCH7A6PM6BSBP2CHBKlkQUW4jrfBOT353HlNr9iumnCY2-ctSXBewHBZfMMTXGjA794OJNzgklnjUcCXocFpd4zdQYBYqwUcW9niIXo66Zx0XcaE1WKoSHcKmkJmWxeVuhzOvPglWS2NTYTnoK4VORY2UITbCl4LUWIKGaRMBRqCeDxqJTcvFTQVS4ceB0vgTB462FLJeZHCOrcwruIyNGxKgBTbWTj6DkU8usG9Hqeu09ntowN3EH6RT6WWYz1MlAULCjQQdw2ceQxM5QxhEWVgj_Ylo7RXPNfwz63N2Mm7tcS_uIhxVH6ki-nD8eYg-RA4BO5r6JMOQeea-c5czWtCFeweiRRw3YNH1R9rRqSG6TIB9Dj4QrSCJCOQrBJisCw8nG9JOuGjZ7-T1Im2nshs31-OX9YXpehROJCmOjuB_FOEPLVHJph3kLddkbesYbnS3la2TT_pzgZCe7rmtlpk-k_mDd-8ffbY95jhFixrmeE5H6SmGVrQjXkgHRjSqF6KqbelC5L3pD52oFWUJm3OqVzLD7JHZPZNWPNtxXbnX9ph93d8rQ2pdJl0RbGAa3k7ZeQ01sxsYGW7ejQ7qVH7cz2p3jvei9ucJ_7q-RE5G2-UR62A4fN-f1GTlFIphqMp6PgBD9Y_QsO-uGgfR4b90hhI1oVivCLniOuKlBd6JAn_kwjwSmLaRu4N8tDA2JGTk5OMaBsi-Hra8A0ncWFqdqHWRNSSkkWQzDQYu1zf-DUKMFO-cObC-h2eeoBPU_Fcw-zqqV5ACe66z_xlVXhnlYBXNESbceR4wEMRD5OkuCoSksYR25SlkGGBGWHwZiBfhoyV5V_RXX3FPDeodqX89_6MuJyL1ZVlZjU3G47hUfVNB1xpuQedOSLMxbVjbY8KY83gSU_IRNxescY7CeBEWS-U6JCUjXh1hdg5sgNgr6Ghy5nGkasMkUG7maUsMqWs9RryvSxbBHzFwE6xobXOTPydJ9u9_uXJfea9ajTothpZ2rAo0-DtfdxM4pJXrKpzlTTxygt21GQsT8qQ9J1UyFsNjPp0I83tWzqlCyyKUh50eBlR0AoBkt88cLM7-OM0SMVzZ-9ix711XepgnushwbF9YAAInUJZYiEiUQfBkWV15G2hFlV-Sgd5VTjZiX2sw3tgBU04hUaGgydWI81GYDVH7oPShMvZVo3P40yIzxNZ4OK-xx0FEVkS2rHK9IeMYH7SwgeOAu70DI-ql3nOCjAdsY2zH2MfVHlnsktw3Tg1SeedOd13sZVKwfSQVP5wiHOrvoFiU3A8n489dZgzviTgk0cApJih8BY7DvHEVcq-HJXP_xatRY98zgHnZjIyWz-KBtHSY-kkIwM437m5nEKEoSQzc54vJ4MYhLbb7frVMQn312tP3FZVqjF1vHmdC8_Q35krCN2zaEGsGeOYJyLPNRJ42JaGPlSRXqV4droRllUnYiIfEWr7WO1M89UZ6dq_Y_yHluafAuI146k5ClsDrElDGgUaVcychJ_DAF3sGMHENa3r1kAVVJcYBIH6qGidqkhCTZVUld7mtmhs9-Z902NpskTTWPPrfUxFU9WHQlqefI7g0TtLVnUmpesa-AoMGIZqTRUBsYsHu2Haa5yFHKzliHGPINruB1w-MGn3zG8v2n0LhCcxdVN6YnHwoDio0nxSZR-Y-KKtgtwpnw33arbKiIgC9a1vPVKxLc2ToFfvdhH-6N5fDbIR_aV7XPls3Ze8G_JnzuGcKrmJMlSP1P1GPE0SsnJEAJHOT6G_ksTQ8CfYB6xJTkt5Npfv07dLhMZKZ8_7GqAGLawBbasLFsEi0ZuJ4IReFPns-aAmRhlMs-EBMvjedAUn9jaDcWal3PGHRYsfnFKXtm1Sz7bsEw0OezAfOgdxuPCzwy7GIdxuioq-h7gZvZReT6Mt9wYbafFuhPzVUwqrveuGkLYezvXzLTYdwKXwJKV57BCz_z0mMUA2So8M0wy2C42Z4hsJ6ONa9TC6ksZI8wL0r_WaLCfanCzCsYn7TeC6SBqC9bsAoHINocfhuass3orU4H2Iw-QqsGcZvB8688H5Hpfeb8ls8ofJ_zkT5NlQT3iQT1-O6TLtkNNLMEUAPJq5TCfApCaSv-xk8BdKX8i4VZEiFhi8gkFE-K4Oak1JKImXD1-eY9pCEAPsRF7etDMjQXqYpcV0j5AlGtcw20evzrV6A5WNAw19rJvEDy-JAym4lHQJEenej3jY_lP6VcQuyn4Wx5UNChHVfbp2v5KvZ8RlBNCYLBCTg45lZww0ugm1hEZSvrrdK1d8tKhH-WPR4vao4uSdVuhnqe0Tl0UDbEHWtM1vA74BCEDnpCbp0qJKoJLacPvp1F4GdhvmBqReucM3l4thUEua_tzh1U2deO-08CdgbWap4Tutuf1VueM91OiYV1U7EA3pboqQFVoHMPG57QRQt_5oeI-XacpUzskMtXFWMcOSjq6lkiGeJIcnyi5AZmvFC-2jgodrziRoNlgiL7-0XxWHsAYQobN5-LTwKN1MZIPs3CeUh72mgG7GDGJacWL-pQiMcKsKCvzGKp4S-KMp9Pbn1ssITk_-WXXCQswKNpwucY2WRS4ef6LjQYQw9sZNvi8zKqzPGFdZ0mT8vU9_ubFkzUNQKjW4a9TFaefi3mCgg_debPPboXiRRZ8mp0kOmhdHxcNVmwxU7Z-umAkRB-y4N09wcWEyX6VRk9zPupAHwdii_ROCWqQ5FY6Ya5BLOe1NxWz1B22w1Kcu6EU_B9xeyB8krpHjCC8m9h4X4WtKIlMx9T1adPUy-UUwJ1-ZurYzy73XEckF2RrMKgn2D-DM1qr8VnUmY1YTVisfLFkhWIWBLHDA_QEEzNTwB8I4oq_NlTNBHhpRyGBkAVdW2dEdhPjPKTJtVzOoCJvbFhUI-DRDxoCjTM8ng_p_YGGiqehy8OFuPjAnp9f9vh9NmGVXDJzhtZ29sGQWA8abmoE-8LVewwD__BX7erKZNVlKljTHoXuJy-oP1WaY6PJ7PVXhrH6kQeS4tSFkgn0ZCQus4XZgb3uq35tA_HleaNrZdRhck49Zmuj09bAgWO1r0CgzfD269Zcp0PoR7T6VCZJM4_K7HZpiBLqijlYZEL7rByIrNOr75bmEyPTLh6ePQiMaDorIfobxjaaQGRupMme4uC_jySQNTjEkCx8v8ZQfwCXrG68USxf5J556t-gkWhNnWovDCPmiD83sktSWGBTvvKRbpuhG3d5efhJsaSA8G4R8yblRlHmDN_vgMPFcrfxLhwAjhkQWKk62HI4M5ijKBXIpskSU8bTR4j1_ASzF96unskY4B1ZoIBEqHrsgr1c0C-lP-bWcxggFk69bqVeYWLkEfmsXYHcyF5kJSjA-0UF5Tha-Az4r3sIbuEnWvSgZcEMIgoHOaya02zYCsnrp8XnxIPl-a5rWhns2n-Pub4oC5xSQIWI4Jt7IGwdM6eoqZ_rnxUrogkckBAgDe5d2Y4S_8D58oKyqOEUh649OnbohkmnRJfFPVi_1BnaAWBnQXoN6ZNilr0Tn-Pb6nndZbdGa4vRfoMLZTFE9g4-u-u4bZJAdeu6rVBOMv7EP3EP9Mdr4xfoM4Mm_Qtq_hhwMxs3lMmyWd0OATFUNqbb8wyganj3HToJtrtZ9s6Xe-EJMyHkN1_weto4QeZtDApzdzU5X-IC81SjWggjEv02-nIw6gbFqlNGrEf43PjKR7__KThQo2kMRdqdnCiUprwOb8yxmc1OrHQzNbmytaOIV1Ti_rKX5pglS2Eh6vlyr88buSoICMzpvIktjTHnpHPqFJ9fnwNJrL7GGM9tYrH_7NM-GdB3wHDkNNBkqB-kzLa5eeVjQ3nb7az9OmEoIj_8cidZoynGKejEa-J24rp5xMVPZsy4WPTxeLqkL84tyiJh2fsVBlSvPyZPSwqZHvqvCXbZP9XtZo15l5I4Pw7Nt26ew8wv79TfEtx8gKP9VraT3apYrya9jpy2D-XdeVjZaEQXxqXiwzpzk4VXzUK9FmAW_EsJY7fkB7W9SO_6J8FuaMY5_OGYdllFss1bucTNeO5IL-ljwc7JcEtCKkKUcmX8YNds0UTK9aLHCw_E6iKytqM7VmEIv77Ml0SDKcBgQKrFrfbo-4qoYx01U7KjiXP-QMl5RJWEuSC06t6DYuCGbZR5dl72BbYjREx0jdu5P4dZn872QERTVp0OuhHkWHw_Z05b4TweWfj6Rr7yS7rxlXJFBSMbZq7SMdc_Cd76eBasKZvSXnLHgUTNq8fsXmncoTrwFeAwcOVJ1VGhkm6_ReR46QhvNBeqwA1-r3CHjepZ34NfFXAuIDBhV1zwx3A46dlANNTxyNN2SSJa5OdO9ewFvsGk"
+        }
+      }
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 742,
+    "price_level": "typical",
+    "typical_price_range": [
+      540,
+      1850
+    ]
+  }
+}

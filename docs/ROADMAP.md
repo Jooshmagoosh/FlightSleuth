@@ -297,7 +297,7 @@ For the owner to confirm or overturn:
 - **The window was looked at once, on the owner's machine**, with the test fake behind it: a
   round trip nobody confirmed, with a price saved. Other screens and scalings were not tried.
 
-## Phase 4, watches and alerts: built; two live steps of the gate remain (branch `phase-4-watches`)
+## Phase 4, watches and alerts: built, gate met, awaiting review (branch `phase-4-watches`)
 
 Rescoped by the owner on 2026-10-09. This replaces the brief's "Phase 4, watches and alerts" and
 its gate, "a watch runs unattended for a week in a container and sends one true alert with no
@@ -370,18 +370,59 @@ The owner's rulings on the plan, also 2026-10-09:
 
 ### Where the gate stands
 
-- **Met: all existing tests pass.** The suite is 644 tests, 245 of them new. One existing test
+- **Met: all existing tests pass.** The suite is 650 tests, 251 of them new. One existing test
   was changed, with the owner's say-so: `GateTest` now allows `notify.py` beside `serpapi.py`.
 - **Met: the watch logic is tested with a fake clock and fake replies.** `tests/test_watch.py`
   (rules, news, standing, budget), `tests/test_watch_run.py` (the run, on a clock handed to it,
-  with a fake ntfy), `tests/test_watch_cli.py` and `WatchWindowTest` in `tests/test_gui.py`. One
-  class runs a check over the real unsorted reply in `tests/fixtures`.
-- **Not yet: the test alert reaches the owner's phone.** The owner runs `watch setup` and
-  `watch test-alert`; nobody else sees the topic. What has been tried is under "Found while building".
-- **Not yet: one real check runs end to end.** It waits for the step above, because a run with
-  no topic checks nothing.
+  with a fake ntfy), `tests/test_watch_cli.py` and `WatchWindowTest` in `tests/test_gui.py`. Two
+  classes run a check over real replies in `tests/fixtures`.
+- **Met: the test alert reached the owner's phone.** The owner ran `watch setup` and
+  `watch test-alert` and reported it on 2026-10-09. Nobody else has seen the topic.
+- **Met: one real check ran end to end**, on 2026-10-09. It is described below.
 
-Credits spent so far in this phase: none.
+The week of unattended running is the owner's acceptance test after the merge.
+
+Credits spent in this phase: 3 of the 5 allowed, all on the one real check, on the owner's
+say-so. Monthly searches left went from 31 to 28.
+
+### The real check, 2026-10-09
+
+A throwaway watch on JFK,EWR to LHR, 8 to 15 December 2026, with `--below 5000` so that it was
+sure to fire, run by `py -m flightsleuth watch run --max-searches 3` at 03:28 local time
+(07:28 UTC), and removed afterwards.
+
+- **Three searches, as agreed**: the unsorted listing, the return flights, the sellers.
+- **The unsorted listing's `departure_token` fetched return flights, at the first try.** That was
+  the one thing no recorded reply had shown. The spare lookup was not needed.
+- **The fare**: $754 listed and $754 with its return flights. Google's own lowest price in the
+  same reply was also $754. Only the set price fired: the 30-day median was $662.50 and the
+  typical range $480 to $830.
+- **ntfy accepted the alert**, and the run printed and logged
+  `JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $754 confirmed. Alert sent: below the $5,000 you set. 3 searches.`
+- **What the alert said.** Title: `JFK,EWR to LHR: $754 round trip`. Tapping it opens
+  `https://www.momondo.com/flight-search/JFK,EWR-LHR/2026-12-08/2026-12-15?sort=price_a`. Text:
+
+  ```
+  Tue 08 Dec - Tue 15 Dec. Why: below the $5,000 you set.
+  Out: EWR->LHR Tue 08 Dec 19:35 -> 10:50 +1, 1 stop, 10h 15m, Icelandair (FI 622, FI 450).
+  Back: LHR->EWR Tue 15 Dec 06:00 -> 20:30, 1 stop, 19h 30m, SWISS (LX 345, LX 18).
+  Return flights fetched 09 Oct 03:28.
+  $742 is two separate tickets (AranGrant $342 + SWISS $400). On one ticket it is $753 from Expedia, an agency, not the airline.
+  Tap to check it on Momondo.
+  ```
+
+- **One fare, three prices**: $754 listed and confirmed, $742 as two separate tickets, $753 on
+  one ticket from an agency. No airline sold it on one ticket. The alert gives all three and
+  names the catch, as ruled.
+- **The three replies are kept** as `watch_listing_unsorted.json`, `watch_return.json` and
+  `watch_booking.json` in `tests/fixtures`, copied out of the cache at no cost and redacted as
+  the others are. `RealCheckTest` replays them and pins that the code follows the same two
+  tokens and words the same alert.
+- **One change was made after the check and has not been run live**: a listing with no price
+  rating no longer borrows the typical range of the sellers' reply. The check did not use that
+  path, because its listing had a rating. "Decisions made while building" has the reason.
+- **Only a firing round trip has been run live.** A quiet check, a repeat, a further drop, an
+  empty return lookup, an outage and a one-way watch have run on the fake clock only.
 
 - [x] `watch run`: checks every due watch once and exits; a missed run is made up at the next
 - [x] Alerts through ntfy with the standard library; the topic generated, kept in `.env`, never committed
@@ -393,22 +434,24 @@ Credits spent so far in this phase: none.
 - [x] Log file, status line, and one alert per outage after two missed intervals
 - [x] "Watch this fare..." in the window, last and small
 - [x] The Task Scheduler command, in the README for the owner to run
-- [ ] The test alert on the owner's phone
-- [ ] One real check, end to end
+- [x] The test alert on the owner's phone
+- [x] One real check, end to end
 
 ### The schedule until 8 November
 
-Two watches, three searches held for each, against 26 (the 31 left on 2026-10-09 less the 5 this
-phase may spend), counting checks from 10 October:
+Two watches, three searches held for each, counting checks from 10 October. The owner's rule
+was the shortest interval that fits the 26 (the 31 left less the 5 this phase might spend) with
+at least 2 spare. The phase spent 3, so 28 are left:
 
-| Interval | Checks | Held | Total | Spare of 26 |
-| --- | --- | --- | --- | --- |
-| Every 3 days | 2 x 10 = 20 | 6 | 26 | 0 |
-| Every 4 days | 2 x 8 = 16 | 6 | 22 | 4 |
+| Interval | Checks | Held | Total | Spare of 26 | Spare of the 28 left |
+| --- | --- | --- | --- | --- | --- |
+| Every 3 days | 2 x 10 = 20 | 6 | 26 | 0 | 2 |
+| Every 4 days | 2 x 8 = 16 | 6 | 22 | 4 | 6 |
 
-Every 4 days is the shortest interval that leaves at least 2 spare. `BudgetTest` pins both rows.
-`watch add` works the sums out afresh from the account on the day, so they move with the date
-and with what the phase really spent.
+Against the 26, every 4 days is the shortest that leaves 2 spare. Against the 28 really left,
+every 3 days just does, and then leaves the owner 2 searches of their own until the reset. The
+choice is the owner's. `BudgetTest` pins both rows against 26. `watch add` works the sums out
+afresh from the account on the day, so they move with the date and with anything spent since.
 
 ### What the unsorted search was chosen on
 
@@ -421,8 +464,10 @@ One pair of real replies, recorded 29 minutes apart on 2026-10-09 for the same r
   back empty, and nine more fares from the same airline sat between the two.
 - **The cost**: a real fare that only the sorted order lists would be missed. One route on one
   evening cannot say how often that happens.
-- **Not proved by any recorded reply**: that a `departure_token` from an unsorted listing
-  fetches return flights. All 77 listings carry one. The real check is the first test of it.
+- **Not proved by either of those replies**: that a `departure_token` from an unsorted listing
+  fetches return flights. All 77 listings carried one. The real check then proved it, once.
+- **A third unsorted reply, from the real check, agrees on the price**: its cheapest fare was
+  again Google's own lowest. It was $754 where the reply six and a half hours earlier said $693.
 - **A one-way uses the ordinary sorted search.** The recorded one-way reply was sorted and still
   carried the rating and the daily lows.
 
@@ -440,8 +485,10 @@ For the owner to confirm or overturn:
   $600 does not; 15% under a $600 median is $510, and $510 fires.
 - **The median needs at least 10 of Google's daily lows from the last 30 days**, taken from the
   reply being checked. With fewer, that rule cannot fire.
-- **A listing with no price rating takes the typical range from the sellers' reply**, which
-  carries one. So that rule can fire on the confirmed price even when the listing was silent.
+- **The rules use the listing's own price rating and no other.** The sellers' reply carries a
+  typical range too, and at first a listing without one borrowed it. Both recorded pairs then
+  showed the two ranges differ ($540 to $1,850 against $480 to $830), so the borrowing was taken
+  out before the push. A listing with no rating can fire only the set price.
 - **A fare with no return flights is remembered by its outbound flights and its price.** It is
   skipped while it is listed at that price, and the next fare is still followed. When every fare
   listed is one of those, the check says so and spends only its one search.

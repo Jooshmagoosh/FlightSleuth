@@ -256,14 +256,16 @@ class AlertTest(RunCase):
             )
         )
 
-    def test_a_listing_with_no_rating_takes_the_typical_range_from_the_sellers_reply(self):
-        # The fake's one-way listing says nothing about its price; its sellers' reply gives the range.
+    def test_a_listing_with_no_rating_does_not_borrow_the_typical_range_of_the_sellers_reply(self):
+        # The fake's one-way listing says nothing about its price. Its sellers' reply has a range that
+        # $200 is well under, but in the real replies that range was not the listing's.
         self.add(watch.trip("JFK", "LHR", DEPART), below=250)
         self.run_at()
-        self.assertEqual(self.last("reasons", "typical_low", "typical_high"), ("below,typical", 500, 800))
+        self.assertEqual(self.last("outcome", "reasons", "typical_low", "typical_high"), ("alerted", "below", None, None))
+        self.assertNotIn("typical range", FakeNtfy.sent[0]["message"])
 
     def test_a_one_way_alert_needs_no_return_lookup_and_opens_the_one_way_page(self):
-        self.add(watch.trip("JFK", "LHR", DEPART), below=250, typical=False)
+        self.add(watch.trip("JFK", "LHR", DEPART), below=250)
         report = self.run_at()
         self.assertEqual(endpoints(), ["search", "booking_options"])
         self.assertEqual(report.lines, ["JFK -> LHR, Tue 12 Mar: $200 confirmed. Alert sent: below the $250 you set. 2 searches."])
@@ -982,6 +984,98 @@ class RecordedReplyTest(unittest.TestCase):
         self.assertIn("On one ticket it is $797 from United.", sent["message"])
         self.assertIn("$694 is two separate tickets (", sent["message"])
         self.assertLess(len(sent["message"].encode("utf-8")), 4096)  # past that, ntfy turns a message into an attachment
+
+
+class RealCheckTest(unittest.TestCase):
+    """The one real check Phase 4 paid for, replayed from the three replies it fetched on 2026-10-09.
+
+    Unlike the class above, these belong together: the return flights were fetched with a token
+    from this unsorted listing, and the sellers with a token from those return flights. That an
+    unsorted listing's token leads anywhere is what no earlier reply had shown.
+    """
+
+    def setUp(self):
+        install(self)
+        fixtures = Path(__file__).parent / "fixtures"
+        self.listing, self.returns, self.booking = (
+            json.loads((fixtures / name).read_text(encoding="utf-8"))
+            for name in ("watch_listing_unsorted.json", "watch_return.json", "watch_booking.json")
+        )
+
+        def replay(fake, query):
+            FakeSerpApi.searches.append(query)
+            if query.booking_token:
+                return self.booking
+            return self.returns if query.departure_token else self.listing
+
+        self.enterContext(mock.patch.object(FakeSerpApi, "search", replay))
+        self.enterContext(mock.patch.dict(os.environ, {config.TOPIC_VAR: TOPIC}))
+        FakeSerpApi.account_reply.update(total_searches_left=31, searches_per_month=250, plan_renewal_date="2026-11-08")
+        self.now = datetime(2026, 10, 9, 7, 28, tzinfo=timezone.utc)
+        self.trip = watch.trip("JFK,EWR", "LHR", date(2026, 12, 8), date(2026, 12, 15))
+        self.history = History(config.history_path())
+        self.addCleanup(self.history.close)
+
+    def check(self, **rules):
+        watch.add(self.trip, every_days=4, now=self.now, **rules)
+        return watch.run_due(now=self.now, max_searches=3)
+
+    def test_the_listing_was_asked_for_in_googles_own_order_and_every_fare_in_it_has_a_token(self):
+        self.assertNotIn("sort_by", self.listing["search_parameters"])
+        fares = self.listing["best_flights"] + self.listing["other_flights"]
+        self.assertEqual((len(fares), sum(1 for fare in fares if fare.get("departure_token"))), (69, 69))
+
+    def test_the_cheapest_fare_listed_is_again_the_price_google_calls_its_lowest(self):
+        fares = self.listing["best_flights"] + self.listing["other_flights"]
+        self.assertEqual((min(fare["price"] for fare in fares), self.listing["price_insights"]["lowest_price"]), (754, 754))
+
+    def test_left_to_its_own_rules_the_check_is_quiet_and_costs_one_search(self):
+        report = self.check()
+        self.assertEqual(report.lines, ["JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $754 listed. No rule fired. 1 search."])
+        (row,) = self.history.watch_checks()
+        # $754 against a 30-day median of $662.50 and a typical range that starts at $480.
+        self.assertEqual((row["price"], row["median"], row["typical_low"], row["typical_high"]), (754, 662.5, 480, 830))
+        self.assertEqual(row["fetched_at"], "2026-10-09T07:28:29+00:00")
+
+    def test_the_token_of_an_unsorted_listing_fetches_return_flights_and_theirs_fetches_the_sellers(self):
+        report = self.check(below=5000)
+        asked = FakeSerpApi.searches
+        self.assertEqual([query.endpoint for query in asked], ["search", "return_flights", "booking_options"])
+        # The code followed the very tokens the real run did.
+        self.assertEqual(asked[1].departure_token, self.returns["search_parameters"]["departure_token"])
+        self.assertEqual(asked[2].booking_token, self.booking["search_parameters"]["booking_token"])
+        self.assertEqual(
+            report.lines,
+            ["JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $754 confirmed. Alert sent: below the $5,000 you set. 3 searches."],
+        )
+        (row,) = self.history.watch_checks()
+        self.assertEqual((row["price"], row["confirmed_price"], row["no_returns"], row["searches"]), (754, 754, "[]", 3))
+        self.assertEqual(
+            row["itinerary_key"], "FI622@2026-12-08T19:35>FI450@2026-12-09T07:35|LX345@2026-12-15T06:00>LX18@2026-12-15T17:15"
+        )
+
+    def test_the_alert_reads_as_the_one_that_reached_the_owners_phone(self):
+        self.check(below=5000)
+        (sent,) = FakeNtfy.sent
+        self.assertEqual(sent["title"], "JFK,EWR to LHR: $754 round trip")
+        self.assertEqual(sent["click"], "https://www.momondo.com/flight-search/JFK,EWR-LHR/2026-12-08/2026-12-15?sort=price_a")
+        self.assertRegex(
+            sent["message"],
+            r"^Tue 08 Dec - Tue 15 Dec\. Why: below the \$5,000 you set\.\n"
+            r"Out: EWR->LHR Tue 08 Dec 19:35 -> 10:50 \+1, 1 stop, 10h 15m, Icelandair \(FI 622, FI 450\)\.\n"
+            r"Back: LHR->EWR Tue 15 Dec 06:00 -> 20:30, 1 stop, 19h 30m, SWISS \(LX 345, LX 18\)\.\n"
+            rf"Return flights fetched {STAMP}\.\n"
+            r"\$742 is two separate tickets \(AranGrant \$342 \+ SWISS \$400\)\. "
+            r"On one ticket it is \$753 from Expedia, an agency, not the airline\.\n"
+            r"Tap to check it on Momondo\.$",
+        )
+
+    def test_the_three_prices_of_one_fare_are_each_what_their_reply_said(self):
+        # Listed and confirmed at $754; sold as two tickets for $742 and as one for $753.
+        back = self.returns["other_flights"]
+        self.assertEqual((len(back), min(option["price"] for option in back)), (4, 754))
+        sold = [(option["together"]["book_with"], option["together"]["price"], bool(option.get("separate_tickets"))) for option in self.booking["booking_options"]]
+        self.assertEqual(sold, [("AranGrant, SWISS", 742, True), ("Expedia", 753, False), ("Orbitz", 753, False)])
 
 
 if __name__ == "__main__":
