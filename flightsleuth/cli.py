@@ -376,18 +376,29 @@ def cmd_bakeoff(args: argparse.Namespace) -> int:
     ask = typed if interactive and not args.no_manual else None
     run = bakeoff.new_run()
     left = None
-    for route, plan in plans:
+    stopped = None
+    for done, (route, plan) in enumerate(plans):
         dot, finish = _progress()
         try:
             outcome = bakeoff.run_route(
                 run, route, plan, on_search=dot, ask=ask, open_link=None if args.no_open else webbrowser.open
             )
+        except UserError as e:
+            # Most likely the hourly limit. What finished is recorded and saved, so say how to carry on.
+            stopped = (
+                f"stopped at {route.label}, after {done} of {len(plans)} routes: {e} "
+                f"Run the same command again to carry on: finished routes replay from saved results "
+                f"for {args.max_age:g} hours and cost nothing."
+            )
+            break
         finally:
             finish()
         if outcome.searches_left is not None:
             left = outcome.searches_left
     print()
     print(bakeoff.report())
+    if stopped:
+        raise UserError(stopped)
     if left is not None:
         print(f"\nAbout {left} SerpApi searches left this month.")
     return 0

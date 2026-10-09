@@ -342,6 +342,30 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertEqual(len(FakeSerpApi.searches), spent)
 
+    def test_running_into_the_hourly_limit_keeps_what_finished_and_says_how_to_carry_on(self):
+        FakeSerpApi.account_reply["account_rate_limit_per_hour"] = 30
+        real = FakeSerpApi.account
+
+        def counting(self):
+            return {**real(self), "this_hour_searches": len(FakeSerpApi.searches)}
+
+        with mock.patch.object(FakeSerpApi, "account", counting):
+            code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+        self.assertEqual(code, 1)
+        self.assertIn("stopped at BOS to WAW, after 1 of 3 routes: this scan needs 24 live searches but only", err)
+        self.assertIn("Run the same command again to carry on", err)
+        self.assertIn("Bake-off report: 1 route\n", out)
+        spent = len(FakeSerpApi.searches)
+
+        # An hour later the limit has reset: the finished route replays, and only the others are paid for.
+        with mock.patch.object(FakeSerpApi, "account", lambda self: {**real(self), "account_rate_limit_per_hour": 100}):
+            code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+        self.assertEqual(code, 0, err)
+        self.assertIn("MCO,SFB to JFK,EWR,LGA: Up to 24 searches needed", err)
+        self.assertIn("Bake-off report: 3 routes", out)
+        self.assertRegex(out, r"MCO,SFB to JFK,EWR,LGA .* \(saved\)")
+        self.assertLessEqual(len(FakeSerpApi.searches) - spent, 50)
+
     def test_the_route_file_has_to_be_named(self):
         code, _, err = self.run_cli("bakeoff")
         self.assertEqual(code, 1)

@@ -256,7 +256,7 @@ def report() -> str:
         dates = render.day(date.fromisoformat(row["depart_date"]))
         if row["return_date"]:
             dates += " - " + render.day(date.fromisoformat(row["return_date"]))
-        when = render.fetched(datetime.fromisoformat(row["fetched_at"]), True)
+        when = render.fetched(datetime.fromisoformat(row["fetched_at"]), row["how"] == "live")
         body.append([route, dates, render.money(row["price"], row["currency"]), row["detail"], when])
     lines += render.table(["Route", "Dates", "SerpApi", "Flights", "Fetched"], body) + [""]
 

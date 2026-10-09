@@ -1,6 +1,8 @@
+import json
 import sqlite3
 import unittest
 from datetime import date, datetime, timezone
+from pathlib import Path
 from unittest import mock
 
 from flightsleuth import config, providers, scan
@@ -227,6 +229,81 @@ class AlternativesTest(unittest.TestCase):
         self.assertEqual((rival.name, rival.price, rival.same_flights), ("rival", 505, True))
         # Its fare is cheaper than the confirmed one and nobody fetched its return flights.
         self.assertEqual([offer.source for offer in check.unchecked], ["rival"])
+
+
+class RecordedChainTest(unittest.TestCase):
+    """The closer look, run over the real replies in tests/fixtures rather than the fake's."""
+
+    def setUp(self):
+        install(self)
+        fixtures = Path(__file__).parent / "fixtures"
+
+        def recorded(name):
+            return json.loads((fixtures / name).read_text(encoding="utf-8"))
+
+        outbound = recorded("roundtrip_outbound.json")
+        dead_end = recorded("roundtrip_return_empty.json")["search_parameters"]["departure_token"]
+
+        def replay(self, query):
+            FakeSerpApi.searches.append(query)
+            if query.booking_token:
+                return recorded("roundtrip_booking.json")
+            if query.departure_token:
+                # Only the cheapest outbound's token was recorded as leading nowhere.
+                return recorded("roundtrip_return_empty.json" if query.departure_token == dead_end else "roundtrip_return.json")
+            return outbound if query.return_date else recorded("oneway.json")
+
+        self.enterContext(mock.patch.object(FakeSerpApi, "search", replay))
+        request = scan.Request("JFK,EWR", "LHR", date(2026, 12, 8), return_date=date(2026, 12, 15), check=True)
+        self.outcome = scan.run(scan.plan(request, today=date(2026, 10, 9)))
+        (self.check,) = self.outcome.checks
+
+    def test_the_646_fare_is_dropped_and_the_spare_lookup_goes_to_another_airline(self):
+        (missed,) = self.check.failed
+        self.assertEqual((missed.price, missed.airlines), (646, ("Scandinavian Airlines",)))
+        self.assertNotIn("Scandinavian Airlines", self.check.confirmed.airlines)
+        self.assertEqual(endpoints()[:4], ["search", "return_flights", "return_flights", "booking_options"])
+
+    def test_the_confirmed_fare_carries_real_return_flights_at_the_return_replys_price(self):
+        confirmed = self.check.confirmed
+        self.assertEqual(confirmed.price, 695)
+        self.assertEqual([segment.flight_number for segment in confirmed.return_segments], ["LX 345", "LX 18"])
+        self.assertEqual(confirmed.return_duration_min, 1170)
+        self.assertEqual(confirmed.longest_layover_min, 515)
+        self.assertTrue(confirmed.booking_token)
+
+    def test_the_other_cheap_fares_of_that_airline_are_reported_as_not_looked_up(self):
+        unchecked = self.check.unchecked
+        self.assertEqual(len(unchecked), 12)
+        self.assertEqual(len([offer for offer in unchecked if offer.airlines == ("Scandinavian Airlines",)]), 10)
+        self.assertEqual(unchecked[0].price, 647)
+        self.assertEqual(self.outcome.results[self.check.trip].cheapest.price, 647)
+
+    def test_the_real_sellers_show_the_separate_tickets_and_the_one_ticket_price(self):
+        sellers = [found for found in self.check.alternatives if found.kind == "seller"]
+        self.assertEqual(len(sellers), 12)
+        cheapest = sellers[0]
+        self.assertEqual((cheapest.name, cheapest.price, cheapest.parts), ("United, SWISS", 694, (("United", 295), ("SWISS", 399))))
+        self.assertTrue(cheapest.offers[0].separate_tickets)
+        whole = next(found for found in sellers if not found.offers[0].separate_tickets)
+        self.assertEqual((whole.name, whole.price, whole.offers[0].sold_by_airline), ("United", 797, True))
+
+    def test_the_destinations_country_is_read_from_the_reply_and_priced(self):
+        self.assertIn("search:gb", endpoints())
+        self.assertEqual([found.name for found in self.check.alternatives if found.kind == "market"], ["gb"])
+
+    def test_it_all_renders(self):
+        from flightsleuth.render import render_text, summarise
+
+        outcome = self.outcome
+        text = render_text(summarise(outcome.trips, outcome.results, checks=outcome.checks))
+        self.assertIn("Cheapest confirmed: $695 round trip, Tue 08 Dec - Tue 15 Dec", text)
+        self.assertIn("The $646 fare listed for these dates (Scandinavian Airlines (SK 904, SK 491, SK 815)) had no return flights", text)
+        self.assertRegex(text, r"back  LHR->EWR  Tue 15 Dec 06:00 -> 20:30 +1 stop  19h 30m  SWISS \(LX 345, LX 18\)")
+        self.assertIn("12 cheaper fares are listed for these dates, from $647, but their return flights were not looked up.", text)
+        self.assertRegex(text, r"\$694 +Buy from United, SWISS +same flights +two separate tickets \(United \$295 \+ SWISS \$399\); 8h 35m layover")
+        self.assertRegex(text, r"\$797 +Buy from United +same flights +one ticket; 8h 35m layover")
+        self.assertIn("Google rates $694 as typical for those dates (typical range $540 to $1,850).", text)
 
 
 class StaleTokenTest(unittest.TestCase):
