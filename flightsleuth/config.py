@@ -29,7 +29,13 @@ def home() -> Path:
 
 
 def cache_path() -> Path:
+    """Saved replies. Disposable: `cache --clear` empties it."""
     return home() / "cache.db"
+
+
+def history_path() -> Path:
+    """Price points and the call log. Kept: nothing in flightsleuth deletes from it."""
+    return home() / "history.db"
 
 
 def key_file() -> Path:

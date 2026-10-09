@@ -3,6 +3,8 @@ from datetime import date, datetime, timedelta, timezone
 from unittest import mock
 
 from flightsleuth import scan
+from flightsleuth.errors import UserError
+from flightsleuth.serpapi import RateLimited
 from tests.fakes import FakeSerpApi, install, reply
 
 
@@ -31,6 +33,26 @@ class CapTest(unittest.TestCase):
         self.assertEqual((plan.saved, plan.live), (25, 2))
         scan.run(plan)
         self.assertEqual(len(FakeSerpApi.searches), 27)
+
+
+class StopOnFailureTest(unittest.TestCase):
+    def setUp(self):
+        install(self)
+
+    def test_no_call_is_sent_after_one_has_failed(self):
+        attempts = []
+
+        def throttled(self, query):
+            attempts.append(query)
+            if len(attempts) >= 2:
+                raise RateLimited("Too many requests.")
+            return reply(query)
+
+        with mock.patch.object(FakeSerpApi, "search", throttled):
+            with self.assertRaisesRegex(UserError, "stopped after 1 of 9 live searches: Too many requests."):
+                scan.run(scan.plan(request(flex=4)))
+        # One worker in tests: the first call lands, the second is refused, the other seven are never sent.
+        self.assertEqual(len(attempts), 2)
 
 
 class ProvenanceTest(unittest.TestCase):

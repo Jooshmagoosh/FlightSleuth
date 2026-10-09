@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, replace
@@ -10,6 +11,7 @@ from datetime import date, datetime, timezone
 from . import config, providers
 from .cache import Cache
 from .errors import UserError
+from .history import History
 from .models import Query, SearchResult
 from .planner import date_pairs, one_way_legs
 from .providers import Capability, Provider
@@ -176,48 +178,80 @@ def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None)
     sources = {name: providers.load(name) for name in dict.fromkeys(call.provider for call in plan.calls)}
     replies = dict(plan.replies)
     missing = plan.missing
+    digested: dict[Call, SearchResult] = {}
     searches_left = None
 
-    if missing:
-        needed: dict[str, int] = {}
-        for call in missing:
-            needed[call.provider] = needed.get(call.provider, 0) + 1
-        for name, count in needed.items():
-            problem = sources[name].budget_problem(count)
-            if problem:
-                raise UserError(problem)
-
-        cache = Cache(config.cache_path())
-
-        def store(call: Call, body: dict) -> None:
-            now = time.time()
-            cache.put(sources[call.provider].cache_key(call.query), body, now=now)
-            replies[call] = Reply(body, datetime.fromtimestamp(now, timezone.utc), live=True)
-            if on_search:
-                on_search(len(replies) - plan.saved, plan.live)
-
-        try:
-            error = fetch_all(sources, missing, store)
-        finally:
-            cache.close()
-        if error:
-            raise UserError(
-                f"stopped after {len(replies) - plan.saved} of {plan.live} live searches: {error}. "
-                f"Finished searches are saved, so running this again picks up where it left off."
-            )
-        left = []
-        for name, count in needed.items():
-            credits = sources[name].credits_left()
-            if credits is not None:
-                left.append(credits - count)
-        searches_left = min(left, default=None)
-
-    parts: dict[Query, list[SearchResult]] = {}
-    for call in plan.calls:
+    def digest(call: Call) -> SearchResult:
         source, reply = sources[call.provider], replies[call]
         result = source.parse(call.query, reply.body)
         when = source.fetched_at(reply.body) or reply.fetched_at
-        parts.setdefault(call.query, []).append(_stamp(result, source.name, when, reply.live))
+        return _stamp(result, source.name, when, reply.live)
+
+    needed: dict[str, int] = {}
+    for call in missing:
+        needed[call.provider] = needed.get(call.provider, 0) + 1
+    for name, count in needed.items():
+        problem = sources[name].budget_problem(count)
+        if problem:
+            raise UserError(problem)
+
+    history = History(config.history_path())
+    try:
+        for call in plan.replies:
+            history.add_call(call.provider, "search", live=False, cost=0, latency_ms=None, status="ok")
+
+        if missing:
+            cache = Cache(config.cache_path())
+
+            def landed(call: Call, body: dict | None, error: UserError | None, latency_ms: int) -> None:
+                source = sources[call.provider]
+                history.add_call(
+                    call.provider,
+                    "search",
+                    live=True,
+                    cost=0 if error else source.cost_per_call,
+                    latency_ms=latency_ms,
+                    status=type(error).__name__ if error else "ok",
+                )
+                if error:
+                    return
+                now = time.time()
+                cache.put(source.cache_key(call.query), body, now=now)
+                replies[call] = Reply(body, datetime.fromtimestamp(now, timezone.utc), live=True)
+                # The price point is written now, not after the run: if a later call fails, this
+                # reply comes back from the cache next time and would never count as live again.
+                try:
+                    digested[call] = digest(call)
+                except UserError:
+                    pass  # an unreadable reply is reported below, once every call has landed
+                else:
+                    cheapest = digested[call].cheapest
+                    if cheapest:
+                        history.add_price_point(cheapest)
+                if on_search:
+                    on_search(len(replies) - plan.saved, plan.live)
+
+            try:
+                error = fetch_all(sources, missing, landed)
+            finally:
+                cache.close()
+            if error:
+                raise UserError(
+                    f"stopped after {len(replies) - plan.saved} of {plan.live} live searches: {error}. "
+                    f"Finished searches are saved, so running this again picks up where it left off."
+                )
+            left = []
+            for name, count in needed.items():
+                credits = sources[name].credits_left()
+                if credits is not None:
+                    left.append(credits - count)
+            searches_left = min(left, default=None)
+    finally:
+        history.close()
+
+    parts: dict[Query, list[SearchResult]] = {}
+    for call in plan.calls:
+        parts.setdefault(call.query, []).append(digested.get(call) or digest(call))
     results = {query: _merge(found) for query, found in parts.items()}
     return Outcome(plan.trips, results, plan.split, searches_left)
 
@@ -243,25 +277,39 @@ def _merge(parts: list[SearchResult]) -> SearchResult:
     )
 
 
-def fetch_all(sources: dict[str, Provider], calls: list[Call], on_result) -> UserError | None:
-    """Make the live calls a few at a time, handing each reply to `on_result` as it lands.
+def fetch_all(sources: dict[str, Provider], calls: list[Call], on_done) -> UserError | None:
+    """Make the live calls a few at a time, reporting each as it finishes.
 
-    The first failure cancels everything not yet started and is returned. Calls
-    already in flight still finish and are handed over, so no paid result is thrown away.
+    `on_done(call, body, error, latency_ms)` gets the reply or the error, never both.
+    The first failure is returned, and no call that has not started yet is sent after it.
+    Calls already in flight still finish and are reported, so no paid result is thrown away.
     """
-    error = None
+    failed = threading.Event()
+
+    def attempt(call: Call) -> tuple[dict | None, UserError | None, int] | None:
+        # Checked on the worker itself: it would otherwise take the next call off the
+        # queue before the main thread had heard about the failure.
+        if failed.is_set():
+            return None
+        started = time.monotonic()
+        try:
+            body, error = sources[call.provider].search(call.query), None
+        except UserError as e:
+            failed.set()
+            body, error = None, e
+        return body, error, round((time.monotonic() - started) * 1000)
+
+    first_error = None
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futures = {pool.submit(sources[call.provider].search, call.query): call for call in calls}
+        futures = {pool.submit(attempt, call): call for call in calls}
         for future in as_completed(futures):
-            if future.cancelled():
+            attempted = future.result()
+            if attempted is None:
                 continue
-            try:
-                raw = future.result()
-            except UserError as e:
-                if error is None:
-                    error = e
-                    for pending in futures:
-                        pending.cancel()
-                continue
-            on_result(futures[future], raw)
-    return error
+            body, error, latency_ms = attempted
+            on_done(futures[future], body, error, latency_ms)
+            if error and first_error is None:
+                first_error = error
+    return first_error
+
+
