@@ -122,11 +122,28 @@ def plan(
     return Plan(trips, split, raw, [query for query in wanted if query not in raw])
 
 
-def run(plan: Plan, *, on_search=None) -> Outcome:
+class OverCap(UserError):
+    """A plan needs more live searches than one run may make."""
+
+    def __init__(self, live: int, limit: int):
+        super().__init__(f"this needs {live} live searches, which is over the limit of {limit} per run")
+        self.live = live
+        self.limit = limit
+
+
+def check_cap(plan: Plan, max_searches: int = DEFAULT_MAX_SEARCHES) -> None:
+    """Refuse a plan that is too big. Front ends call this early so they can word the refusal themselves."""
+    if plan.live > max_searches:
+        raise OverCap(plan.live, max_searches)
+
+
+def run(plan: Plan, *, max_searches: int = DEFAULT_MAX_SEARCHES, on_search=None) -> Outcome:
     """Pay for the plan's missing searches, save them, and parse everything.
 
+    Nothing is spent on a plan over `max_searches`, whoever the caller is.
     `on_search(done, live)` is called after each live search lands.
     """
+    check_cap(plan, max_searches)
     raw = dict(plan.raw)
     searches_left = None
     if plan.missing:

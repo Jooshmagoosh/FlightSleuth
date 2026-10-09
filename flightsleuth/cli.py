@@ -122,11 +122,13 @@ def cmd_search(args: argparse.Namespace) -> int:
     )
     plan = scan.plan(request, max_age_hours=args.max_age, fresh=args.fresh)
     print(f"{_searches(plan.total)} needed: {plan.saved} saved, {plan.live} live.", file=sys.stderr)
-    if plan.live > args.max_searches:
+    try:
+        scan.check_cap(plan, args.max_searches)
+    except scan.OverCap as e:
         raise UserError(
-            f"that is over the limit of {args.max_searches} live searches per run. "
+            f"that is over the limit of {e.limit} live searches per run. "
             f"Narrow --flex or --nights, or raise --max-searches."
-        )
+        ) from None
     if args.dry_run:
         return 0
 
@@ -137,7 +139,7 @@ def cmd_search(args: argparse.Namespace) -> int:
         dots.append(done)
 
     try:
-        outcome = scan.run(plan, on_search=dot)
+        outcome = scan.run(plan, max_searches=args.max_searches, on_search=dot)
     finally:
         if dots:
             print(file=sys.stderr)
