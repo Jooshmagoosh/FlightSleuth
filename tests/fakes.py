@@ -1,10 +1,12 @@
-"""A stand-in for SerpApi, and the setup that keeps tests away from the real key and cache."""
+"""Stand-ins for SerpApi and ntfy, and the setup that keeps tests away from the real key, cache and phone."""
 import contextlib
+import io
+import json
 import os
 import tempfile
 from unittest import mock
 
-from flightsleuth import config, providers, scan
+from flightsleuth import config, notify, providers, scan
 from flightsleuth.models import Explore
 from flightsleuth.providers import SerpApiProvider
 from flightsleuth.serpapi import RateLimited
@@ -168,6 +170,22 @@ class FakeSerpApi:
         return reply(query)
 
 
+class FakeNtfy:
+    """Stands where ntfy's server would: keeps what was posted to it, and can be told to fail."""
+
+    sent = []  # the body of every message accepted, as a dict
+    posts = []  # (address, headers) of every request, accepted or not
+    fail = None  # an exception to raise in place of accepting a message
+
+    @staticmethod
+    def urlopen(request, timeout=None):
+        FakeNtfy.posts.append((request.full_url, dict(request.header_items())))
+        if FakeNtfy.fail is not None:
+            raise FakeNtfy.fail
+        FakeNtfy.sent.append(json.loads(request.data))
+        return io.BytesIO(b'{"id": "abc", "time": 1, "event": "message"}')
+
+
 class FakeProvider(SerpApiProvider):
     """The real SerpApi provider with the fake client behind it."""
 
@@ -202,6 +220,11 @@ def install(test):
     test.enterContext(mock.patch.object(scan, "WORKERS", 1))
     # Run from the throwaway folder: a real .env in the project must never be read or overwritten.
     test.enterContext(contextlib.chdir(home))
+    # No test may send a real alert: whatever is posted to ntfy lands in FakeNtfy.sent.
+    FakeNtfy.sent = []
+    FakeNtfy.posts = []
+    FakeNtfy.fail = None
+    test.enterContext(mock.patch.object(notify, "urlopen", FakeNtfy.urlopen))
     # No test may open a real browser tab, or wait on a keyboard nobody is at.
     test.enterContext(mock.patch("webbrowser.open"))
     nobody = mock.Mock()

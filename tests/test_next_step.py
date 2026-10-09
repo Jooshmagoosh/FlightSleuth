@@ -390,7 +390,11 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
 
 
 class GateTest(unittest.TestCase):
-    """Phase 3 was to add no price source and no call to any network."""
+    """Phase 3 was to add no price source and no call to any network.
+
+    Phase 4 added one module that reaches a network, with the owner's say-so on 2026-10-09:
+    `notify.py`, which sends alerts to ntfy. It is not a price source.
+    """
 
     NETWORK = {"urllib", "http", "socket", "ssl", "ftplib", "smtplib", "poplib", "imaplib", "xmlrpc", "asyncio"}
 
@@ -398,7 +402,7 @@ class GateTest(unittest.TestCase):
         install(self)
         self.assertEqual(providers.names(), ["serpapi"])
 
-    def test_only_the_serpapi_client_imports_anything_that_reaches_a_network(self):
+    def test_only_the_serpapi_client_and_the_alert_sender_import_anything_that_reaches_a_network(self):
         package = Path(links.__file__).parent
         reaching = set()
         for path in package.rglob("*.py"):
@@ -411,4 +415,4 @@ class GateTest(unittest.TestCase):
                     continue
                 if any(name.split(".")[0] in self.NETWORK for name in names):
                     reaching.add(path.relative_to(package).as_posix())
-        self.assertEqual(reaching, {"serpapi.py"})
+        self.assertEqual(reaching, {"serpapi.py", "notify.py"})
