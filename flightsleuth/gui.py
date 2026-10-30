@@ -14,7 +14,7 @@ from tkinter import messagebox, simpledialog, ttk
 from . import config, notify, scan, typed, watch
 from .errors import UserError
 from .models import Query
-from .render import ALTERNATIVE_HEADERS, NO_FARES, NextStep, Summary, budget_lines, summarise, watch_title
+from .render import ALTERNATIVE_HEADERS, NO_FARES, NextStep, Summary, budget_lines, plural, summarise, watch_title
 
 STOPS = {"Any number of stops": "any", "Nonstop only": "nonstop", "1 stop or fewer": "1", "2 stops or fewer": "2"}
 CABINS = {"Economy": "economy", "Premium economy": "premium", "Business": "business", "First": "first"}
@@ -654,7 +654,7 @@ class App:
             self.status.set(f"Watching it, but alerts are not set up. Run: {notify.SETUP}")
             return
         every = added.watch.every_days
-        status = f"Watching this fare every {every} day{'s' if every != 1 else ''}."
+        status = f"Watching this fare every {plural(every, 'day')}."
         if added.budget:
             status += f" The searches cover it, with {added.budget.now.spare} to spare."
         self.status.set(status)

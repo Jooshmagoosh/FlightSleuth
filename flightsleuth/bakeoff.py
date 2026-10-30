@@ -238,7 +238,7 @@ def report() -> str:
         if row["measure"] != BASELINE and same_run(row):
             measured.setdefault(row["measure"], {})[row["route"]] = row
 
-    lines = [f"Bake-off report: {len(latest)} route{'s' if len(latest) != 1 else ''}", ""]
+    lines = [f"Bake-off report: {render.plural(len(latest), 'route')}", ""]
     body = []
     for route, row in latest.items():
         dates = render.day(date.fromisoformat(row["depart_date"]))

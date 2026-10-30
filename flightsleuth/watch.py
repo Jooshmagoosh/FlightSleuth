@@ -607,7 +607,7 @@ def _check_all(history: History, numbers: list[int], now: datetime, max_searches
     fetched: set[scan.Request] = set()
     for number in numbers:
         detail, searches, failed = _Check(history, latest[number], room, now).run(fetched, per_check)
-        count = "" if not searches else f" {searches} search{'es' if searches != 1 else ''}."
+        count = f" {render.plural(searches, 'search')}." if searches else ""
         report.say(latest[number], f"{detail}{count}")
         report.spent += searches
         report.failed = report.failed or failed

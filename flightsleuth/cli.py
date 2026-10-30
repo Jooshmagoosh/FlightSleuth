@@ -12,7 +12,7 @@ from . import bakeoff, config, notify, providers, scan, typed, watch
 from .cache import Cache
 from .errors import UserError
 from .models import Explore
-from .render import NO_FARES, budget_lines, render_places, render_text, summarise, watch_lines, watch_title
+from .render import NO_FARES, budget_lines, plural, render_places, render_text, summarise, watch_lines, watch_title
 from .serpapi import CABINS, DURATIONS, STOPS
 
 # The only regions SerpApi's documentation gives an id for. Any other is passed as its id.
@@ -298,22 +298,17 @@ def _watch_parser(watching: argparse.ArgumentParser) -> None:
     limit.add_argument("searches", type=_count, nargs="?", help="the new limit")
 
 
-def _searches(count: int, kind: str = "") -> str:
-    noun = "search" if count == 1 else "searches"
-    return f"{count} {kind} {noun}" if kind else f"{count} {noun}"
-
-
 def plan_line(plan: scan.Plan) -> str:
     """What a plan costs. A plan with later stages can only give a ceiling, and says what each stage is for."""
     if not plan.later:
-        return f"{_searches(plan.total)} needed: {plan.saved} saved, {plan.live} live."
+        return f"{plural(plan.total, 'search')} needed: {plan.saved} saved, {plan.live} live."
     stages = [f"{len(plan.calls)} {FIRST[plan.strategy]}"]
     if plan.refine_calls:
         stages.append(f"up to {plan.refine_calls} {LATER[plan.strategy]}")
     if plan.check_calls:
         fares = "the best fare" if plan.checks == 1 else f"the {plan.checks} best fares"
         stages.append(f"up to {plan.check_calls} to look closer at {fares}")
-    return f"Up to {_searches(plan.total)} needed: {', '.join(stages)}. {plan.saved} saved, up to {plan.live} live."
+    return f"Up to {plural(plan.total, 'search')} needed: {', '.join(stages)}. {plan.saved} saved, up to {plan.live} live."
 
 
 def _at_keyboard() -> bool:
@@ -457,16 +452,16 @@ def cmd_bakeoff(args: argparse.Namespace) -> int:
         print(f"{route.label}: {plan_line(plan)}", file=sys.stderr)
     most = bakeoff.ceiling(plans)
     extra = " That includes one for each route in case its cheapest fare has no return flights." if most else ""
-    count = f"{len(plans)} route{'s' if len(plans) != 1 else ''}"
-    print(f"{count}: up to {_searches(most, 'live')} in all.{extra}", file=sys.stderr)
+    count = plural(len(plans), "route")
+    print(f"{count}: up to {plural(most, 'live search')} in all.{extra}", file=sys.stderr)
     if args.dry_run:
         return 0
 
     interactive = _at_keyboard()
     if most and not args.yes:
         if not interactive:
-            raise UserError(f"add --yes to spend up to {_searches(most, 'live')}, or --dry-run to see the plan")
-        if input(f"Spend up to {_searches(most, 'live')}? Type yes to go on: ").strip().lower() != "yes":
+            raise UserError(f"add --yes to spend up to {plural(most, 'live search')}, or --dry-run to see the plan")
+        if input(f"Spend up to {plural(most, 'live search')}? Type yes to go on: ").strip().lower() != "yes":
             raise UserError("nothing was spent")
     ask = _answer if interactive and not args.no_manual else None
     run = bakeoff.new_run()
@@ -603,7 +598,7 @@ def _watch_limit(args: argparse.Namespace) -> int:
     if args.searches is not None:
         path = config.save_setting(config.WATCH_MONTHLY_VAR, str(args.searches))
         print(f"Saved in {path}")
-    print(f"Watches may use up to {_searches(config.watch_monthly())} a month, and never more than the plan has left.")
+    print(f"Watches may use up to {plural(config.watch_monthly(), 'search')} a month, and never more than the plan has left.")
     return 0
 
 
@@ -637,9 +632,9 @@ def cmd_quota(args: argparse.Namespace) -> int:
 def cmd_cache(args: argparse.Namespace) -> int:
     with Cache() as cache:
         if args.clear:
-            print(f"Removed {_searches(cache.clear(), 'saved')}.")
+            print(f"Removed {plural(cache.clear(), 'saved search')}.")
         else:
-            print(f"{_searches(cache.count(), 'saved')} in {cache.path}")
+            print(f"{plural(cache.count(), 'saved search')} in {cache.path}")
     return 0
 
 
