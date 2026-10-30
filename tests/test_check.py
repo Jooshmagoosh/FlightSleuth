@@ -9,7 +9,7 @@ from flightsleuth import config, providers, scan
 from flightsleuth.errors import UserError
 from flightsleuth.models import Offer, SearchResult, Segment
 from flightsleuth.providers import Capability, DataClass, Provider
-from tests.fakes import FakeSerpApi, history_rows, install, rich_reply
+from tests.fakes import NO_FLIGHTS, FakeSerpApi, age_the_cache, endpoints, history_rows, install, rich_reply
 
 TODAY = date(2030, 1, 1)
 DEPART, BACK = date(2030, 3, 12), date(2030, 3, 19)  # the fake's round-trip fare for the 12th is 520
@@ -28,15 +28,6 @@ def look(**changes):
     return plan, outcome, check
 
 
-def endpoints():
-    return [query.endpoint + (f":{query.market}" if query.market else "") for query in FakeSerpApi.searches]
-
-
-def age_the_cache(hours):
-    db = sqlite3.connect(config.cache_path())
-    with db:
-        db.execute("UPDATE responses SET fetched_at = fetched_at - ?", (hours * 3600,))
-    db.close()
 
 
 class ConfirmTest(unittest.TestCase):
@@ -97,7 +88,7 @@ class ConfirmTest(unittest.TestCase):
 
     def test_when_every_fare_tried_comes_back_empty_nothing_is_confirmed(self):
         FakeSerpApi.phantoms = 1
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         real = FakeSerpApi.search
 
         def no_returns(self, query):

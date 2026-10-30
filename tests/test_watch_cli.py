@@ -11,14 +11,13 @@ from unittest import mock
 
 from flightsleuth import cli, config, watch
 from flightsleuth.history import History
-from tests.fakes import FakeNtfy, FakeSerpApi, install
+from tests.fakes import STAMP, FakeNtfy, FakeSerpApi, install, run_cli
 
 TODAY = date.today()
 DEPART = TODAY + timedelta(days=400)
 BACK = DEPART + timedelta(days=7)
 ROUTE = ("JFK", "LHR", "--depart", DEPART.isoformat(), "--return", BACK.isoformat())
 TOPIC = "flightsleuth-test-topic"
-STAMP = r"\d\d \w{3} \d\d:\d\d"
 DAY = r"\w{3} \d\d \w{3}"  # a date, such as "Tue 08 Dec"
 
 
@@ -33,14 +32,11 @@ class WatchCommandCase(unittest.TestCase):
         )
         self.enterContext(mock.patch.dict(os.environ, {config.TOPIC_VAR: TOPIC}))
 
-    def run_cli(self, *argv):
-        out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            code = cli.main(["watch", *argv])
-        return code, out.getvalue(), err.getvalue()
+    def run_watch(self, *argv):
+        return run_cli("watch", *argv)
 
     def ok(self, *argv):
-        code, out, err = self.run_cli(*argv)
+        code, out, err = self.run_watch(*argv)
         self.assertEqual(code, 0, err)
         return out
 
@@ -73,7 +69,7 @@ class AddCommandTest(WatchCommandCase):
 
     def test_a_watch_the_searches_cannot_cover_is_refused_with_the_sums_shown(self):
         FakeSerpApi.account_reply["total_searches_left"] = 9
-        code, out, err = self.run_cli("add", *ROUTE)
+        code, out, err = self.run_watch("add", *ROUTE)
         self.assertEqual((code, out), (1, ""))
         lines = err.splitlines()
         self.assertEqual(lines[2], "  30 checks at 1 search each, and 3 held back for each of 1 watch to confirm an alert: 30 + 3 = 33")
@@ -89,7 +85,7 @@ class AddCommandTest(WatchCommandCase):
     def test_a_fourth_watch_is_refused(self):
         for _ in range(3):
             self.ok("add", *ROUTE, "--every", "10")
-        code, _, err = self.run_cli("add", *ROUTE, "--every", "10")
+        code, _, err = self.run_watch("add", *ROUTE, "--every", "10")
         self.assertEqual(code, 1)
         self.assertIn("there are already 3 watches, which is the most", err)
 
@@ -102,7 +98,7 @@ class AddCommandTest(WatchCommandCase):
         )
 
     def test_nights_of_nought_and_a_price_that_is_not_one_are_refused(self):
-        code, _, err = self.run_cli("add", "JFK", "LHR", "--depart", DEPART.isoformat(), "--nights", "0")
+        code, _, err = self.run_watch("add", "JFK", "LHR", "--depart", DEPART.isoformat(), "--nights", "0")
         self.assertEqual(code, 1)
         self.assertIn("--nights must be 1 or more", err)
         with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()) as err:
@@ -148,7 +144,7 @@ class ListCommandTest(WatchCommandCase):
     def test_a_failed_check_is_the_status_line_and_the_watch_stays_due(self):
         self.ok("add", *ROUTE)
         FakeSerpApi.fail_after = 0
-        self.run_cli("run")
+        self.run_watch("run")
         lines = self.ok("list").splitlines()
         self.assertRegex(lines[2], rf"^   Last check: {STAMP}\. Check failed: stopped after 0 of 1 live searches: .* It stays due\.$")
         self.assertEqual(lines[3:5], ["   Last price: none yet.", "   Next due: now. Searches used: 0."])
@@ -178,7 +174,7 @@ class RemoveCommandTest(WatchCommandCase):
         self.assertRegex(self.ok("remove", "1"), rf"^Removed watch 1: JFK -> LHR, {DAY} - {DAY}\. Its history is kept\.\n$")
 
     def test_a_number_that_is_not_a_watch_is_an_error(self):
-        code, _, err = self.run_cli("remove", "4")
+        code, _, err = self.run_watch("remove", "4")
         self.assertEqual((code, err), (1, "flightsleuth: there is no watch 4. See them with: py -m flightsleuth watch list\n"))
 
 
@@ -187,7 +183,7 @@ class RunCommandTest(WatchCommandCase):
 
     def test_it_checks_what_is_due_prints_a_line_for_each_and_exits_cleanly(self):
         self.ok("add", *ROUTE)
-        code, out, err = self.run_cli("run")
+        code, out, err = self.run_watch("run")
         self.assertEqual((code, err), (0, ""))
         self.assertRegex(out, rf"^JFK -> LHR, {DAY} - {DAY}: \$520 listed\. No rule fired\. 1 search\.\n$")
         self.assertEqual(len(FakeSerpApi.searches), 1)
@@ -211,7 +207,7 @@ class RunCommandTest(WatchCommandCase):
     def test_a_failed_check_exits_with_an_error_code_and_is_logged(self):
         self.ok("add", *ROUTE)
         FakeSerpApi.fail_after = 0
-        code, out, _ = self.run_cli("run")
+        code, out, _ = self.run_watch("run")
         self.assertEqual(code, 1)
         self.assertIn("Check failed: stopped after 0 of 1 live searches", out)
         self.assertIn("Check failed: stopped after 0 of 1 live searches", self.log())
@@ -219,7 +215,7 @@ class RunCommandTest(WatchCommandCase):
     def test_without_a_topic_nothing_is_spent_and_the_log_says_why(self):
         self.ok("add", *ROUTE)
         with mock.patch.dict(os.environ, {config.TOPIC_VAR: ""}):
-            code, _, err = self.run_cli("run")
+            code, _, err = self.run_watch("run")
         self.assertEqual(code, 1)
         self.assertEqual(err, "flightsleuth: no alert topic is set up, so nothing was checked. Run: py -m flightsleuth watch setup\n")
         self.assertIn("  Nothing was checked: no alert topic is set up", self.log())
@@ -229,7 +225,7 @@ class RunCommandTest(WatchCommandCase):
         self.ok("add", *ROUTE)
         with mock.patch.object(watch, "run_due", side_effect=RuntimeError("boom")):
             with self.assertRaises(RuntimeError):
-                self.run_cli("run")
+                self.run_watch("run")
         self.assertIn("  The run stopped unexpectedly: RuntimeError('boom')\n", self.log())
 
     def test_a_dry_run_spends_nothing_and_writes_no_log(self):
@@ -317,12 +313,12 @@ class TestAlertCommandTest(WatchCommandCase):
 
     def test_before_setup_it_says_what_to_run(self):
         with mock.patch.dict(os.environ, {config.TOPIC_VAR: ""}):
-            code, _, err = self.run_cli("test-alert")
+            code, _, err = self.run_watch("test-alert")
         self.assertEqual((code, err), (1, "flightsleuth: no alert topic is set up yet. Run: py -m flightsleuth watch setup\n"))
 
     def test_a_message_ntfy_would_not_take_is_an_error(self):
         FakeNtfy.fail = urllib.error.URLError("no route to host")
-        code, out, err = self.run_cli("test-alert")
+        code, out, err = self.run_watch("test-alert")
         self.assertEqual((code, out), (1, ""))
         self.assertIn("the alert could not be sent: network error: no route to host", err)
 
@@ -342,9 +338,9 @@ class LimitCommandTest(WatchCommandCase):
 
     def test_the_new_ceiling_decides_what_can_be_added(self):
         self.ok("limit", "20")
-        self.assertEqual(self.run_cli("add", *ROUTE)[0], 1)
+        self.assertEqual(self.run_watch("add", *ROUTE)[0], 1)
         self.ok("limit", "400")
-        self.assertEqual(self.run_cli("add", *ROUTE)[0], 0)
+        self.assertEqual(self.run_watch("add", *ROUTE)[0], 0)
 
 
 class GateTest(unittest.TestCase):

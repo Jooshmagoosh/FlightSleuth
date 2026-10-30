@@ -13,7 +13,7 @@ except ImportError:
     raise unittest.SkipTest("tkinter is not installed, so the window cannot be tested") from None
 
 from flightsleuth import config, gui, watch
-from tests.fakes import FakeSerpApi, history_rows, install
+from tests.fakes import NO_FLIGHTS, FakeSerpApi, history_rows, install
 
 
 def rows(tree):
@@ -490,7 +490,7 @@ class NextStepWindowTest(unittest.TestCase):
     def test_it_goes_away_when_the_next_search_finds_no_fares(self):
         self.search()
         self.app.depart.set(date(2030, 3, 13))
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         with mock.patch.object(FakeSerpApi, "search", lambda self, query: empty):
             self.search()
         self.assertEqual(self.app.headline.get(), gui.NO_FARES)
@@ -795,7 +795,7 @@ class WatchWindowTest(unittest.TestCase):
     def test_a_search_that_finds_no_fares_greys_the_button_out_again_and_closes_the_small_window(self):
         self.search()
         self.open_watch()
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         self.app.depart.set(date(2030, 3, 13))
         with mock.patch.object(FakeSerpApi, "search", lambda fake, query: empty):
             self.search()

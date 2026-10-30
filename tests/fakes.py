@@ -3,10 +3,11 @@ import contextlib
 import io
 import json
 import os
+import sqlite3
 import tempfile
 from unittest import mock
 
-from flightsleuth import config, notify, providers, scan
+from flightsleuth import cli, config, notify, providers, scan
 from flightsleuth.history import History
 from flightsleuth.models import Explore
 from flightsleuth.providers import SerpApiProvider
@@ -175,10 +176,34 @@ class FakeSerpApi:
         return reply(query)
 
 
+STAMP = r"\d\d \w{3} \d\d:\d\d"  # a fetch time as the front ends print it, such as "08 Oct 14:02"
+
+
 def history_rows(table):
     """Every row of one table in the test's own history.db, oldest first."""
     with History() as history:
         return history.rows(table)
+
+
+def run_cli(*argv):
+    """Run the command line as somebody would. Returns the exit code, what it printed, and what it said on stderr."""
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = cli.main(list(argv))
+    return code, out.getvalue(), err.getvalue()
+
+
+def endpoints():
+    """What each search sent to the fake asked for, in order, with the market when it named one."""
+    return [query.endpoint + (f":{query.market}" if query.market else "") for query in FakeSerpApi.searches]
+
+
+def age_the_cache(hours):
+    """Make every saved reply this much older. A fake clock moves the code on, not the cache's own clock."""
+    db = sqlite3.connect(config.cache_path())
+    with db:
+        db.execute("UPDATE responses SET fetched_at = fetched_at - ?", (hours * 3600,))
+    db.close()
 
 
 class FakeNtfy:

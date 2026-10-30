@@ -1,7 +1,6 @@
 """The run that checks the watches, on a fake clock and the fake price source. Nothing here reaches a network."""
 import json
 import os
-import sqlite3
 import statistics
 import unittest
 import urllib.error
@@ -13,7 +12,7 @@ from flightsleuth import config, notify, render, scan, watch
 from flightsleuth.errors import UserError
 from flightsleuth.history import History
 from flightsleuth.serpapi import SerpApiError
-from tests.fakes import FakeNtfy, FakeSerpApi, install, rich_reply
+from tests.fakes import NO_FLIGHTS, STAMP, FakeNtfy, FakeSerpApi, age_the_cache, endpoints, install, rich_reply
 
 NOW = datetime(2030, 1, 10, 12, 0, tzinfo=timezone.utc)  # the fake clock starts on a Thursday, at midday
 TODAY = NOW.date()
@@ -22,8 +21,6 @@ LONDON = watch.trip("JFK", "LHR", DEPART, BACK)
 TITLE = "JFK -> LHR, Tue 12 Mar - Tue 19 Mar"
 MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
 TOPIC = "flightsleuth-test-topic"
-STAMP = r"\d\d \w{3} \d\d:\d\d"  # a fetch time, such as "08 Oct 14:02"
-EMPTY = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
 NO_NETWORK = urllib.error.URLError("no route to host")
 
 
@@ -33,16 +30,6 @@ def daily_lows(*prices, last=TODAY):
     return [[int((start + timedelta(days=n)).timestamp()), price] for n, price in enumerate(prices)]
 
 
-def endpoints():
-    return [query.endpoint for query in FakeSerpApi.searches]
-
-
-def age_the_cache(hours):
-    """Make every saved reply this much older. The fake clock moves the watches on, not the cache's own clock."""
-    db = sqlite3.connect(config.cache_path())
-    with db:
-        db.execute("UPDATE responses SET fetched_at = fetched_at - ?", (hours * 3600,))
-    db.close()
 
 
 class RunCase(unittest.TestCase):
@@ -157,7 +144,7 @@ class CheckTest(RunCase):
 
     def test_a_reply_with_no_fares_is_a_finished_check(self):
         self.add()
-        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: NO_FLIGHTS):
             report = self.run_at()
         self.assertEqual(report.lines, [f"{TITLE}: No fares were listed. 1 search."])
         self.assertEqual(self.last("finished", "outcome", "price"), (1, "no fares", None))
@@ -376,7 +363,7 @@ class ReturnFlightsTest(RunCase):
         def search(fake, query):
             FakeSerpApi.searches.append(query)
             if query.departure_token and query.departure_token.split(":")[2] in airlines:
-                return EMPTY
+                return NO_FLIGHTS
             return rich_reply(query)
 
         return mock.patch.object(FakeSerpApi, "search", search)

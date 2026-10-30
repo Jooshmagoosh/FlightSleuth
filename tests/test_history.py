@@ -7,7 +7,7 @@ from unittest import mock
 
 from flightsleuth import cli, config, providers, scan
 from flightsleuth.errors import UserError
-from tests.fakes import FakeSerpApi, history_rows, install, reply
+from tests.fakes import NO_FLIGHTS, FakeSerpApi, history_rows, install, reply
 from tests.test_providers import CheapSource
 
 
@@ -89,7 +89,7 @@ class HistoryTest(unittest.TestCase):
         )
 
     def test_a_reply_with_no_fares_records_the_call_but_no_price(self):
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         with mock.patch.object(FakeSerpApi, "search", lambda self, query: empty):
             self.search()
         self.assertEqual(history_rows("price_points"), [])
