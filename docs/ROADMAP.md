@@ -552,6 +552,51 @@ For the owner to confirm or overturn:
 - **The trigger's hour may move with the clocks.** Built on 2026-10-09 it read 13:00 UTC for
   9 in the morning; after the clocks change it may start at 8. The run does not care when.
 
+## Refinement: built, awaiting review (branch `refine-code`)
+
+Asked for by the owner on 2026-10-30, between Phase 4 and Phase 5: refine the code, debloat it,
+and make it easier to service. Not a phase of the brief, so it has no gate of its own. The rule
+held throughout: nothing the program does changed, and every commit kept the suite green. The
+suite is still 650 tests. Some now call the new names (`rows("price_points")` for
+`price_points()`, `lookup` for `Cache.get`), and no value any test expects was changed.
+
+- [x] `history.py`: one `_add` writes every table from a dict of column to value, in place of
+      ten methods that each listed their columns twice; one `rows(table)` in place of ten readers
+- [x] `History()` and `Cache()` open their usual file and close themselves in a `with` block;
+      nine `try`/`finally` blocks went. `Cache.get`, used only by its tests, went too
+- [x] The watch run in named steps: `_Check` (`run`, `_judge`, `_confirm`, `_alert`),
+      `_retire`, `_check_all` and `Report.say`, in place of a 127-line function of closures
+- [x] One parser function per command; the airport and traveller options written once
+- [x] Three self-contained steps out of `scan.plan`: `_pairs`, `_explore_months`, `_follow_ups`
+- [x] The window's two small boxes built from one pattern: `_small_window` and `_lay_out`
+- [x] `render.plural` for every "3 searches" and "1 day", in place of thirteen hand-written ones
+- [x] The tests' shared helpers in `tests/fakes.py`, in place of copies in up to five files
+
+What changed that anyone can see: `explore --help` now explains `--bags` and `--market`, as
+`search --help` always did.
+
+What it did not do is make the code much smaller. The core is the same size, about 6,075
+lines, because the new helpers carry docstrings the old repetition did not need; the tests are
+60 lines shorter. Most of what could be removed is whole features, and that is the owner's
+decision, so it is listed below rather than done.
+
+### For the owner to decide
+
+What the owner's own `history.db` shows in use up to 2026-10-30, and what each feature costs to
+keep. The counts are rough, from the names of the functions involved.
+
+- **The bake-off** (`bakeoff`): run once, on 2026-10-08, to decide the Momondo ruling. About
+  450 lines of the core (`bakeoff.py`, its command, two tables' writers) and 415 of tests. The
+  `why_first` sentence says it should be replaced when measured again, which is the one reason
+  to keep it; `site_prices` now gathers the same evidence a price at a time. The two tables
+  would stay in `history.db`, with their rows.
+- **Explore** (`explore`, and the `explore` strategy of `search`): two live calls ever, both to
+  record the fixtures. A region or anywhere has never been tried against the live service.
+  About 280 lines of the core and 450 of tests, and three fixtures.
+- **Smaller options**: `--strategy one-way` (never chosen by `auto`), `--deep`, `--thorough`,
+  `--split` and `--other-market`. Each is tens of lines, not hundreds, and nothing records
+  whether the owner has used them.
+
 ## Phase 5, web app: not started
 
 Gate: it installs to a phone home screen and receives a push alert.

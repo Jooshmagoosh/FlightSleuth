@@ -87,7 +87,7 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 | `serpapi.py` | SerpApi HTTP client, request builders and reply parsers for both engines. Searches reach it only through its adapter. |
 | `models.py` | `Query`, `Explore`, `Segment`, `Offer`, `Seller`, `Alternative`, `Check`, `Destination`, `Insights`, `SearchResult`. |
 | `cache.py` | Disposable SQLite cache of raw replies (`cache.db`). Pruned after any run that fetched something. |
-| `history.py` | Append-only tables in `history.db`. Never cleared. Four of them hold the watches. |
+| `history.py` | Append-only tables in `history.db`. Never cleared. Four of them hold the watches. Each `add_*` builds a dict of column to value and hands it to `_add`; `rows(table)` reads one back. |
 | `render.py` | Wording shared by both front ends, including the headline rules, every catch and the next step. Also the words of an alert, of a check's outcome, of `watch list` and of the budget's sums. |
 | `watch.py` | Watches: the three rules, what counts as news, where a watch stands, the budget, and `run_due`, which checks what is due. Its searches go through `scan`; its alerts through `notify`. |
 | `notify.py` | Sends one alert to ntfy. With `serpapi.py`, one of the only two modules that reach a network. |
@@ -96,7 +96,7 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 | `bakeoff.py` | Route file, budget sharing, recording and the report. Its calls go through `scan`. |
 | `cli.py`, `gui.py` | The two front ends. They hold no search logic. |
 | `config.py` | Data folder, API key, run mode, and the settings kept beside the key: the ntfy topic and server, and the watches' monthly ceiling. |
-| `tests/fakes.py` | Fake SerpApi registered in the real one's place, a fake ntfy, plus isolation from the real key, cache, history, `.env`, browser, keyboard and phone. `FakeSerpApi.rich` makes it reply as real replies do, with tokens; `FakeSerpApi.insights` sets what a listing says about its price. |
+| `tests/fakes.py` | Fake SerpApi registered in the real one's place, a fake ntfy, plus isolation from the real key, cache, history, `.env`, browser, keyboard and phone. `FakeSerpApi.rich` makes it reply as real replies do, with tokens; `FakeSerpApi.insights` sets what a listing says about its price. Also the helpers every test file shares: `run_cli`, `history_rows`, `endpoints`, `age_the_cache`, `NO_FLIGHTS` and `STAMP`. Add a helper here rather than copying one into a test file. |
 
 ## How the pieces fit
 
@@ -124,6 +124,8 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
 - **Provenance.** Sources return offers without it; `scan` stamps `source`, `fetched_at` and
   `verified_live` on every offer. `fetched_at` is the time the source reports when it reports one
   (SerpApi's `processed_at`), else this machine's clock when the reply landed.
+- **Opening the stores.** `History()` and `Cache()` open their usual file and close themselves in a
+  `with` block: `with History() as history:`. Only `scan._Session` holds one open across calls.
 - **History.** A price point is written only when a plain search is fetched live, as it lands.
   Plain means no market, no bags and sorted by price: `price_points` has no column for the others,
   and a test pins its columns. Follow-ups write a `provider_calls` row under their own endpoint and
@@ -161,8 +163,12 @@ Everything else spends credits: any `search`, `explore` or `bakeoff` without `--
   - `watch.budget` sets the watches against `Provider.allowance`, with `HOLD` searches kept
     back for each. `watch.add` refuses what does not fit; a run spends only what the account,
     the monthly ceiling (`config.watch_monthly`) and its own `--max-searches` leave.
-  - `render.py` holds every word: `alert`, `outage`, `checked`, `watch_lines`, `budget_lines`.
-    It imports `watch` for type hints only, because `watch` imports it.
+  - One check is a `watch._Check`: `run` makes the listing, `_judge` decides whether a price is
+    worth an alert, `_confirm` fetches the return flights and the sellers, `_alert` sends it. Each
+    step that ends the check calls `close`, which writes its `watch_checks` row.
+  - `render.py` holds every word: `alert`, `outage`, `checked`, `watch_lines`, `budget_lines`, and
+    `plural` for any count with its noun. It imports `watch` for type hints only, because `watch`
+    imports it.
   - A round-trip check is not a plain search, so it writes no `price_points` row. A one-way's is,
     and does.
   - Both front ends add a watch through `watch.add`. The window does it off the main thread,
