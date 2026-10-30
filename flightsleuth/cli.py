@@ -104,15 +104,44 @@ def _saving_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--dry-run", action="store_true", help="show what it would cost, then stop")
 
 
+def _route(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("origin", type=_airports, help="departure airport(s), e.g. JFK or JFK,EWR,LGA")
+    parser.add_argument("destination", type=_airports, help="arrival airport(s), e.g. LHR or LHR,LGW")
+
+
+def _travellers(parser: argparse.ArgumentParser, *, priced: bool = True) -> None:
+    """Who flies and how, for every command that searches. `priced` adds bags and the country priced for."""
+    parser.add_argument("--stops", choices=list(STOPS), default="any", help="most stops allowed (default: any)")
+    parser.add_argument("--cabin", choices=list(CABINS), default="economy")
+    parser.add_argument("--adults", type=_count, default=1)
+    parser.add_argument("--currency", default="USD")
+    if priced:
+        parser.add_argument("--bags", type=_count, default=0, metavar="N", help="carry-on bags every price must include")
+        parser.add_argument(
+            "--market", type=_country, default=None, metavar="CC", help="price it as sold in this country, e.g. gb"
+        )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="flightsleuth", description="Find the cheapest fares for a route by scanning dates and airports."
     )
     commands = parser.add_subparsers(dest="command", required=True)
+    _search_parser(commands.add_parser("search", help="find the cheapest fares for a route"))
+    _explore_parser(commands.add_parser("explore", help="find cheap places to go when the destination is open"))
+    _bakeoff_parser(
+        commands.add_parser("bakeoff", help="measure each price source against SerpApi on a file of routes")
+    )
+    _watch_parser(commands.add_parser("watch", help="keep an eye on a fare and be told on your phone when it drops"))
+    commands.add_parser("gui", help="open the search window")
+    commands.add_parser("quota", help="show how many SerpApi searches are left")
+    cache = commands.add_parser("cache", help="show or clear saved results")
+    cache.add_argument("--clear", action="store_true")
+    return parser
 
-    search = commands.add_parser("search", help="find the cheapest fares for a route")
-    search.add_argument("origin", type=_airports, help="departure airport(s), e.g. JFK or JFK,EWR,LGA")
-    search.add_argument("destination", type=_airports, help="arrival airport(s), e.g. LHR or LHR,LGW")
+
+def _search_parser(search: argparse.ArgumentParser) -> None:
+    _route(search)
     search.add_argument("--depart", type=_date, metavar="YYYY-MM-DD", help="the day to leave")
     search.add_argument(
         "--window",
@@ -129,14 +158,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--flex", type=_count, default=0, metavar="DAYS", help="also try departing this many days either side"
     )
     search.add_argument("--split", action="store_true", help="also price each round trip as two one-way tickets")
-    search.add_argument("--stops", choices=list(STOPS), default="any", help="most stops allowed (default: any)")
-    search.add_argument("--cabin", choices=list(CABINS), default="economy")
-    search.add_argument("--adults", type=_count, default=1)
-    search.add_argument("--currency", default="USD")
-    search.add_argument("--bags", type=_count, default=0, metavar="N", help="carry-on bags every price must include")
-    search.add_argument(
-        "--market", type=_country, default=None, metavar="CC", help="price it as sold in this country, e.g. gb"
-    )
+    _travellers(search)
     search.add_argument(
         "--deep", action="store_true", help="slower search that matches the Google Flights site more closely"
     )
@@ -185,25 +207,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _saving_options(search)
 
-    explore = commands.add_parser("explore", help="find cheap places to go when the destination is open")
+
+def _explore_parser(explore: argparse.ArgumentParser) -> None:
     explore.add_argument("origin", type=_airports, help="departure airport(s), e.g. MCO or MCO,SFB")
     where = explore.add_mutually_exclusive_group()
-    where.add_argument("--to", dest="destination", type=_airports, default=None, help="one airport, to ask when it is cheapest")
+    where.add_argument(
+        "--to", dest="destination", type=_airports, default=None, help="one airport, to ask when it is cheapest"
+    )
     where.add_argument("--area", type=_area, default=None, help=f"a region: {', '.join(AREAS)}, or a Google id")
     explore.add_argument(
         "--month", type=_count, default=0, metavar="N", help="1 to 12 (default: any time in the next six months)"
     )
     explore.add_argument("--length", choices=list(LENGTHS), default="week", help="trip length (default: week)")
-    explore.add_argument("--stops", choices=list(STOPS), default="any", help="most stops allowed (default: any)")
-    explore.add_argument("--cabin", choices=list(CABINS), default="economy")
-    explore.add_argument("--adults", type=_count, default=1)
-    explore.add_argument("--currency", default="USD")
-    explore.add_argument("--bags", type=_count, default=0, metavar="N")
-    explore.add_argument("--market", type=_country, default=None, metavar="CC")
+    _travellers(explore)
     explore.add_argument("--top", type=_count, default=20, metavar="N", help="places to list (default: 20)")
     _saving_options(explore)
 
-    measure = commands.add_parser("bakeoff", help="measure each price source against SerpApi on a file of routes")
+
+def _bakeoff_parser(measure: argparse.ArgumentParser) -> None:
     measure.add_argument("routes", type=Path, nargs="?", help="the route file, e.g. docs/routes.txt")
     which = measure.add_mutually_exclusive_group()
     which.add_argument(
@@ -234,11 +255,11 @@ def build_parser() -> argparse.ArgumentParser:
     measure.add_argument("--report", action="store_true", help="print the report from what is already recorded; free")
     _saving_options(measure)
 
-    watching = commands.add_parser("watch", help="keep an eye on a fare and be told on your phone when it drops")
+
+def _watch_parser(watching: argparse.ArgumentParser) -> None:
     actions = watching.add_subparsers(dest="action", required=True)
     add = actions.add_parser("add", help="watch the cheapest fare on fixed dates; adding costs nothing")
-    add.add_argument("origin", type=_airports, help="departure airport(s), e.g. JFK or JFK,EWR,LGA")
-    add.add_argument("destination", type=_airports, help="arrival airport(s), e.g. LHR or LHR,LGW")
+    _route(add)
     add.add_argument("--depart", type=_date, required=True, metavar="YYYY-MM-DD", help="the day to leave")
     back = add.add_mutually_exclusive_group(required=True)
     back.add_argument("--return", dest="return_date", type=_date, metavar="YYYY-MM-DD")
@@ -257,12 +278,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-typical", action="store_true", help="do not alert just because it is below Google's typical range"
     )
     add.add_argument("--every", type=_count, default=1, metavar="DAYS", help="days between checks (default: 1)")
-    add.add_argument("--stops", choices=list(STOPS), default="any", help="most stops allowed (default: any)")
-    add.add_argument("--cabin", choices=list(CABINS), default="economy")
-    add.add_argument("--adults", type=_count, default=1)
-    add.add_argument("--currency", default="USD")
+    _travellers(add, priced=False)
     add.add_argument("--dry-run", action="store_true", help="show whether the searches cover it, and add nothing")
-    shown = actions.add_parser("list", help="show each watch: its last check, last price, next due date and searches used")
+    shown = actions.add_parser(
+        "list", help="show each watch: its last check, last price, next due date and searches used"
+    )
     shown.add_argument("--all", action="store_true", help="also show watches that were removed or have retired")
     remove = actions.add_parser("remove", help="stop checking a watch; its history is kept")
     remove.add_argument("number", type=_count, help="the watch's number, as `watch list` shows it")
@@ -276,12 +296,6 @@ def build_parser() -> argparse.ArgumentParser:
     actions.add_parser("test-alert", help="send a test alert to your phone; makes no search")
     limit = actions.add_parser("limit", help="show or set the most searches the watches may use in a month")
     limit.add_argument("searches", type=_count, nargs="?", help="the new limit")
-
-    commands.add_parser("gui", help="open the search window")
-    commands.add_parser("quota", help="show how many SerpApi searches are left")
-    cache = commands.add_parser("cache", help="show or clear saved results")
-    cache.add_argument("--clear", action="store_true")
-    return parser
 
 
 def _searches(count: int, kind: str = "") -> str:
