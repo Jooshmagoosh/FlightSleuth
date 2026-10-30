@@ -15,7 +15,7 @@ from datetime import date, datetime, timedelta, timezone
 from . import config, links, notify, providers, render, scan
 from .errors import UserError
 from .history import History
-from .models import Insights, Query
+from .models import Check, Insights, Query
 from .providers import Allowance, Capability
 
 MAX_WATCHES = 3
@@ -205,14 +205,9 @@ def standings(history: History) -> list[Standing]:
     return found
 
 
-def _month_on(day: date) -> date:
-    """The same day a month later, or that month's last day where it is shorter."""
-    year, month = divmod(day.year * 12 + day.month, 12)
-    return date(year, month + 1, min(day.day, calendar.monthrange(year, month + 1)[1]))
-
-
-def _month_back(day: date) -> date:
-    year, month = divmod(day.year * 12 + day.month - 2, 12)
+def _months_on(day: date, months: int) -> date:
+    """The same day that many months later (earlier if negative), or that month's last day where it is shorter."""
+    year, month = divmod(day.year * 12 + day.month - 1 + months, 12)
     return date(year, month + 1, min(day.day, calendar.monthrange(year, month + 1)[1]))
 
 
@@ -282,7 +277,7 @@ class Budget:
 def month_start(allowance: Allowance, today: date) -> date:
     """The first day of the plan's month that today is in. Thirty days back if the account names no reset."""
     if allowance.resets_on and allowance.resets_on > today:
-        return _month_back(allowance.resets_on)
+        return _months_on(allowance.resets_on, -1)
     return today - timedelta(days=30)
 
 
@@ -302,7 +297,7 @@ def budget(
     """
     known = allowance.resets_on is not None and allowance.resets_on > today
     reset = allowance.resets_on if known else today + timedelta(days=30)
-    after = _month_on(reset)
+    after = _months_on(reset, 1)
 
     def span(start: date, end: date, available: int) -> Span:
         # A watch already overdue is checked today, and its interval counts from then.
@@ -503,6 +498,10 @@ class Report:
     spent: int = 0
     failed: bool = False  # a check could not be made, and stays due
 
+    def say(self, standing: Standing, text: str) -> None:
+        """Add a line about one watch, named by its route and dates."""
+        self.lines.append(f"{render.watch_title(standing.watch.trip)}: {text}")
+
 
 class _Room:
     """How many searches a run may still make, and what it was that ran out when that is none."""
@@ -546,33 +545,19 @@ def run_due(*, now: datetime | None = None, max_searches: int | None = None, dry
     what it could cost, and writes nothing.
     """
     now = now or datetime.now().astimezone()
-    today = now.date()
     report = Report()
-    history = History()
-    try:
-        active = []
-        for standing in standings(history):
-            if standing.ended:
-                continue
-            if standing.watch.trip.depart_date < today:
-                if not dry_run:
-                    history.add_watch_event(standing.watch.id, "retired", "its departure date has passed", now)
-                report.lines.append(f"{render.watch_title(standing.watch.trip)}: retired. Its departure date has passed.")
-                continue
-            active.append(standing)
-        due = [standing for standing in active if standing.due <= today]
+    with History() as history:
+        active = _retire(history, now, report, write=not dry_run)
+        due = [standing for standing in active if standing.due <= now.date()]
         for standing in active:
             if standing not in due:
-                report.lines.append(f"{render.watch_title(standing.watch.trip)}: not due until {render.day(standing.due)}.")
+                report.say(standing, f"not due until {render.day(standing.due)}.")
         if not active:
             report.lines.append("There are no watches to check.")
         if dry_run:
             for standing in due:
-                most = scan.plan(replace(request(standing.watch), check=True, look="confirm"), today=today).total
-                report.lines.append(
-                    f"{render.watch_title(standing.watch.trip)}: due. 1 search, and up to {most - 1} more "
-                    f"if the price is worth an alert."
-                )
+                most = scan.plan(replace(request(standing.watch), check=True, look="confirm"), today=now.date()).total
+                report.say(standing, f"due. 1 search, and up to {most - 1} more if the price is worth an alert.")
             return report
         if not due and not any(standing.unsent for standing in active):
             return report
@@ -581,40 +566,51 @@ def run_due(*, now: datetime | None = None, max_searches: int | None = None, dry
         # An alert that never reached ntfy goes first, while its price is still recent. It needs no search.
         for standing in active:
             _resend(history, standing, now, report)
-        if not due:
-            return report
-
-        try:
-            allowance, per_check = account()
-        except UserError as e:
-            # Nothing can be budgeted without the account, so nothing is spent.
-            detail = render.checked("failed", "", error=f"the account could not be read: {str(e).rstrip('.')}")
-            for standing in due:
-                history.add_watch_check(
-                    standing.watch.id, checked_at=now, day=today, finished=False, outcome="failed", detail=detail
-                )
-                report.lines.append(f"{render.watch_title(standing.watch.trip)}: {detail}")
-            report.failed = True
+        if due:
+            _check_all(history, [standing.watch.id for standing in due], now, max_searches, report)
             _tell_of_outages(history, now, report)
-            return report
-        ceiling = config.watch_monthly()
-        used = used_since(history, month_start(allowance, today)) if allowance else 0
-        room = _Room(allowance, ceiling, used, max_searches)
+    return report
 
-        again = {standing.watch.id: standing for standing in standings(history)}  # as they stand after any resend
-        fetched: set[scan.Request] = set()
-        for standing in due:
-            detail, searches, failed = _look(
-                history, again[standing.watch.id], room, fetched, per_check, now=now, today=today
+
+def _retire(history: History, now: datetime, report: Report, *, write: bool) -> list[Standing]:
+    """The watches still being checked, after retiring those whose departure date has passed."""
+    active = []
+    for standing in standings(history):
+        if standing.ended:
+            continue
+        if standing.watch.trip.depart_date < now.date():
+            if write:
+                history.add_watch_event(standing.watch.id, "retired", "its departure date has passed", now)
+            report.say(standing, "retired. Its departure date has passed.")
+            continue
+        active.append(standing)
+    return active
+
+
+def _check_all(history: History, numbers: list[int], now: datetime, max_searches: int | None, report: Report) -> None:
+    """Check each of the watches named, in turn, inside what the account, the ceiling and the run allow."""
+    latest = {standing.watch.id: standing for standing in standings(history)}  # as they stand after any resend
+    try:
+        allowance, per_check = account()
+    except UserError as e:
+        # Nothing can be budgeted without the account, so nothing is spent.
+        detail = render.checked("failed", "", error=f"the account could not be read: {str(e).rstrip('.')}")
+        for number in numbers:
+            history.add_watch_check(
+                number, checked_at=now, day=now.date(), finished=False, outcome="failed", detail=detail
             )
-            count = "" if not searches else f" {searches} search{'es' if searches != 1 else ''}."
-            report.lines.append(f"{render.watch_title(standing.watch.trip)}: {detail}{count}")
-            report.spent += searches
-            report.failed = report.failed or failed
-        _tell_of_outages(history, now, report)
-        return report
-    finally:
-        history.close()
+            report.say(latest[number], detail)
+        report.failed = True
+        return
+    used = used_since(history, month_start(allowance, now.date())) if allowance else 0
+    room = _Room(allowance, config.watch_monthly(), used, max_searches)
+    fetched: set[scan.Request] = set()
+    for number in numbers:
+        detail, searches, failed = _Check(history, latest[number], room, now).run(fetched, per_check)
+        count = "" if not searches else f" {searches} search{'es' if searches != 1 else ''}."
+        report.say(latest[number], f"{detail}{count}")
+        report.spent += searches
+        report.failed = report.failed or failed
 
 
 def _resend(history: History, standing: Standing, now: datetime, report: Report) -> None:
@@ -636,7 +632,7 @@ def _resend(history: History, standing: Standing, now: datetime, report: Report)
     )
     price = render.money(waiting["price"], standing.watch.trip.currency)
     went = f"still did not go: {error.rstrip('.')}." if error else "has now been sent."
-    report.lines.append(f"{render.watch_title(standing.watch.trip)}: the alert about {price} that did not go before {went}")
+    report.say(standing, f"the alert about {price} that did not go before {went}")
 
 
 def _tell_of_outages(history: History, now: datetime, report: Report) -> None:
@@ -644,142 +640,160 @@ def _tell_of_outages(history: History, now: datetime, report: Report) -> None:
     for standing in standings(history):
         if standing.ended or standing.outage_told or now.date() < standing.overdue_since:
             continue
-        found = standing.watch
         said = standing.last["detail"] if standing.last else ""
         last_day = date.fromisoformat(standing.done["day"]) if standing.done else None
-        error = _send(notify.Alert(*render.outage(found.trip, last_day, standing.due, said)))
+        error = _send(notify.Alert(*render.outage(standing.watch.trip, last_day, standing.due, said)))
         if error:
-            told = f"it has gone unchecked, and telling you so failed: {error.rstrip('.')}."
+            report.say(standing, f"it has gone unchecked, and telling you so failed: {error.rstrip('.')}.")
         else:
-            history.add_watch_event(found.id, "outage", said, now)
-            told = "you have been told that it has gone unchecked."
-        report.lines.append(f"{render.watch_title(found.trip)}: {told}")
+            history.add_watch_event(standing.watch.id, "outage", said, now)
+            report.say(standing, "you have been told that it has gone unchecked.")
 
 
-def _look(
-    history: History, standing: Standing, room: _Room, fetched: set, per_check: int, *, now: datetime, today: date
-) -> tuple[str, int, bool]:
-    """Check one watch and record it. Returns what it came to, what it spent, and whether it has to be tried again."""
-    found = standing.watch
-    currency = found.trip.currency
-    before = history.spent()
-    record: dict = {}
-    numbers: list[int] = []
+class _Check:
+    """One check of one watch: the listing, then the closer look if its price is worth an alert.
 
-    def paid() -> int:
-        return round(history.spent() - before)
+    Each step that ends the check calls `close`, which writes the `watch_checks` row with what
+    `found` holds by then, and returns what the check came to, what it spent, and whether it failed.
+    """
 
-    def close(outcome: str, *, finished: bool = True, **said) -> tuple[str, int, bool]:
+    def __init__(self, history: History, standing: Standing, room: _Room, now: datetime):
+        self.history = history
+        self.standing = standing
+        self.watch = standing.watch
+        self.room = room
+        self.now = now
+        self.today = now.date()
+        self.spent_before = history.spent()
+        self.found: dict = {}  # the columns of the check's row, filled in as they are learned
+        self.number: int | None = None  # the row's id, once it is written
+
+    def paid(self) -> int:
+        return round(self.history.spent() - self.spent_before)
+
+    def close(self, outcome: str, *, finished: bool = True, **said) -> tuple[str, int, bool]:
+        found = self.found
         detail = render.checked(
-            outcome, currency, price=record.get("price"), confirmed=record.get("confirmed_price"), **said
+            outcome, self.watch.trip.currency, price=found.get("price"), confirmed=found.get("confirmed_price"), **said
         )
-        searches = paid()
-        room.spend(searches)
-        numbers.append(
-            history.add_watch_check(
-                found.id,
-                checked_at=now,
-                day=today,
-                finished=finished,
-                outcome=outcome,
-                detail=detail,
-                searches=searches,
-                **record,
-            )
+        searches = self.paid()
+        self.room.spend(searches)
+        self.number = self.history.add_watch_check(
+            self.watch.id,
+            checked_at=self.now,
+            day=self.today,
+            finished=finished,
+            outcome=outcome,
+            detail=detail,
+            searches=searches,
+            **found,
         )
         return detail, searches, outcome == "failed"
 
-    # The listing: one search, unless another watch on the same dates has just paid for it.
-    asked = request(found)
-    shared = asked in fetched
-    if not shared and room.left is not None and room.left < per_check:
-        return close("skipped", finished=False, error=room.why)
-    try:
-        plan = scan.plan(asked, fresh=not shared, today=today)
-        outcome = scan.run(plan, max_searches=None if shared else room.left)
-    except UserError as e:
-        return close("failed", finished=False, error=str(e).rstrip("."))
-    fetched.add(asked)
-    result = outcome.results.get(plan.trips[0])
-    if result is None or result.cheapest is None:
-        return close("no fares")
-    first = scan.first_to_try(result, standing.empties)
-    if first is None:
-        record.update(price=result.cheapest.price, fetched_at=result.cheapest.fetched_at)
-        return close("known empty")
-    insights = result.insights
-    record.update(
-        price=first.price,
-        itinerary_key=first.outbound_key,
-        median=median(insights, today),
-        typical_range=insights.typical_range if insights else None,
-        fetched_at=first.fetched_at,
-    )
-    rules = fired(found, first.price, insights, today)
-    record["reasons"] = tuple(rule.rule for rule in rules)
-    reasons = [render.why(rule, first.price, currency) for rule in rules]
-    if not rules:
-        return close("quiet")
-    lowest = standing.lowest_alerted
-    if not is_news(first.price, lowest):
-        return close("repeat", lowest=lowest, bar=news_below(lowest))
-
-    # Worth an alert, so now its return flights and its sellers: up to HOLD more searches.
-    spare = None if room.left is None else room.left - paid()
-    if spare is not None and spare <= 0:
-        return close("not confirmed", reasons=reasons, error=room.why)
-    try:
-        # The listing fetched a moment ago is reused. A follow-up saved any longer ago is not: an
-        # alert is only ever sent on return flights fetched for this check.
-        closer = scan.plan(
-            replace(asked, check=True, look="confirm", known_empty=standing.empties),
-            today=today,
-            reserve=spare,
-            max_age_hours=CONFIRM_MINUTES / 60,
+    def run(self, fetched: set[scan.Request], per_check: int) -> tuple[str, int, bool]:
+        """The listing: one search, unless another watch on the same dates has just paid for it."""
+        asked = request(self.watch)
+        shared = asked in fetched
+        if not shared and self.room.left is not None and self.room.left < per_check:
+            return self.close("skipped", finished=False, error=self.room.why)
+        try:
+            plan = scan.plan(asked, fresh=not shared, today=self.today)
+            outcome = scan.run(plan, max_searches=None if shared else self.room.left)
+        except UserError as e:
+            return self.close("failed", finished=False, error=str(e).rstrip("."))
+        fetched.add(asked)
+        result = outcome.results.get(plan.trips[0])
+        if result is None or result.cheapest is None:
+            return self.close("no fares")
+        first = scan.first_to_try(result, self.standing.empties)
+        if first is None:
+            self.found.update(price=result.cheapest.price, fetched_at=result.cheapest.fetched_at)
+            return self.close("known empty")
+        insights = result.insights
+        self.found.update(
+            price=first.price,
+            itinerary_key=first.outbound_key,
+            median=median(insights, self.today),
+            typical_range=insights.typical_range if insights else None,
+            fetched_at=first.fetched_at,
         )
-        outcome = scan.run(closer)
-    except UserError as e:
-        return close("failed", finished=False, error=str(e).rstrip("."))
-    check = outcome.checks[0] if outcome.checks else None
-    if check is not None:
-        record["no_returns"] = tuple((offer.outbound_key, offer.price) for offer in check.failed)
-    confirmed = check.confirmed if check else None
-    if confirmed is None:
-        fresh = [pair for pair in record.get("no_returns", ()) if pair not in standing.empties]
-        if fresh:
-            return close("no return flights", reasons=reasons)
-        return close("not confirmed", reasons=reasons, error="there was no way left to fetch its return flights")
-    record.update(
-        confirmed_price=confirmed.price, itinerary_key=confirmed.itinerary_key, fetched_at=confirmed.fetched_at
-    )
-    # Still the listing's own rating. The sellers' reply carries a typical range too, but in both
-    # recorded pairs it was a different one ($540 to $1,850 against $480 to $830), so it is not
-    # borrowed for a listing that came with none.
-    rules = fired(found, confirmed.price, insights, today)
-    record["reasons"] = tuple(rule.rule for rule in rules)
-    reasons = [render.why(rule, confirmed.price, currency) for rule in rules]
-    if not rules:
-        return close("rose")
-    if not is_news(confirmed.price, lowest):
-        return close("repeat", lowest=lowest, bar=news_below(lowest))
+        reasons, stop = self._judge(first.price, insights, quiet="quiet")
+        if stop:
+            return stop
+        return self._confirm(asked, insights, reasons)
 
-    if not confirmed.verified_live:
-        # A one-way's fare is its listing, which the closer look read back from the cache. This
-        # check fetched it a moment ago, so it is not a saved price and must not be called one.
-        check = replace(check, confirmed=replace(confirmed, verified_live=True))
-    title, message, click = render.alert(check, reasons)
-    error = _send(notify.Alert(title, message, click))
-    said = close("alert not sent" if error else "alerted", reasons=reasons, error=error.rstrip("."))
-    history.add_watch_alert(
-        found.id,
-        numbers[-1],
-        price=confirmed.price,
-        title=title,
-        message=message,
-        click=click,
-        sent=not error,
-        error=error,
-        fetched_at=confirmed.fetched_at,
-        at=now,
-    )
-    return said
+    def _judge(
+        self, price: float, insights: Insights | None, *, quiet: str
+    ) -> tuple[list[str], tuple[str, int, bool] | None]:
+        """The reasons a price would be alerted, and the closed check if it will not be.
+
+        It will not be when no rule fires, which closes the check as `quiet`, or when the price is
+        one already alerted, which closes it as a repeat.
+        """
+        rules = fired(self.watch, price, insights, self.today)
+        self.found["reasons"] = tuple(rule.rule for rule in rules)
+        reasons = [render.why(rule, price, self.watch.trip.currency) for rule in rules]
+        if not rules:
+            return reasons, self.close(quiet)
+        lowest = self.standing.lowest_alerted
+        if not is_news(price, lowest):
+            return reasons, self.close("repeat", lowest=lowest, bar=news_below(lowest))
+        return reasons, None
+
+    def _confirm(self, asked: scan.Request, insights: Insights | None, reasons: list[str]) -> tuple[str, int, bool]:
+        """Worth an alert, so now its return flights and its sellers: up to HOLD more searches."""
+        spare = None if self.room.left is None else self.room.left - self.paid()
+        if spare is not None and spare <= 0:
+            return self.close("not confirmed", reasons=reasons, error=self.room.why)
+        try:
+            # The listing fetched a moment ago is reused. A follow-up saved any longer ago is not: an
+            # alert is only ever sent on return flights fetched for this check.
+            closer = scan.plan(
+                replace(asked, check=True, look="confirm", known_empty=self.standing.empties),
+                today=self.today,
+                reserve=spare,
+                max_age_hours=CONFIRM_MINUTES / 60,
+            )
+            outcome = scan.run(closer)
+        except UserError as e:
+            return self.close("failed", finished=False, error=str(e).rstrip("."))
+        check = outcome.checks[0] if outcome.checks else None
+        if check is not None:
+            self.found["no_returns"] = tuple((offer.outbound_key, offer.price) for offer in check.failed)
+        confirmed = check.confirmed if check else None
+        if confirmed is None:
+            if any(pair not in self.standing.empties for pair in self.found.get("no_returns", ())):
+                return self.close("no return flights", reasons=reasons)
+            return self.close("not confirmed", reasons=reasons, error="there was no way left to fetch its return flights")
+        self.found.update(
+            confirmed_price=confirmed.price, itinerary_key=confirmed.itinerary_key, fetched_at=confirmed.fetched_at
+        )
+        # Still the listing's own rating. The sellers' reply carries a typical range too, but in both
+        # recorded pairs it was a different one ($540 to $1,850 against $480 to $830), so it is not
+        # borrowed for a listing that came with none.
+        reasons, stop = self._judge(confirmed.price, insights, quiet="rose")
+        if stop:
+            return stop
+        if not confirmed.verified_live:
+            # A one-way's fare is its listing, which the closer look read back from the cache. This
+            # check fetched it a moment ago, so it is not a saved price and must not be called one.
+            check = replace(check, confirmed=replace(confirmed, verified_live=True))
+        return self._alert(check, reasons)
+
+    def _alert(self, check: Check, reasons: list[str]) -> tuple[str, int, bool]:
+        title, message, click = render.alert(check, reasons)
+        error = _send(notify.Alert(title, message, click))
+        said = self.close("alert not sent" if error else "alerted", reasons=reasons, error=error.rstrip("."))
+        self.history.add_watch_alert(
+            self.watch.id,
+            self.number,
+            price=check.confirmed.price,
+            title=title,
+            message=message,
+            click=click,
+            sent=not error,
+            error=error,
+            fetched_at=check.confirmed.fetched_at,
+            at=self.now,
+        )
+        return said
