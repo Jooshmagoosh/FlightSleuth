@@ -506,16 +506,8 @@ class App:
         if self._dialog is not None:
             self._dialog.lift()
             return
-        self._dialog = dialog = tk.Toplevel(self.root)
-        dialog.title(f"The price you found on {step.site}")
-        dialog.transient(self.root)
-        dialog.resizable(False, False)
-        dialog.protocol("WM_DELETE_WINDOW", self._close_dialog)
-        body = ttk.Frame(dialog, padding=12)
-        body.pack(fill="both", expand=True)
-        ttk.Label(body, text=f"The fare you are checking:\n{step.against}", justify="left").grid(
-            row=0, column=0, columnspan=2, sticky="w", pady=(0, 10)
-        )
+        self._dialog, body = self._small_window(f"The price you found on {step.site}", self._close_dialog)
+        intro = ttk.Label(body, text=f"The fare you are checking:\n{step.against}", justify="left")
         price = ttk.Entry(body, textvariable=self.found_price, width=12)
         fields = (
             (f"Price you found on {step.site}, in {step.trip.currency}", price),
@@ -529,19 +521,8 @@ class App:
                 ttk.Combobox(body, textvariable=self.found_held, values=list(HELD), width=25, state="readonly"),
             ),
         )
-        for row, (text, box) in enumerate(fields, 1):
-            ttk.Label(body, text=text).grid(row=row, column=0, sticky="w", padx=(0, 10), pady=3)
-            box.grid(row=row, column=1, sticky="w", pady=3)
-        ttk.Label(body, text="Only the price is needed. Leave the rest if you are not sure.", foreground="gray40").grid(
-            row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0)
-        )
-        buttons = ttk.Frame(body)
-        buttons.grid(row=len(fields) + 2, column=0, columnspan=2, sticky="e", pady=(10, 0))
-        self._save_button = ttk.Button(buttons, text="Save", default="active", command=self.save_found)
-        self._save_button.pack(side="left", padx=(0, 8))
-        ttk.Button(buttons, text="Close", command=self._close_dialog).pack(side="left")
-        dialog.bind("<Return>", lambda event: self.save_found())
-        dialog.bind("<Escape>", lambda event: self._close_dialog())
+        note = "Only the price is needed. Leave the rest if you are not sure."
+        self._save_button = _lay_out(body, intro, fields, note, ("Save", self.save_found), self._close_dialog)
         price.focus_set()
 
     def save_found(self) -> None:
@@ -602,19 +583,11 @@ class App:
             self._watch_dialog.lift()
             return
         trip, price = self._watched
-        self._watch_dialog = dialog = tk.Toplevel(self.root)
-        dialog.title("Watch this fare")
-        dialog.transient(self.root)
-        dialog.resizable(False, False)
-        dialog.protocol("WM_DELETE_WINDOW", self._close_watch)
-        body = ttk.Frame(dialog, padding=12)
-        body.pack(fill="both", expand=True)
+        self._watch_dialog, body = self._small_window("Watch this fare", self._close_watch)
         about = [f"{watch_title(trip)}: the cheapest fare on these dates, with any airline.", price]
         if trip.bags or trip.market:
             about.append("A watch prices the fare as an ordinary search does: no carry-on bags added, and no other country's prices.")
-        ttk.Label(body, text="\n".join(about), justify="left", wraplength=self._font.measure("0") * 80).grid(
-            row=0, column=0, columnspan=2, sticky="w", pady=(0, 10)
-        )
+        intro = ttk.Label(body, text="\n".join(about), justify="left", wraplength=self._font.measure("0") * 80)
         below = ttk.Entry(body, textvariable=self.watch_below, width=12)
         fields = (
             (f"Tell me when it is below this price, in {trip.currency}", below),
@@ -631,20 +604,20 @@ class App:
                 ttk.Spinbox(body, from_=1, to=watch.LONGEST_INTERVAL, textvariable=self.watch_every, width=4),
             ),
         )
-        for row, (text, box) in enumerate(fields, 1):
-            ttk.Label(body, text=text).grid(row=row, column=0, sticky="w", padx=(0, 10), pady=3)
-            box.grid(row=row, column=1, sticky="w", pady=3)
-        ttk.Label(body, text=WATCH_NOTE, foreground="gray40", justify="left").grid(
-            row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0)
-        )
-        buttons = ttk.Frame(body)
-        buttons.grid(row=len(fields) + 2, column=0, columnspan=2, sticky="e", pady=(10, 0))
-        self._add_button = ttk.Button(buttons, text="Watch", default="active", command=self.add_watch)
-        self._add_button.pack(side="left", padx=(0, 8))
-        ttk.Button(buttons, text="Close", command=self._close_watch).pack(side="left")
-        dialog.bind("<Return>", lambda event: self.add_watch())
-        dialog.bind("<Escape>", lambda event: self._close_watch())
+        self._add_button = _lay_out(body, intro, fields, WATCH_NOTE, ("Watch", self.add_watch), self._close_watch)
         below.focus_set()
+
+    def _small_window(self, title: str, close) -> tuple[tk.Toplevel, ttk.Frame]:
+        """A small window over the main one, which `close` closes. Returns it, and the frame to fill."""
+        dialog = tk.Toplevel(self.root)
+        dialog.title(title)
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+        dialog.protocol("WM_DELETE_WINDOW", close)
+        dialog.bind("<Escape>", lambda event: close())
+        body = ttk.Frame(dialog, padding=12)
+        body.pack(fill="both", expand=True)
+        return dialog, body
 
     def add_watch(self) -> None:
         """Set the watch against the searches there are, off the main thread, and keep it if they cover it."""
@@ -724,6 +697,28 @@ def _work(request: scan.Request, post) -> None:
         post(("error", str(e)))
     except Exception as e:  # nothing is watching this thread, so say it in the window
         post(("error", f"something unexpected went wrong: {e!r}"))
+
+
+def _lay_out(body: ttk.Frame, intro: ttk.Label, fields, note: str, action: tuple[str, object], close) -> ttk.Button:
+    """Fill a small window: what it is about, a label and a box for each field, a grey note, then its button and Close.
+
+    `action` is the button's text and what it does; Enter does the same. Returns the button.
+    """
+    intro.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
+    for row, (text, box) in enumerate(fields, 1):
+        ttk.Label(body, text=text).grid(row=row, column=0, sticky="w", padx=(0, 10), pady=3)
+        box.grid(row=row, column=1, sticky="w", pady=3)
+    ttk.Label(body, text=note, foreground="gray40", justify="left").grid(
+        row=len(fields) + 1, column=0, columnspan=2, sticky="w", pady=(6, 0)
+    )
+    buttons = ttk.Frame(body)
+    buttons.grid(row=len(fields) + 2, column=0, columnspan=2, sticky="e", pady=(10, 0))
+    text, act = action
+    button = ttk.Button(buttons, text=text, default="active", command=act)
+    button.pack(side="left", padx=(0, 8))
+    ttk.Button(buttons, text="Close", command=close).pack(side="left")
+    body.winfo_toplevel().bind("<Return>", lambda event: act())
+    return button
 
 
 def _watch_work(trip: Query, rules: dict, post) -> None:
