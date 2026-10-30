@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from . import config, links, render, scan, typed
+from . import links, render, scan, typed
 from .errors import UserError
 from .history import History
 from .models import Check, Offer, Query
@@ -133,8 +133,8 @@ def run_route(run: str, route: Route, search: scan.Plan, *, on_search=None, ask=
     confirmed = bool(check and check.confirmed)
 
     probed = _probe(trip, check.failed) if check and check.failed else None
-    history = History(config.history_path())
-    try:
+    with History() as history:
+
         def fare(measure, price, offers, *, same, detail, how=None):
             history.add_bakeoff_fare(
                 run, route.label, trip, measure, price, same_flights=same, how=how or _how(offers), detail=detail,
@@ -154,12 +154,10 @@ def run_route(run: str, route: Route, search: scan.Plan, *, on_search=None, ask=
         say(_route_lines(route, trip, base, confirmed, check, trip.currency))
         if ask and base is not None:
             for label, url in links.other_sites(trip):
-                typed = _typed(label, url, trip.currency, ask, open_link, say)
-                if typed is not None:
-                    price, same = typed
+                answer = _typed(label, url, trip.currency, ask, open_link, say)
+                if answer is not None:
+                    price, same = answer
                     fare(label.split(" (")[0], price, [], same=same, detail="typed from the site", how="typed")
-    finally:
-        history.close()
     return outcome
 
 
@@ -223,11 +221,8 @@ def new_run() -> str:
 
 def report() -> str:
     """Everything recorded, for each route's most recent bake-off, as plain text."""
-    history = History(config.history_path())
-    try:
-        fares, lookups = history.bakeoff_fares(), history.bakeoff_lookups()
-    finally:
-        history.close()
+    with History() as history:
+        fares, lookups = history.rows("bakeoff_fares"), history.rows("bakeoff_lookups")
     latest: dict[str, dict] = {}
     for row in fares:
         if row["measure"] == BASELINE:
@@ -243,7 +238,7 @@ def report() -> str:
         if row["measure"] != BASELINE and same_run(row):
             measured.setdefault(row["measure"], {})[row["route"]] = row
 
-    lines = [f"Bake-off report: {len(latest)} route{'s' if len(latest) != 1 else ''}", ""]
+    lines = [f"Bake-off report: {render.plural(len(latest), 'route')}", ""]
     body = []
     for route, row in latest.items():
         dates = render.day(date.fromisoformat(row["depart_date"]))

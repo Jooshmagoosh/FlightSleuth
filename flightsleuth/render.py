@@ -38,7 +38,7 @@ def day(d: date) -> str:
 
 
 def stops(count: int) -> str:
-    return "nonstop" if count == 0 else f"{count} stop{'s' if count > 1 else ''}"
+    return "nonstop" if count == 0 else plural(count, "stop")
 
 
 def times(offer: Offer) -> str:
@@ -393,7 +393,7 @@ def _unsent(trip: Query) -> list[str]:
     if trip.stops != "any":
         asked.append(_most_stops(trip))
     if trip.bags:
-        asked.append(f"{trip.bags} carry-on bag{'s' if trip.bags != 1 else ''} in the price")
+        asked.append(f"{plural(trip.bags, 'carry-on bag')} in the price")
     return asked
 
 
@@ -449,10 +449,10 @@ def summarise(
     first = trips[0]
     round_trip = first.return_date is not None
     kind = "round trip" if round_trip else "one way"
-    people = f"{first.adults} adult{'s' if first.adults != 1 else ''}"
+    people = plural(first.adults, "adult")
     title = f"{first.origin} -> {first.destination}, {kind}, {people}, {first.cabin}"
     if first.bags:
-        title += f", {first.bags} carry-on bag{'s' if first.bags != 1 else ''} in every price"
+        title += f", {plural(first.bags, 'carry-on bag')} in every price"
     if first.market:
         title += f", priced for {first.market.upper()}"
 
@@ -555,7 +555,8 @@ def watch_title(trip: Query) -> str:
     return f"{trip.origin} -> {trip.destination}, {_dates(trip)}"
 
 
-def _count(number: int, noun: str) -> str:
+def plural(number: int, noun: str) -> str:
+    """A count and its noun, such as "1 day" or "3 searches"."""
     return f"{number} {noun}" if number == 1 else f"{number} {noun}{'es' if noun.endswith('ch') else 's'}"
 
 
@@ -695,11 +696,11 @@ def watch_lines(standing: watch.Standing, now: datetime, resend_hours: int) -> l
     """One watch as `watch list` shows it: what it is, its rules, and where it stands."""
     found, trip = standing.watch, standing.watch.trip
     currency = trip.currency
-    people = f"{trip.adults} adult{'s' if trip.adults != 1 else ''}"
+    people = plural(trip.adults, "adult")
     kind = "round trip" if trip.return_date else "one way"
     limit = "" if trip.stops == "any" else f", {_most_stops(trip)}"
     lines = [f"{found.id}. {watch_title(trip)}, {kind}, {people}, {trip.cabin}{limit}"]
-    lines.append(f"   Alert when it is {_rules(found)}. Checked every {_count(found.every_days, 'day')}.")
+    lines.append(f"   Alert when it is {_rules(found)}. Checked every {plural(found.every_days, 'day')}.")
     last = standing.last
     if last is None:
         lines.append("   Last check: none yet.")
@@ -728,14 +729,14 @@ def watch_lines(standing: watch.Standing, now: datetime, resend_hours: int) -> l
 
 def _span_lines(span: watch.Span, have: str) -> list[str]:
     lines = [
-        f"  {watch_title(found.trip)}: {_count(count, 'check')}, one every {_count(found.every_days, 'day')}"
+        f"  {watch_title(found.trip)}: {plural(count, 'check')}, one every {plural(found.every_days, 'day')}"
         for found, count in span.checks
     ]
     cost = span.count * span.per_check
     each = "1 search" if span.per_check == 1 else f"{span.per_check} searches"
     lines.append(
-        f"  {_count(span.count, 'check')} at {each} each, and {span.hold} held back for each of "
-        f"{_count(span.watching, 'watch')} to confirm an alert: {cost} + {span.held} = {span.needed}"
+        f"  {plural(span.count, 'check')} at {each} each, and {span.hold} held back for each of "
+        f"{plural(span.watching, 'watch')} to confirm an alert: {cost} + {span.held} = {span.needed}"
     )
     verdict = f"so {span.spare} would be spare" if span.spare >= 0 else f"so that is {-span.spare} too many"
     return [*lines, f"  {have}, {verdict}."]
@@ -750,7 +751,7 @@ def budget_lines(budget: watch.Budget) -> list[str]:
         first = "In the next 30 days (the account did not say when its searches reset):"
     room = budget.ceiling - budget.used
     if budget.left <= room:
-        have = f"{_count(budget.left, 'search')} {'is' if budget.left == 1 else 'are'} left"
+        have = f"{plural(budget.left, 'search')} {'is' if budget.left == 1 else 'are'} left"
     else:
         have = (
             f"Watches have used {budget.used} of the {budget.ceiling} searches a month they may, "

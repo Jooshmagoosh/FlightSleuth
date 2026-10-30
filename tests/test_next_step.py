@@ -1,17 +1,15 @@
 import ast
-import contextlib
-import io
 import sqlite3
 import unittest
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
-from flightsleuth import cli, config, links, providers, scan, typed
+from flightsleuth import config, links, providers, scan, typed
 from flightsleuth.history import History
 from flightsleuth.models import Query
 from flightsleuth.render import UNCONFIRMED, summarise
-from tests.fakes import FakeSerpApi, install, rich_reply
+from tests.fakes import NO_FLIGHTS, STAMP, FakeSerpApi, history_rows, install, rich_reply, run_cli
 
 TODAY = date(2030, 1, 1)
 WHY = (
@@ -21,8 +19,6 @@ WHY = (
 ROUND_TRIP = Query("JFK,EWR", "LHR", date(2030, 3, 12), date(2030, 3, 19))
 FIXED = ("search", "JFK", "LHR", "--depart", "2030-03-12", "--return", "2030-03-19")
 MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
-EMPTY = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
-STAMP = r"\d\d \w{3} \d\d:\d\d"  # a time, such as "08 Oct 14:02"
 
 
 class FirstSiteTest(unittest.TestCase):
@@ -64,7 +60,7 @@ def summary(**changes):
 def no_returns(self, query):
     """Every return lookup comes back empty, so the closer look confirms nothing."""
     FakeSerpApi.searches.append(query)
-    return EMPTY if query.departure_token else rich_reply(query)
+    return NO_FLIGHTS if query.departure_token else rich_reply(query)
 
 
 class NextStepTest(unittest.TestCase):
@@ -74,21 +70,20 @@ class NextStepTest(unittest.TestCase):
         install(self)
         FakeSerpApi.rich = True
 
-    def run_cli(self, *argv):
-        out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            code = cli.main(list(argv))
-        self.assertEqual(code, 0, err.getvalue())
-        return out.getvalue()
+    def ok(self, *argv):
+        """Run the command line, insist that it succeeded, and return what it printed."""
+        code, out, err = run_cli(*argv)
+        self.assertEqual(code, 0, err)
+        return out
 
     def test_a_confirmed_fare_is_followed_by_the_momondo_link_and_what_was_measured(self):
-        out = self.run_cli(*FIXED, "--check")
+        out = self.ok(*FIXED, "--check")
         self.assertIn("Cheapest: $520 round trip, Tue 12 Mar - Tue 19 Mar\n", out)
         self.assertIn(f"\nCheck this fare on Momondo: {MOMONDO}\n  {WHY}\nCheck and book: ", out)
         self.assertNotIn("free way to confirm", out)
 
     def test_it_comes_before_the_google_link_and_the_other_three_sites(self):
-        out = self.run_cli(*FIXED, "--check")
+        out = self.ok(*FIXED, "--check")
         order = [out.index(text) for text in ("Check this fare on Momondo:", "Check and book:", "Same dates on Skyscanner:")]
         self.assertEqual(order, sorted(order))
         self.assertEqual(out.count("Same dates on "), 3)
@@ -96,7 +91,7 @@ class NextStepTest(unittest.TestCase):
         self.assertEqual(out.count(MOMONDO), 1)
 
     def test_a_fare_nobody_looked_up_is_told_that_checking_it_there_is_a_free_way_to_confirm_it(self):
-        out = self.run_cli(*FIXED)
+        out = self.ok(*FIXED)
         self.assertIn("Cheapest listed: $520 round trip, Tue 12 Mar - Tue 19 Mar (not yet confirmed)\n", out)
         self.assertIn(
             f"Check this fare on Momondo: {MOMONDO}\n"
@@ -109,7 +104,7 @@ class NextStepTest(unittest.TestCase):
     def test_so_is_a_fare_the_closer_look_could_not_confirm(self):
         FakeSerpApi.phantoms = 1
         with mock.patch.object(FakeSerpApi, "search", no_returns):
-            out = self.run_cli(*FIXED, "--check")
+            out = self.ok(*FIXED, "--check")
         self.assertIn("round trip, Tue 12 Mar - Tue 19 Mar (not confirmed)\n", out)
         self.assertIn("  Checking it on Momondo is a free way to confirm it", out)
 
@@ -119,31 +114,31 @@ class NextStepTest(unittest.TestCase):
         self.assertEqual(summary().caveat, UNCONFIRMED)
 
     def test_a_one_way_stays_as_it_was(self):
-        out = self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
+        out = self.ok("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
         self.assertNotIn("Check this fare", out)
         self.assertIn("Same dates on Momondo: https://www.momondo.com/flight-search/JFK-LHR/2030-03-12?sort=price_a", out)
         self.assertEqual(out.count("Same dates on "), 4)
 
     def test_so_do_two_one_way_tickets_that_beat_the_round_trip(self):
         FakeSerpApi.rich = False  # the plain fake prices a one-way at 200 and this round trip at 520
-        out = self.run_cli(*FIXED, "--split")
+        out = self.ok(*FIXED, "--split")
         self.assertIn("Cheapest: $400 as two one-way tickets", out)
         self.assertNotIn("Check this fare", out)
         self.assertEqual(out.count("Same dates on "), 4)
 
     def test_no_fares_means_no_next_step(self):
-        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
-            out = self.run_cli(*FIXED)
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: NO_FLIGHTS):
+            out = self.ok(*FIXED)
         self.assertNotIn("Momondo", out)
 
     def test_what_the_link_cannot_carry_is_named_so_like_is_compared_with_like(self):
-        out = self.run_cli(*FIXED, "--adults", "2", "--cabin", "business", "--stops", "1", "--bags", "1")
+        out = self.ok(*FIXED, "--adults", "2", "--cabin", "business", "--stops", "1", "--bags", "1")
         self.assertIn(
             "  The link carries only the airports and dates. Set the page to 2 adults, business class, "
             "1 stop or fewer, 1 carry-on bag in the price before comparing prices.\n",
             out,
         )
-        self.assertNotIn("The link carries only", self.run_cli(*FIXED, "--fresh"))
+        self.assertNotIn("The link carries only", self.ok(*FIXED, "--fresh"))
 
     def test_the_step_knows_which_fare_a_price_found_there_is_set_against(self):
         listed = summary().next_step
@@ -164,7 +159,7 @@ class NextStepTest(unittest.TestCase):
     def test_a_site_marked_first_keeps_its_warning_on_the_link(self):
         risky = tuple({**site, "why_first": "measured"} if site["name"] == "Skiplagged" else site for site in links.sites()[1:])
         with mock.patch.object(links, "sites", lambda: risky):
-            out = self.run_cli(*FIXED)
+            out = self.ok(*FIXED)
         self.assertIn("Check this fare on Skiplagged (lists hidden-city fares): https://skiplagged.com/flights/JFK/LHR/", out)
         self.assertNotIn("Same dates on Skiplagged", out)
 
@@ -175,13 +170,6 @@ if __name__ == "__main__":
 
 TYPED_AT = datetime(2030, 1, 2, 12, 0, tzinfo=timezone.utc)
 
-
-def site_prices():
-    history = History(config.history_path())
-    try:
-        return history.site_prices()
-    finally:
-        history.close()
 
 
 class SitePriceTableTest(unittest.TestCase):
@@ -204,7 +192,7 @@ class SitePriceTableTest(unittest.TestCase):
     def test_a_typed_price_is_kept_beside_the_fare_it_was_checked_against(self):
         before = datetime.now(timezone.utc) - timedelta(seconds=2)
         self.keep(summary(check=True, adults=2, bags=1).next_step, 499.5, seller="Mytrip", same_flights=True, held=False)
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         fetched = datetime.fromisoformat(row.pop("our_fetched_at"))
         self.assertTrue(before <= fetched <= datetime.now(timezone.utc) + timedelta(seconds=2))
         self.assertEqual(
@@ -236,19 +224,19 @@ class SitePriceTableTest(unittest.TestCase):
 
     def test_a_price_set_against_a_fare_nobody_confirmed_says_so(self):
         self.keep(summary().next_step, 480)
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual((row["our_price"], row["our_confirmed"], row["itinerary_key"]), (520, 0, "TA1@2030-03-12T18:30"))
         self.assertEqual((row["seller"], row["same_flights"], row["held"]), ("", None, None))
 
     def test_it_adds_nothing_to_the_prices_flightsleuth_fetched_itself(self):
         step = summary().next_step
         history = History(config.history_path())
-        fetched = history.price_points()
+        fetched = history.rows("price_points")
         history.close()
         self.keep(step, 480)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual(history.price_points(), fetched)
+        self.assertEqual(history.rows("price_points"), fetched)
         self.assertEqual(len(fetched), 1)
 
     def test_its_rows_cannot_be_changed_or_deleted(self):
@@ -259,7 +247,7 @@ class SitePriceTableTest(unittest.TestCase):
             with self.assertRaisesRegex(sqlite3.DatabaseError, "append-only", msg=statement):
                 db.execute(statement)
         db.rollback()
-        self.assertEqual(site_prices()[0]["price"], 480)
+        self.assertEqual(history_rows("site_prices")[0]["price"], 480)
 
     def test_a_history_file_from_before_this_table_gains_it_and_keeps_its_rows(self):
         step = summary().next_step
@@ -267,10 +255,10 @@ class SitePriceTableTest(unittest.TestCase):
         db.executescript("DROP TRIGGER site_prices_no_update; DROP TRIGGER site_prices_no_delete; DROP TABLE site_prices;")
         db.close()
         self.keep(step, 480)
-        self.assertEqual(len(site_prices()), 1)
+        self.assertEqual(len(history_rows("site_prices")), 1)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual(len(history.price_points()), 1)
+        self.assertEqual(len(history.rows("price_points")), 1)
 
 
 def at_keyboard(test, *answers):
@@ -300,12 +288,12 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
     """At the end of a round-trip search the command line asks what Momondo showed, and keeps the answer."""
 
     setUp = NextStepTest.setUp
-    run_cli = NextStepTest.run_cli
+    ok = NextStepTest.ok
 
     def test_the_price_the_seller_and_both_answers_are_kept(self):
         asked = at_keyboard(self, "abc", "$1,234.50", " Mytrip ", "y", "n")
-        out = self.run_cli(*FIXED, "--check")
-        (row,) = site_prices()
+        out = self.ok(*FIXED, "--check")
+        (row,) = history_rows("site_prices")
         self.assertEqual(
             (row["site"], row["price"], row["seller"], row["same_flights"], row["held"]), ("Momondo", 1234.5, "Mytrip", 1, 0)
         )
@@ -329,8 +317,8 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
 
     def test_a_price_found_for_a_fare_nobody_confirmed_is_kept_as_that(self):
         at_keyboard(self, "480", "", "", "")
-        out = self.run_cli(*FIXED)
-        (row,) = site_prices()
+        out = self.ok(*FIXED)
+        (row,) = history_rows("site_prices")
         self.assertEqual(
             (row["price"], row["seller"], row["same_flights"], row["held"], row["our_confirmed"]), (480, "", None, None, 0)
         )
@@ -340,53 +328,53 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
 
     def test_a_matching_price_is_said_to_be_the_same(self):
         at_keyboard(self, "520", "", "", "")
-        self.assertRegex(self.run_cli(*FIXED), rf"That is the same as the \$520 listed fare fetched {STAMP}\.\n$")
+        self.assertRegex(self.ok(*FIXED), rf"That is the same as the \$520 listed fare fetched {STAMP}\.\n$")
 
     def test_a_fare_replayed_from_saved_results_is_said_to_be_saved(self):
-        self.run_cli(*FIXED)
+        self.ok(*FIXED)
         at_keyboard(self, "480", "", "", "")
-        self.assertRegex(self.run_cli(*FIXED), rf"the \$520 listed fare fetched {STAMP} \(saved\)\.\n$")
+        self.assertRegex(self.ok(*FIXED), rf"the \$520 listed fare fetched {STAMP} \(saved\)\.\n$")
 
     def test_pressing_enter_skips_it_after_one_question(self):
         asked = at_keyboard(self, "")
-        out = self.run_cli(*FIXED)
+        out = self.ok(*FIXED)
         self.assertEqual(asked.call_count, 1)
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
         self.assertNotIn("Saved", out)
 
     def test_a_keyboard_that_goes_away_is_an_empty_answer(self):
         asked = at_keyboard(self)
         asked.side_effect = EOFError
-        self.run_cli(*FIXED)
+        self.ok(*FIXED)
         self.assertEqual(asked.call_count, 1)
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
 
     def test_nobody_is_asked_when_no_one_is_at_the_keyboard(self):
         with mock.patch("builtins.input") as asked:
-            self.run_cli(*FIXED)
+            self.ok(*FIXED)
         asked.assert_not_called()
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
 
     def test_no_record_turns_the_question_off(self):
         asked = at_keyboard(self)
-        self.run_cli(*FIXED, "--no-record")
+        self.ok(*FIXED, "--no-record")
         asked.assert_not_called()
 
     def test_a_one_way_a_dry_run_and_an_empty_result_ask_nothing(self):
         asked = at_keyboard(self)
-        self.run_cli("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
-        self.run_cli(*FIXED, "--dry-run")
-        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
-            self.run_cli(*FIXED)
+        self.ok("search", "JFK", "LHR", "--depart", "2030-03-12", "--one-way")
+        self.ok(*FIXED, "--dry-run")
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: NO_FLIGHTS):
+            self.ok(*FIXED)
         asked.assert_not_called()
 
     def test_recording_sends_no_search_and_logs_no_call(self):
         at_keyboard(self, "480", "Mytrip", "y", "y")
-        self.run_cli(*FIXED)
+        self.ok(*FIXED)
         self.assertEqual(len(FakeSerpApi.searches), 1)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual((len(history.calls()), len(history.price_points()), len(history.site_prices())), (1, 1, 1))
+        self.assertEqual((len(history.rows("provider_calls")), len(history.rows("price_points")), len(history.rows("site_prices"))), (1, 1, 1))
 
 
 class GateTest(unittest.TestCase):

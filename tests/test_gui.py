@@ -13,8 +13,7 @@ except ImportError:
     raise unittest.SkipTest("tkinter is not installed, so the window cannot be tested") from None
 
 from flightsleuth import config, gui, watch
-from flightsleuth.history import History
-from tests.fakes import FakeSerpApi, install
+from tests.fakes import NO_FLIGHTS, FakeSerpApi, history_rows, install
 
 
 def rows(tree):
@@ -424,13 +423,6 @@ def texts(frame):
     return [widget.cget("text") for widget in frame.winfo_children()]
 
 
-def site_prices():
-    history = History(config.history_path())
-    try:
-        return history.site_prices()
-    finally:
-        history.close()
-
 
 class NextStepWindowTest(unittest.TestCase):
     """What Phase 3 added to the window: checking the fare on Momondo comes first, and what was found is kept."""
@@ -498,7 +490,7 @@ class NextStepWindowTest(unittest.TestCase):
     def test_it_goes_away_when_the_next_search_finds_no_fares(self):
         self.search()
         self.app.depart.set(date(2030, 3, 13))
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         with mock.patch.object(FakeSerpApi, "search", lambda self, query: empty):
             self.search()
         self.assertEqual(self.app.headline.get(), gui.NO_FARES)
@@ -549,7 +541,7 @@ class NextStepWindowTest(unittest.TestCase):
         self.app._save_button.invoke()
 
         self.assertEqual(self.errors, [])
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual(
             (row["site"], row["price"], row["seller"], row["same_flights"], row["held"]), ("Momondo", 1480.5, "Mytrip", 1, 0)
         )
@@ -572,7 +564,7 @@ class NextStepWindowTest(unittest.TestCase):
         self.open_dialog()
         self.app.found_price.set("499")
         self.app._save_button.invoke()
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual((row["price"], row["seller"], row["same_flights"], row["held"]), (499, "", None, None))
         self.assertEqual((row["our_price"], row["our_confirmed"]), (520, 1))
         self.assertEqual(row["itinerary_key"], "TA1@2030-03-12T18:30|TA2@2030-03-19T09:00")
@@ -588,7 +580,7 @@ class NextStepWindowTest(unittest.TestCase):
             self.errors,
             ["Type the price you found first, as a number such as 412", "'cheap' is not a price. Type a number such as 412"],
         )
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
         self.assertIs(self.app._dialog, dialog)  # still open, to try again
         self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
 
@@ -600,7 +592,7 @@ class NextStepWindowTest(unittest.TestCase):
         self.app._close_dialog()
         self.assertIsNone(self.app._dialog)
         self.assertEqual((self.app.found_price.get(), self.app.found_same.get()), ("", "Not sure"))
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
 
     def test_a_new_search_closes_it_and_forgets_what_the_last_one_saved(self):
         self.search()
@@ -615,7 +607,7 @@ class NextStepWindowTest(unittest.TestCase):
         self.assertIsNone(self.app._dialog)
         self.assertEqual(self.app.found_price.get(), "")
         self.assertEqual(self.app.next_text.get(), f"{FREE} {WHY}")
-        self.assertEqual(len(site_prices()), 1)
+        self.assertEqual(len(history_rows("site_prices")), 1)
 
 
 TRIP = "JFK -> LHR, Tue 12 Mar - Tue 19 Mar"
@@ -803,7 +795,7 @@ class WatchWindowTest(unittest.TestCase):
     def test_a_search_that_finds_no_fares_greys_the_button_out_again_and_closes_the_small_window(self):
         self.search()
         self.open_watch()
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         self.app.depart.set(date(2030, 3, 13))
         with mock.patch.object(FakeSerpApi, "search", lambda fake, query: empty):
             self.search()

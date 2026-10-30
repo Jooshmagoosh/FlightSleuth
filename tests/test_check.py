@@ -7,10 +7,9 @@ from unittest import mock
 
 from flightsleuth import config, providers, scan
 from flightsleuth.errors import UserError
-from flightsleuth.history import History
 from flightsleuth.models import Offer, SearchResult, Segment
 from flightsleuth.providers import Capability, DataClass, Provider
-from tests.fakes import FakeSerpApi, install, rich_reply
+from tests.fakes import NO_FLIGHTS, FakeSerpApi, age_the_cache, endpoints, history_rows, install, rich_reply
 
 TODAY = date(2030, 1, 1)
 DEPART, BACK = date(2030, 3, 12), date(2030, 3, 19)  # the fake's round-trip fare for the 12th is 520
@@ -29,15 +28,6 @@ def look(**changes):
     return plan, outcome, check
 
 
-def endpoints():
-    return [query.endpoint + (f":{query.market}" if query.market else "") for query in FakeSerpApi.searches]
-
-
-def age_the_cache(hours):
-    db = sqlite3.connect(config.cache_path())
-    with db:
-        db.execute("UPDATE responses SET fetched_at = fetched_at - ?", (hours * 3600,))
-    db.close()
 
 
 class ConfirmTest(unittest.TestCase):
@@ -98,7 +88,7 @@ class ConfirmTest(unittest.TestCase):
 
     def test_when_every_fare_tried_comes_back_empty_nothing_is_confirmed(self):
         FakeSerpApi.phantoms = 1
-        empty = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
+        empty = NO_FLIGHTS
         real = FakeSerpApi.search
 
         def no_returns(self, query):
@@ -443,34 +433,27 @@ class RecordTest(unittest.TestCase):
         install(self)
         FakeSerpApi.rich = True
 
-    def history(self, table):
-        history = History(config.history_path())
-        try:
-            return getattr(history, table)()
-        finally:
-            history.close()
-
     def test_every_follow_up_is_logged_under_its_own_endpoint(self):
         look()
         self.assertEqual(
-            [(call["endpoint"], call["live"], call["cost"]) for call in self.history("calls")],
+            [(call["endpoint"], call["live"], call["cost"]) for call in history_rows("provider_calls")],
             [("search", 1, 1), ("return_flights", 1, 1), ("booking_options", 1, 1), ("search", 1, 1), ("search", 1, 1), ("search", 1, 1)],
         )
 
     def test_a_replayed_follow_up_is_logged_as_saved(self):
         look()
         look()
-        self.assertEqual([call["live"] for call in self.history("calls")], [1] * 6 + [0] * 6)
+        self.assertEqual([call["live"] for call in history_rows("provider_calls")], [1] * 6 + [0] * 6)
 
     def test_only_plain_searches_add_price_points(self):
         look()
-        points = [(p["origin"], p["return_date"], p["price"]) for p in self.history("price_points")]
+        points = [(p["origin"], p["return_date"], p["price"]) for p in history_rows("price_points")]
         # The round trip and the two one-ways. Not the return lookup, and not the other market's price.
         self.assertEqual(points, [("JFK", "2030-03-19", 520), ("JFK", None, 200), ("LHR", None, 200)])
 
     def test_a_search_priced_with_bags_adds_no_price_point(self):
         scan.run(scan.plan(request(check=False, bags=1), today=TODAY))
-        self.assertEqual(self.history("price_points"), [])
+        self.assertEqual(history_rows("price_points"), [])
 
     def test_googles_price_history_is_kept_in_its_own_table_one_row_a_day(self):
         days = [[int(datetime(2030, 1, day, tzinfo=timezone.utc).timestamp()), 500 + day] for day in (1, 2, 3)]
@@ -484,10 +467,10 @@ class RecordTest(unittest.TestCase):
         with mock.patch.object(FakeSerpApi, "search", with_history):
             scan.run(scan.plan(request(check=False), today=TODAY))
             scan.run(scan.plan(request(check=False), today=TODAY, fresh=True))
-        rows = self.history("price_history")
+        rows = history_rows("google_price_history")
         self.assertEqual([(row["day"], row["price"]) for row in rows], [("2030-01-01", 501), ("2030-01-02", 502), ("2030-01-03", 503)])
         self.assertEqual({(row["origin"], row["depart_date"], row["return_date"], row["source"]) for row in rows}, {("JFK", "2030-03-12", "2030-03-19", "serpapi")})
-        self.assertEqual(len(self.history("price_points")), 2)  # none of Google's points went in there
+        self.assertEqual(len(history_rows("price_points")), 2)  # none of Google's points went in there
 
     def test_the_new_tables_are_append_only_too(self):
         look()

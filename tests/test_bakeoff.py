@@ -9,8 +9,7 @@ from unittest import mock
 
 from flightsleuth import bakeoff, cli, config
 from flightsleuth.errors import UserError
-from flightsleuth.history import History
-from tests.fakes import FakeSerpApi, install
+from tests.fakes import FakeSerpApi, history_rows, install, run_cli
 from tests.test_window import valley
 
 TODAY = date(2030, 1, 1)
@@ -40,13 +39,6 @@ def write(text, name="routes.txt"):
 def one_route(length="5 to 9 nights"):
     return bakeoff.read_routes(write(f"JFK to LHR | depart between 2030-03-01 and 2030-05-30 | {length}\n"))[0]
 
-
-def rows(table):
-    history = History(config.history_path())
-    try:
-        return getattr(history, table)()
-    finally:
-        history.close()
 
 
 class RouteFileTest(unittest.TestCase):
@@ -128,7 +120,7 @@ class RecordTest(unittest.TestCase):
         return bakeoff.run_route("run-1", route, search, say=self.said.append, **options)
 
     def fares(self):
-        return {row["measure"]: row for row in rows("bakeoff_fares")}
+        return {row["measure"]: row for row in history_rows("bakeoff_fares")}
 
     def test_the_confirmed_fare_is_the_baseline(self):
         outcome = self.run_route()
@@ -153,18 +145,18 @@ class RecordTest(unittest.TestCase):
         self.assertNotIn("one ticket", self.fares())
         FakeSerpApi.separate = True
         self.run_route(bakeoff.read_routes(write("BOS to LHR | depart between 2030-03-01 and 2030-05-30 | 5 to 9 nights\n"))[0])
-        whole = [row for row in rows("bakeoff_fares") if row["measure"] == "one ticket"]
+        whole = [row for row in history_rows("bakeoff_fares") if row["measure"] == "one ticket"]
         self.assertEqual([(row["route"], row["price"], row["same_flights"], row["detail"]) for row in whole], [("BOS to LHR", 445, 1, "sold by Cheapo Travel")])
 
     def test_a_good_return_lookup_is_counted(self):
         self.run_route()
-        (lookup,) = rows("bakeoff_lookups")
+        (lookup,) = history_rows("bakeoff_lookups")
         self.assertEqual((lookup["found"], lookup["cheapest"], lookup["in_unsorted"], lookup["price"]), (1, 1, None, 420))
 
     def test_a_failed_lookup_is_counted_and_googles_own_order_is_asked_whether_it_lists_that_fare(self):
         FakeSerpApi.phantoms = 1
         self.run_route()
-        missed, held = rows("bakeoff_lookups")
+        missed, held = history_rows("bakeoff_lookups")
         self.assertEqual((missed["found"], missed["cheapest"], missed["in_unsorted"], missed["itinerary_key"][:3]), (0, 1, 0, "PH0"))
         self.assertEqual((held["found"], held["cheapest"]), (1, 0))
         probe = FakeSerpApi.searches[-1]
@@ -180,7 +172,7 @@ class RecordTest(unittest.TestCase):
     def test_a_one_way_route_has_a_baseline_and_no_return_lookup(self):
         self.run_route(one_route("one way"))
         self.assertEqual(self.fares()["baseline"]["return_date"], None)
-        self.assertEqual(rows("bakeoff_lookups"), [])
+        self.assertEqual(history_rows("bakeoff_lookups"), [])
 
     def test_each_route_is_reported_as_it_finishes_with_its_fetch_time(self):
         self.run_route()
@@ -267,7 +259,7 @@ class ReportTest(unittest.TestCase):
         routes = bakeoff.read_routes(write(line))
         for route, search in bakeoff.plan(routes, budget=25, today=TODAY, fresh=True):
             bakeoff.run_route("run-2", route, search, say=lambda text: None)
-        self.assertEqual({row["run"] for row in rows("bakeoff_fares")}, {"run-1", "run-2"})
+        self.assertEqual({row["run"] for row in history_rows("bakeoff_fares")}, {"run-1", "run-2"})
         text = bakeoff.report()
         self.assertIn("Bake-off report: 1 route\n", text)
         self.assertRegex(text, r"As sold in GB +1 +0 ")
@@ -280,15 +272,10 @@ class BakeoffCommandTest(unittest.TestCase):
         FakeSerpApi.fare = valley
         write(ROUTES)
 
-    def run_cli(self, *argv):
-        out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            code = cli.main(list(argv))
-        return code, out.getvalue(), err.getvalue()
 
     def test_the_dry_run_prices_the_top_six_routes_for_nothing(self):
         with mock.patch.dict(os.environ, {config.KEY_VAR: ""}):
-            code, out, err = self.run_cli("bakeoff", "routes.txt", "--dry-run")
+            code, out, err = run_cli("bakeoff", "routes.txt", "--dry-run")
         self.assertEqual(code, 0, err)
         lines = err.splitlines()
         self.assertEqual(len(lines), 7)
@@ -299,13 +286,13 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertFalse(config.history_path().exists())
 
     def test_every_route_in_the_file_can_be_asked_for(self):
-        code, _, err = self.run_cli("bakeoff", "routes.txt", "--routes", "0", "--budget", "200", "--dry-run")
+        code, _, err = run_cli("bakeoff", "routes.txt", "--routes", "0", "--budget", "200", "--dry-run")
         self.assertEqual(code, 0, err)
         self.assertIn("8 routes: up to ", err)
 
     def test_one_route_can_be_picked_out_of_the_file_by_its_position(self):
         with mock.patch.dict(os.environ, {config.KEY_VAR: ""}):
-            code, out, err = self.run_cli("bakeoff", "routes.txt", "--only", "2", "--dry-run")
+            code, out, err = run_cli("bakeoff", "routes.txt", "--only", "2", "--dry-run")
         self.assertEqual(code, 0, err)
         lines = err.splitlines()
         self.assertEqual(len(lines), 2)
@@ -314,22 +301,22 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertEqual(FakeSerpApi.searches, [])
 
     def test_that_one_route_runs_alone_and_stays_inside_one_runs_limit(self):
-        code, out, err = self.run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
+        code, out, err = run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
         self.assertEqual(code, 0, err)
         self.assertLessEqual(len(FakeSerpApi.searches), 25)
         self.assertEqual({(query.origin, query.destination) for query in FakeSerpApi.searches}, {("BOS", "WAW"), ("WAW", "BOS")})
         self.assertIn("BOS to WAW: $", out)
         self.assertIn("Bake-off report: 1 route\n", out)
-        self.assertEqual({row["route"] for row in rows("bakeoff_fares")}, {"BOS to WAW"})
+        self.assertEqual({row["route"] for row in history_rows("bakeoff_fares")}, {"BOS to WAW"})
 
     def test_a_single_route_keeps_its_share_small_when_the_budget_is(self):
-        code, _, err = self.run_cli("bakeoff", "routes.txt", "--only", "1", "--budget", "15", "--dry-run")
+        code, _, err = run_cli("bakeoff", "routes.txt", "--only", "1", "--budget", "15", "--dry-run")
         self.assertEqual(code, 0, err)
         self.assertIn("1 route: up to 15 live searches in all.", err)
 
     def test_a_position_that_is_not_in_the_file_is_refused(self):
         for position in ("0", "9"):
-            code, _, err = self.run_cli("bakeoff", "routes.txt", "--only", position, "--dry-run")
+            code, _, err = run_cli("bakeoff", "routes.txt", "--only", position, "--dry-run")
             self.assertEqual(code, 1)
             self.assertIn("routes.txt has 8 routes, so --only takes a number from 1 to 8", err)
 
@@ -339,7 +326,7 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertIn("not allowed with argument", err.getvalue())
 
     def test_it_will_not_spend_without_a_yes(self):
-        code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "1")
+        code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "1")
         self.assertEqual(code, 1)
         self.assertIn("add --yes to spend up to 25 live searches, or --dry-run to see the plan", err)
         self.assertEqual(FakeSerpApi.searches, [])
@@ -348,13 +335,13 @@ class BakeoffCommandTest(unittest.TestCase):
         tty = mock.Mock()
         tty.isatty.return_value = True
         with mock.patch("sys.stdin", tty), mock.patch("builtins.input", return_value="no"):
-            code, _, err = self.run_cli("bakeoff", "routes.txt", "--routes", "1")
+            code, _, err = run_cli("bakeoff", "routes.txt", "--routes", "1")
         self.assertEqual(code, 1)
         self.assertIn("nothing was spent", err)
         self.assertEqual(FakeSerpApi.searches, [])
 
     def test_with_a_yes_it_runs_each_route_inside_its_share_and_prints_the_report(self):
-        code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "2", "--yes")
+        code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "2", "--yes")
         self.assertEqual(code, 0, err)
         self.assertLessEqual(len(FakeSerpApi.searches), 50)
         self.assertIn("MCO,SFB to JFK,EWR,LGA: $", out)
@@ -364,30 +351,30 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertRegex(out, r"About \d+ SerpApi searches left this month\.")
 
     def test_the_report_can_be_printed_again_for_nothing(self):
-        self.run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
+        run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
         spent = len(FakeSerpApi.searches)
-        code, out, _ = self.run_cli("bakeoff", "--report")
+        code, out, _ = run_cli("bakeoff", "--report")
         self.assertEqual(code, 0)
         self.assertIn("Bake-off report: 1 route", out)
         self.assertEqual(len(FakeSerpApi.searches), spent)
 
     def test_running_it_again_within_the_hour_replays_for_nothing_and_needs_no_yes(self):
-        self.run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
+        run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
         spent = len(FakeSerpApi.searches)
-        code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
+        code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "1", "--yes")
         self.assertEqual(code, 0, err)
         self.assertEqual(len(FakeSerpApi.searches), spent)
 
     def test_a_route_tried_alone_replays_for_nothing_in_the_full_run_hours_later(self):
         FakeSerpApi.phantoms = 1  # so the unsorted probe is part of what has to replay
-        self.run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
+        run_cli("bakeoff", "routes.txt", "--only", "2", "--yes")
         alone = len(FakeSerpApi.searches)
         db = sqlite3.connect(config.cache_path())
         with db:
             db.execute("UPDATE responses SET fetched_at = fetched_at - 3 * 3600")
         db.close()
 
-        code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+        code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
         self.assertEqual(code, 0, err)
         again = FakeSerpApi.searches[alone:]
         self.assertEqual([query for query in again if "WAW" in (query.origin, query.destination)], [])
@@ -402,7 +389,7 @@ class BakeoffCommandTest(unittest.TestCase):
             return {**real(self), "this_hour_searches": len(FakeSerpApi.searches)}
 
         with mock.patch.object(FakeSerpApi, "account", counting):
-            code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+            code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
         self.assertEqual(code, 1)
         self.assertIn("stopped at BOS to WAW, after 1 of 3 routes: this scan needs 24 live searches but only", err)
         self.assertIn("Run the same command again to carry on", err)
@@ -411,7 +398,7 @@ class BakeoffCommandTest(unittest.TestCase):
 
         # An hour later the limit has reset: the finished route replays, and only the others are paid for.
         with mock.patch.object(FakeSerpApi, "account", lambda self: {**real(self), "account_rate_limit_per_hour": 100}):
-            code, out, err = self.run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
+            code, out, err = run_cli("bakeoff", "routes.txt", "--routes", "3", "--yes")
         self.assertEqual(code, 0, err)
         self.assertIn("MCO,SFB to JFK,EWR,LGA: Up to 24 searches needed", err)
         self.assertIn("Bake-off report: 3 routes", out)
@@ -419,7 +406,7 @@ class BakeoffCommandTest(unittest.TestCase):
         self.assertLessEqual(len(FakeSerpApi.searches) - spent, 50)
 
     def test_the_route_file_has_to_be_named(self):
-        code, _, err = self.run_cli("bakeoff")
+        code, _, err = run_cli("bakeoff")
         self.assertEqual(code, 1)
         self.assertIn("name the route file", err)
 

@@ -1,7 +1,6 @@
 """The run that checks the watches, on a fake clock and the fake price source. Nothing here reaches a network."""
 import json
 import os
-import sqlite3
 import statistics
 import unittest
 import urllib.error
@@ -13,7 +12,7 @@ from flightsleuth import config, notify, render, scan, watch
 from flightsleuth.errors import UserError
 from flightsleuth.history import History
 from flightsleuth.serpapi import SerpApiError
-from tests.fakes import FakeNtfy, FakeSerpApi, install, rich_reply
+from tests.fakes import NO_FLIGHTS, STAMP, FakeNtfy, FakeSerpApi, age_the_cache, endpoints, install, rich_reply
 
 NOW = datetime(2030, 1, 10, 12, 0, tzinfo=timezone.utc)  # the fake clock starts on a Thursday, at midday
 TODAY = NOW.date()
@@ -22,8 +21,6 @@ LONDON = watch.trip("JFK", "LHR", DEPART, BACK)
 TITLE = "JFK -> LHR, Tue 12 Mar - Tue 19 Mar"
 MOMONDO = "https://www.momondo.com/flight-search/JFK-LHR/2030-03-12/2030-03-19?sort=price_a"
 TOPIC = "flightsleuth-test-topic"
-STAMP = r"\d\d \w{3} \d\d:\d\d"  # a fetch time, such as "08 Oct 14:02"
-EMPTY = {"search_metadata": {"status": "Success"}, "error": "Google Flights hasn't returned any results."}
 NO_NETWORK = urllib.error.URLError("no route to host")
 
 
@@ -33,16 +30,6 @@ def daily_lows(*prices, last=TODAY):
     return [[int((start + timedelta(days=n)).timestamp()), price] for n, price in enumerate(prices)]
 
 
-def endpoints():
-    return [query.endpoint for query in FakeSerpApi.searches]
-
-
-def age_the_cache(hours):
-    """Make every saved reply this much older. The fake clock moves the watches on, not the cache's own clock."""
-    db = sqlite3.connect(config.cache_path())
-    with db:
-        db.execute("UPDATE responses SET fetched_at = fetched_at - ?", (hours * 3600,))
-    db.close()
 
 
 class RunCase(unittest.TestCase):
@@ -63,7 +50,7 @@ class RunCase(unittest.TestCase):
         return watch.run_due(now=NOW + timedelta(days=days), **options)
 
     def checks(self):
-        return self.history.watch_checks()
+        return self.history.rows("watch_checks")
 
     def last(self, *columns):
         row = self.checks()[-1]
@@ -117,15 +104,15 @@ class CheckTest(RunCase):
     def test_a_round_trip_check_adds_no_price_point_because_it_is_not_sorted_by_price(self):
         self.add()
         self.run_at()
-        self.assertEqual(self.history.price_points(), [])
-        self.assertEqual([(call["endpoint"], call["live"], call["cost"]) for call in self.history.calls()], [("search", 1, 1)])
+        self.assertEqual(self.history.rows("price_points"), [])
+        self.assertEqual([(call["endpoint"], call["live"], call["cost"]) for call in self.history.rows("provider_calls")], [("search", 1, 1)])
 
     def test_a_one_way_check_is_the_ordinary_sorted_search_and_adds_one(self):
         self.add(watch.trip("JFK", "LHR", DEPART))
         report = self.run_at()
         self.assertEqual(report.lines, ["JFK -> LHR, Tue 12 Mar: $200 listed. No rule fired. 1 search."])
         self.assertTrue(FakeSerpApi.searches[0].by_price)
-        self.assertEqual([point["price"] for point in self.history.price_points()], [200])
+        self.assertEqual([point["price"] for point in self.history.rows("price_points")], [200])
 
     def test_it_is_not_checked_again_until_its_interval_has_passed(self):
         self.add(every_days=4)
@@ -157,7 +144,7 @@ class CheckTest(RunCase):
 
     def test_a_reply_with_no_fares_is_a_finished_check(self):
         self.add()
-        with mock.patch.object(FakeSerpApi, "search", lambda self, query: EMPTY):
+        with mock.patch.object(FakeSerpApi, "search", lambda self, query: NO_FLIGHTS):
             report = self.run_at()
         self.assertEqual(report.lines, [f"{TITLE}: No fares were listed. 1 search."])
         self.assertEqual(self.last("finished", "outcome", "price"), (1, "no fares", None))
@@ -205,7 +192,7 @@ class AlertTest(RunCase):
     def test_the_alert_is_kept_with_the_check_that_found_the_price(self):
         self.add(below=600)
         self.run_at()
-        (alert,) = self.history.watch_alerts()
+        (alert,) = self.history.rows("watch_alerts")
         self.assertEqual((alert["watch_id"], alert["check_id"], alert["price"], alert["sent"], alert["error"]), (1, 1, 520, 1, ""))
         self.assertEqual((alert["title"], alert["click"], alert["at"]), ("JFK to LHR: $520 round trip", MOMONDO, "2030-01-10T12:00:00+00:00"))
 
@@ -376,7 +363,7 @@ class ReturnFlightsTest(RunCase):
         def search(fake, query):
             FakeSerpApi.searches.append(query)
             if query.departure_token and query.departure_token.split(":")[2] in airlines:
-                return EMPTY
+                return NO_FLIGHTS
             return rich_reply(query)
 
         return mock.patch.object(FakeSerpApi, "search", search)
@@ -672,7 +659,7 @@ class UnsentAlertTest(RunCase):
         )
         self.assertEqual(self.last("finished", "outcome"), (1, "alert not sent"))
         self.assertFalse(self.first.failed)
-        (alert,) = self.history.watch_alerts()
+        (alert,) = self.history.rows("watch_alerts")
         self.assertEqual((alert["sent"], alert["price"]), (0, 520))
 
     def test_the_next_run_sends_it_marked_late_and_spends_nothing(self):
@@ -704,7 +691,7 @@ class UnsentAlertTest(RunCase):
         FakeNtfy.fail = None
         watch.run_due(now=NOW + timedelta(hours=20))
         self.assertEqual(len(FakeNtfy.sent), 1)
-        self.assertEqual([alert["sent"] for alert in self.history.watch_alerts()], [0, 0, 1])
+        self.assertEqual([alert["sent"] for alert in self.history.rows("watch_alerts")], [0, 0, 1])
 
     def test_after_a_day_it_is_let_go_and_the_next_check_looks_again(self):
         self.assertEqual(len(self.run_at(2).lines), 1)  # two days on: too old to send as it stands
@@ -726,7 +713,7 @@ class RetireTest(RunCase):
         report = self.run_at(days)
         self.assertEqual(report.lines, [f"{TITLE}: retired. Its departure date has passed.", "There are no watches to check."])
         self.assertEqual(FakeSerpApi.searches, [])
-        (event,) = self.history.watch_events()
+        (event,) = self.history.rows("watch_events")
         self.assertEqual((event["event"], event["detail"]), ("retired", "its departure date has passed"))
         self.assertEqual(self.run_at(days + 1).lines, ["There are no watches to check."])
         self.assertEqual(watch.listed(), [])
@@ -752,13 +739,13 @@ class DryRunTest(RunCase):
                 "JFK -> LHR, Tue 12 Mar: due. 1 search, and up to 1 more if the price is worth an alert.",
             ],
         )
-        self.assertEqual((FakeSerpApi.searches, FakeNtfy.posts, self.checks(), self.history.calls()), ([], [], [], []))
+        self.assertEqual((FakeSerpApi.searches, FakeNtfy.posts, self.checks(), self.history.rows("provider_calls")), ([], [], [], []))
 
     def test_it_retires_nothing(self):
         self.add()
         report = self.run_at((DEPART - TODAY).days + 1, dry_run=True)
         self.assertEqual(report.lines[0], f"{TITLE}: retired. Its departure date has passed.")
-        self.assertEqual(self.history.watch_events(), [])
+        self.assertEqual(self.history.rows("watch_events"), [])
 
     def test_it_needs_no_topic(self):
         self.add()
@@ -847,7 +834,7 @@ class RemoveTest(RunCase):
         self.run_at()
         self.assertEqual(watch.remove(1, now=NOW).trip, LONDON)
         self.assertEqual(self.run_at(1).lines, ["There are no watches to check."])
-        self.assertEqual((len(self.history.watches()), len(self.checks()), watch.listed()), (1, 1, []))
+        self.assertEqual((len(self.history.rows("watches")), len(self.checks()), watch.listed()), (1, 1, []))
         self.assertEqual([standing.ended for standing in watch.listed(ended=True)], ["removed"])
 
     def test_a_number_that_is_not_a_watch_is_said_plainly(self):
@@ -904,7 +891,7 @@ class TestAlertTest(RunCase):
                 }
             ],
         )
-        self.assertEqual((sent.click, FakeSerpApi.searches, self.history.calls()), ("", [], []))
+        self.assertEqual((sent.click, FakeSerpApi.searches, self.history.rows("provider_calls")), ("", [], []))
 
     def test_with_a_watch_it_opens_that_watchs_dates_on_momondo_as_a_real_alert_would(self):
         self.add()
@@ -964,12 +951,12 @@ class RecordedReplyTest(unittest.TestCase):
         watch.add(self.trip, every_days=4, now=self.now)
         report = watch.run_due(now=self.now)
         self.assertEqual(report.lines, ["JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $693 listed. No rule fired. 1 search."])
-        (row,) = self.history.watch_checks()
+        (row,) = self.history.rows("watch_checks")
         # Google's daily lows for 10 September to 8 October: 29 of them, the last the day before the check.
         lows = [price for _, price in self.listing["price_insights"]["price_history"][-29:]]
         self.assertEqual((row["price"], row["median"], row["typical_low"], row["typical_high"]), (693, statistics.median(lows), 480, 830))
         self.assertEqual(row["fetched_at"], "2026-10-09T01:04:44+00:00")  # the time SerpApi says it asked Google
-        self.assertEqual(len(self.history.price_history()), 61)
+        self.assertEqual(len(self.history.rows("google_price_history")), 61)
 
     def test_a_price_set_above_it_fires_and_the_chain_is_read_through_to_the_sellers(self):
         watch.add(self.trip, below=700, every_days=4, now=self.now)
@@ -1032,7 +1019,7 @@ class RealCheckTest(unittest.TestCase):
     def test_left_to_its_own_rules_the_check_is_quiet_and_costs_one_search(self):
         report = self.check()
         self.assertEqual(report.lines, ["JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $754 listed. No rule fired. 1 search."])
-        (row,) = self.history.watch_checks()
+        (row,) = self.history.rows("watch_checks")
         # $754 against a 30-day median of $662.50 and a typical range that starts at $480.
         self.assertEqual((row["price"], row["median"], row["typical_low"], row["typical_high"]), (754, 662.5, 480, 830))
         self.assertEqual(row["fetched_at"], "2026-10-09T07:28:29+00:00")
@@ -1048,7 +1035,7 @@ class RealCheckTest(unittest.TestCase):
             report.lines,
             ["JFK,EWR -> LHR, Tue 08 Dec - Tue 15 Dec: $754 confirmed. Alert sent: below the $5,000 you set. 3 searches."],
         )
-        (row,) = self.history.watch_checks()
+        (row,) = self.history.rows("watch_checks")
         self.assertEqual((row["price"], row["confirmed_price"], row["no_returns"], row["searches"]), (754, 754, "[]", 3))
         self.assertEqual(
             row["itinerary_key"], "FI622@2026-12-08T19:35>FI450@2026-12-09T07:35|LX345@2026-12-15T06:00>LX18@2026-12-15T17:15"

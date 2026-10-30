@@ -50,8 +50,13 @@ class SerpApiProvider(Provider):
     def fetched_at(self, raw: dict) -> datetime | None:
         return serpapi.fetched_at(raw)
 
+    def _read_account(self) -> dict:
+        """The plan and its usage, from SerpApi's account endpoint, which is free. Kept for credits_left."""
+        self._account = self._connect().account()
+        return self._account
+
     def budget_problem(self, calls: int) -> str | None:
-        self._account = account = self._connect().account()
+        account = self._read_account()
         month_left = account.get("total_searches_left")
         if month_left is not None and calls > month_left:
             return f"this scan needs {calls} live searches but only {month_left} are left this month"
@@ -69,7 +74,7 @@ class SerpApiProvider(Provider):
         # The account endpoint is free. `plan_renewal_date` is the day the searches reset: the
         # owner's free plan reported 2026-11-08 on 2026-10-09. SerpApi documents it as null for
         # an account with no monthly plan.
-        self._account = account = self._connect().account()
+        account = self._read_account()
         left = account.get("total_searches_left")
         if left is None:
             return None
@@ -80,7 +85,7 @@ class SerpApiProvider(Provider):
         return Allowance(left=left, per_month=account.get("searches_per_month"), resets_on=resets_on)
 
     def quota_lines(self) -> list[str]:
-        account = self._connect().account()
+        account = self._read_account()
         return [
             f"Plan: {account.get('plan_name')}",
             f"This month: {account.get('total_searches_left')} of {account.get('searches_per_month')} searches left",

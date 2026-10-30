@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta, timezone
 
-from . import config, planner, providers
+from . import planner, providers
 from .cache import Cache
 from .errors import UserError
 from .history import History
@@ -180,22 +180,9 @@ def plan(
     if request.look not in LOOKS:
         raise UserError(f"{request.look!r} is not a kind of closer look; choose one of {', '.join(LOOKS)}")
     window = _window(request, today)
-    if window is None:
-        if request.depart < today:
-            raise UserError("the departure date is in the past")
-        if request.return_date and request.return_date < request.depart:
-            raise UserError("the return date is before the departure date")
-        if request.strategy not in ("auto", "grid"):
-            raise UserError(f"the {request.strategy} strategy needs a date window")
-        pairs = date_pairs(
-            request.depart, return_date=request.return_date, nights=request.nights, flex=request.flex, today=today
-        )
-    else:
-        pairs = planner.window_pairs(*window, request.nights)
     cap = max_searches if max_searches is not None else cap_for(request)
-
     base = _base(request)
-    trips = [replace(base, depart_date=depart, return_date=back) for depart, back in pairs]
+    trips = [replace(base, depart_date=depart, return_date=back) for depart, back in _pairs(request, window, today)]
     round_trip = trips[0].return_date is not None
     split = request.split and round_trip
     grid = list(trips)
@@ -242,30 +229,10 @@ def plan(
         trips = []  # the pairs worth a round-trip search are chosen once the one-way prices are in
     else:
         askers = providers.offering(Capability.EXPLORE)
-        duration = planner.explore_duration(request.nights)
-        months = planner.window_months(*window, today)
         if not askers:
             raise UserError("no price source can suggest dates")
-        if duration is None:
-            raise UserError("the explore strategy suits trips of a weekend, about a week or about two weeks")
-        if months is None:
-            raise UserError(f"the explore strategy only reaches {planner.EXPLORE_MONTHS} months ahead")
         costs, split = closer_look(False), False
-        wanted = [
-            Explore(
-                origin=request.origin,
-                destination=request.destination.split(",")[0],  # the explore engine takes one place
-                month=month,
-                duration=duration,
-                adults=request.adults,
-                cabin=request.cabin,
-                stops=request.stops,
-                currency=request.currency,
-                market=request.market,
-                bags=request.bags,
-            )
-            for month in months
-        ]
+        wanted = _explore_months(request, window, today)
         refine = (cap - len(wanted) * len(askers) - checks * sum(costs.values())) // len(sources)
         if refine < 1:
             raise UserError(f"a limit of {cap} live searches leaves none to price the dates explore suggests")
@@ -273,19 +240,10 @@ def plan(
 
     keys = {Call(source.name, query): source.cache_key(query) for query in wanted for source in askers}
     replies = _saved(keys, max_age_hours, fresh)
-
-    # A saved listing may be too old for its tokens, and looking closer then starts by fetching it
-    # again. That call is counted for any source holding such a reply. It can never push a plan
-    # over a cap it was sized to, because the saved reply it replaces is one call the plan no
-    # longer needs; and the refining is left as it was, so an old run replays to the same fare.
-    cutoff = datetime.now(timezone.utc) - timedelta(minutes=TOKEN_MINUTES)
-    old = {call.provider for call, reply in replies.items() if reply.fetched_at < cutoff}
     reserved = {}
     for source in sources:
-        follow = checks * costs[source.name]
-        if follow and source.name in old and source.capabilities & _FOLLOW_UPS:
-            follow += 1
-        later = refine + follow if reserve is None else min(refine + follow, reserve)
+        later = refine + _follow_ups(source, checks * costs[source.name], replies)
+        later = later if reserve is None else min(later, reserve)
         if later:
             reserved[source.name] = later
     return Plan(
@@ -304,6 +262,59 @@ def plan(
         max_age_hours=max_age_hours,
         fresh=fresh,
     )
+
+
+def _pairs(request: Request, window: tuple[date, date] | None, today: date) -> list[planner.Pair]:
+    """The date pairs a request asks about: its window's, or its fixed dates slid by `flex`."""
+    if window is not None:
+        return planner.window_pairs(*window, request.nights)
+    if request.depart < today:
+        raise UserError("the departure date is in the past")
+    if request.return_date and request.return_date < request.depart:
+        raise UserError("the return date is before the departure date")
+    if request.strategy not in ("auto", "grid"):
+        raise UserError(f"the {request.strategy} strategy needs a date window")
+    return date_pairs(
+        request.depart, return_date=request.return_date, nights=request.nights, flex=request.flex, today=today
+    )
+
+
+def _explore_months(request: Request, window: tuple[date, date], today: date) -> list[Explore]:
+    """One explore call for each month the window touches, for the explore strategy to seed the dates from."""
+    duration = planner.explore_duration(request.nights)
+    months = planner.window_months(*window, today)
+    if duration is None:
+        raise UserError("the explore strategy suits trips of a weekend, about a week or about two weeks")
+    if months is None:
+        raise UserError(f"the explore strategy only reaches {planner.EXPLORE_MONTHS} months ahead")
+    return [
+        Explore(
+            origin=request.origin,
+            destination=request.destination.split(",")[0],  # the explore engine takes one place
+            month=month,
+            duration=duration,
+            adults=request.adults,
+            cabin=request.cabin,
+            stops=request.stops,
+            currency=request.currency,
+            market=request.market,
+            bags=request.bags,
+        )
+        for month in months
+    ]
+
+
+def _follow_ups(source: Provider, follow: int, replies: dict[Call, Reply]) -> int:
+    """The most closer-look calls a source may be sent, given the saved replies a plan starts from.
+
+    A saved listing may be too old for its tokens, and looking closer then starts by fetching it
+    again. That call is counted for any source holding such a reply. It can never push a plan
+    over a cap it was sized to, because the saved reply it replaces is one call the plan no
+    longer needs; and the refining is left as it was, so an old run replays to the same fare.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=TOKEN_MINUTES)
+    old = any(call.provider == source.name and reply.fetched_at < cutoff for call, reply in replies.items())
+    return follow + 1 if follow and old and source.capabilities & _FOLLOW_UPS else follow
 
 
 def plan_explore(trip: Explore, *, max_age_hours: float = DEFAULT_MAX_AGE_HOURS, fresh: bool = False) -> Plan:
@@ -372,15 +383,12 @@ def _check_cost(source: Provider, round_trip: bool, split_done: bool, look: str 
 def _saved(keys: dict[Call, str], max_age_hours: float, fresh: bool) -> dict[Call, Reply]:
     replies = {}
     if not fresh:
-        cache = Cache(config.cache_path())
-        try:
+        with Cache() as cache:
             for call, key in keys.items():
                 saved = cache.lookup(key, max_age_hours * 3600)
                 if saved is not None:
                     body, when = saved
                     replies[call] = Reply(body, datetime.fromtimestamp(when, timezone.utc), live=False)
-        finally:
-            cache.close()
     return replies
 
 
@@ -481,7 +489,7 @@ class _Session:
                     raise UserError(problem)
 
     def __enter__(self) -> _Session:
-        self.history = History(config.history_path())
+        self.history = History()
         for call in self.plan.replies:
             self._log_replay(call)
         return self
@@ -498,7 +506,7 @@ class _Session:
 
     def _open_cache(self) -> Cache:
         if self.cache is None:
-            self.cache = Cache(config.cache_path())
+            self.cache = Cache()
         return self.cache
 
     def _log_replay(self, call: Call) -> None:

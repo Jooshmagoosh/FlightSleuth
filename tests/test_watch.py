@@ -35,7 +35,7 @@ class WatchTableTest(unittest.TestCase):
     def test_a_watch_is_kept_with_its_search_its_rules_and_its_interval(self):
         self.assertEqual(self.keep(), 1)
         self.assertEqual(
-            self.history.watches(),
+            self.history.rows("watches"),
             [
                 {
                     "id": 1,
@@ -59,7 +59,7 @@ class WatchTableTest(unittest.TestCase):
 
     def test_each_watch_gets_the_next_number(self):
         self.assertEqual([self.keep(), self.keep(below=None)], [1, 2])
-        self.assertIsNone(self.history.watches()[1]["below"])
+        self.assertIsNone(self.history.rows("watches")[1]["below"])
 
     def test_a_check_is_kept_with_what_it_found_and_what_it_cost(self):
         number = self.history.add_watch_check(
@@ -78,7 +78,7 @@ class WatchTableTest(unittest.TestCase):
             searches=3,
             fetched_at=NOW,
         )
-        (row,) = self.history.watch_checks()
+        (row,) = self.history.rows("watch_checks")
         self.assertEqual((number, row["id"], row["watch_id"]), (1, 1, 1))
         self.assertEqual((row["finished"], row["outcome"], row["price"], row["confirmed_price"]), (1, "no return flights", 480, None))
         self.assertEqual((row["median"], row["typical_low"], row["typical_high"]), (640, 500, 800))
@@ -87,7 +87,7 @@ class WatchTableTest(unittest.TestCase):
 
     def test_a_check_that_failed_needs_only_what_went_wrong(self):
         self.history.add_watch_check(1, checked_at=NOW, day=TODAY, finished=False, outcome="failed", detail="network error")
-        (row,) = self.history.watch_checks()
+        (row,) = self.history.rows("watch_checks")
         self.assertEqual((row["finished"], row["price"], row["reasons"], row["no_returns"], row["searches"]), (0, None, "", "[]", 0))
 
     def test_an_alert_and_an_event_are_kept_too(self):
@@ -95,7 +95,7 @@ class WatchTableTest(unittest.TestCase):
         self.history.add_watch_alert(
             1, 7, price=455, title="t", message="m", click="https://example.org", sent=False, error="no network", fetched_at=NOW, at=NOW
         )
-        (event,), (alert,) = self.history.watch_events(), self.history.watch_alerts()
+        (event,), (alert,) = self.history.rows("watch_events"), self.history.rows("watch_alerts")
         self.assertEqual((event["watch_id"], event["event"], event["detail"]), (1, "removed", "by the owner"))
         self.assertEqual((alert["check_id"], alert["price"], alert["sent"], alert["error"]), (7, 455, 0, "no network"))
 
@@ -119,7 +119,7 @@ class WatchTableTest(unittest.TestCase):
             db.executescript(f"DROP TRIGGER {table}_no_update; DROP TRIGGER {table}_no_delete; DROP TABLE {table};")
         db.close()
         reopened = history(self)
-        self.assertEqual((reopened.watches(), len(reopened.price_points())), ([], 1))
+        self.assertEqual((reopened.rows("watches"), len(reopened.rows("price_points"))), ([], 1))
 
     def test_what_has_been_spent_is_the_cost_of_the_live_calls(self):
         self.assertEqual(self.history.spent(), 0)
