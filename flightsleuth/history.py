@@ -6,6 +6,7 @@ import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from . import config
 from .models import Offer, Query
 
 TABLES = (
@@ -193,79 +194,122 @@ BEGIN SELECT RAISE(ABORT, '{table} is append-only'); END;
 )
 
 
-def _utc(moment: datetime) -> str:
-    return moment.astimezone(timezone.utc).isoformat(timespec="seconds")
+def _utc(moment: datetime | None) -> str | None:
+    return moment.astimezone(timezone.utc).isoformat(timespec="seconds") if moment else None
+
+
+def _insert(table: str, row: dict, verb: str = "INSERT") -> str:
+    return f"{verb} INTO {table} ({', '.join(row)}) VALUES ({', '.join('?' * len(row))})"
+
+
+def _search(trip: Query) -> dict:
+    """The columns a row keeps about the search it belongs to."""
+    return {
+        "origin": trip.origin,
+        "destination": trip.destination,
+        "depart_date": trip.depart_date.isoformat(),
+        "return_date": trip.return_date.isoformat() if trip.return_date else None,
+        "adults": trip.adults,
+        "cabin": trip.cabin,
+        "stops": trip.stops,
+        "currency": trip.currency,
+    }
 
 
 class History:
-    def __init__(self, path: Path):
-        self.path = path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(path)
+    """`history.db`, open. Use it in a `with` block, or close it when done.
+
+    Every table is written through `_add`, which takes a row as a dict of column names to
+    values. A bool is stored as 1 or 0 and None as NULL, as sqlite3 does by itself.
+    """
+
+    def __init__(self, path: Path | None = None):
+        self.path = path or config.history_path()
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._db = sqlite3.connect(self.path)
         self._db.row_factory = sqlite3.Row
         self._db.executescript(SCHEMA)
 
+    def __enter__(self) -> History:
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
+
+    def close(self) -> None:
+        self._db.close()
+
+    def _add(self, table: str, row: dict) -> int:
+        """Append one row. Returns its id."""
+        with self._db:
+            return self._db.execute(_insert(table, row), tuple(row.values())).lastrowid
+
+    def _add_new(self, table: str, rows: list[dict]) -> int:
+        """Append the rows whose unique key the table does not hold yet. Returns how many went in."""
+        if not rows:
+            return 0
+        with self._db:
+            return self._db.executemany(
+                _insert(table, rows[0], "INSERT OR IGNORE"), [tuple(row.values()) for row in rows]
+            ).rowcount
+
+    def rows(self, table: str) -> list[dict]:
+        """Every row of one table, oldest first."""
+        if table not in TABLES:
+            raise ValueError(f"history.db has no table called {table!r}")
+        return [dict(row) for row in self._db.execute(f"SELECT * FROM {table} ORDER BY id")]
+
+    def spent(self) -> float:
+        """Everything the live calls so far have cost, in the sources' own credits."""
+        return self._db.execute("SELECT COALESCE(SUM(cost), 0) FROM provider_calls WHERE live = 1").fetchone()[0]
+
     def add_price_point(self, offer: Offer) -> None:
         """Record the fare a live reply gave. `offer` must carry its source and fetch time."""
-        query = offer.query
-        with self._db:
-            self._db.execute(
-                "INSERT INTO price_points (origin, destination, depart_date, return_date, adults, cabin, stops,"
-                " price, currency, source, fetched_at, itinerary_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    query.origin,
-                    query.destination,
-                    query.depart_date.isoformat(),
-                    query.return_date.isoformat() if query.return_date else None,
-                    query.adults,
-                    query.cabin,
-                    query.stops,
-                    offer.price,
-                    query.currency,
-                    offer.source,
-                    _utc(offer.fetched_at),
-                    offer.itinerary_key,
-                ),
-            )
+        self._add(
+            "price_points",
+            {
+                **_search(offer.query),
+                "price": offer.price,
+                "source": offer.source,
+                "fetched_at": _utc(offer.fetched_at),
+                "itinerary_key": offer.itinerary_key,
+            },
+        )
 
     def add_call(
         self, provider: str, endpoint: str, *, live: bool, cost: float, latency_ms: int | None, status: str
     ) -> None:
-        with self._db:
-            self._db.execute(
-                "INSERT INTO provider_calls (provider, endpoint, live, cost, latency_ms, status, called_at)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (provider, endpoint, int(live), cost, latency_ms, status, _utc(datetime.now(timezone.utc))),
-            )
+        self._add(
+            "provider_calls",
+            {
+                "provider": provider,
+                "endpoint": endpoint,
+                "live": live,
+                "cost": cost,
+                "latency_ms": latency_ms,
+                "status": status,
+                "called_at": _utc(datetime.now(timezone.utc)),
+            },
+        )
 
     def add_price_history(self, query: Query, source: str, points, recorded_at: datetime) -> int:
         """Keep Google's daily lowest prices for one search. A day already held is left as it is."""
-        rows = [
-            (
-                query.origin,
-                query.destination,
-                query.depart_date.isoformat(),
-                query.return_date.isoformat() if query.return_date else "",
-                query.adults,
-                query.cabin,
-                query.stops,
-                query.currency,
-                query.market,
-                query.bags,
-                when.astimezone(timezone.utc).date().isoformat(),
-                price,
-                source,
-                _utc(recorded_at),
-            )
-            for when, price in points
-        ]
-        with self._db:
-            return self._db.executemany(
-                "INSERT OR IGNORE INTO google_price_history (origin, destination, depart_date, return_date, adults,"
-                " cabin, stops, currency, market, bags, day, price, source, recorded_at)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                rows,
-            ).rowcount
+        search = _search(query)
+        # '' and not NULL for a one-way: NULLs never collide, so the unique key would not hold.
+        search.update(return_date=search["return_date"] or "", market=query.market, bags=query.bags)
+        return self._add_new(
+            "google_price_history",
+            [
+                {
+                    **search,
+                    "day": when.astimezone(timezone.utc).date().isoformat(),
+                    "price": price,
+                    "source": source,
+                    "recorded_at": _utc(recorded_at),
+                }
+                for when, price in points
+            ],
+        )
 
     def add_bakeoff_fare(
         self,
@@ -280,45 +324,42 @@ class History:
         detail: str,
         fetched_at: datetime,
     ) -> None:
-        with self._db:
-            self._db.execute(
-                "INSERT INTO bakeoff_fares (run, route, depart_date, return_date, measure, price, currency,"
-                " same_flights, how, detail, fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    run,
-                    route,
-                    trip.depart_date.isoformat(),
-                    trip.return_date.isoformat() if trip.return_date else None,
-                    measure,
-                    price,
-                    trip.currency,
-                    None if same_flights is None else int(same_flights),
-                    how,
-                    detail,
-                    _utc(fetched_at),
-                ),
-            )
+        search = _search(trip)
+        self._add(
+            "bakeoff_fares",
+            {
+                "run": run,
+                "route": route,
+                "depart_date": search["depart_date"],
+                "return_date": search["return_date"],
+                "measure": measure,
+                "price": price,
+                "currency": trip.currency,
+                "same_flights": same_flights,
+                "how": how,
+                "detail": detail,
+                "fetched_at": _utc(fetched_at),
+            },
+        )
 
     def add_bakeoff_lookup(
         self, run: str, route: str, offer: Offer, *, cheapest: bool, found: bool, in_unsorted: bool | None = None
     ) -> None:
-        query = offer.query
-        with self._db:
-            self._db.execute(
-                "INSERT INTO bakeoff_lookups (run, route, depart_date, return_date, price, itinerary_key, cheapest,"
-                " found, in_unsorted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    run,
-                    route,
-                    query.depart_date.isoformat(),
-                    query.return_date.isoformat() if query.return_date else None,
-                    offer.price,
-                    offer.outbound_key,
-                    int(cheapest),
-                    int(found),
-                    None if in_unsorted is None else int(in_unsorted),
-                ),
-            )
+        search = _search(offer.query)
+        self._add(
+            "bakeoff_lookups",
+            {
+                "run": run,
+                "route": route,
+                "depart_date": search["depart_date"],
+                "return_date": search["return_date"],
+                "price": offer.price,
+                "itinerary_key": offer.outbound_key,
+                "cheapest": cheapest,
+                "found": found,
+                "in_unsorted": in_unsorted,
+            },
+        )
 
     def add_site_price(
         self,
@@ -334,36 +375,25 @@ class History:
         recorded_at: datetime,
     ) -> None:
         """Keep a price read on another site by eye, with the fare of ours it was checked against."""
-        with self._db:
-            self._db.execute(
-                "INSERT INTO site_prices (origin, destination, depart_date, return_date, adults, cabin, stops,"
-                " currency, market, bags, site, price, seller, same_flights, held, our_price, our_source,"
-                " our_fetched_at, our_confirmed, itinerary_key, recorded_at)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    trip.origin,
-                    trip.destination,
-                    trip.depart_date.isoformat(),
-                    trip.return_date.isoformat() if trip.return_date else None,
-                    trip.adults,
-                    trip.cabin,
-                    trip.stops,
-                    trip.currency,
-                    trip.market,
-                    trip.bags,
-                    site,
-                    price,
-                    seller,
-                    None if same_flights is None else int(same_flights),
-                    None if held is None else int(held),
-                    ours.price,
-                    ours.source,
-                    _utc(ours.fetched_at) if ours.fetched_at else None,
-                    int(confirmed),
-                    ours.itinerary_key,
-                    _utc(recorded_at),
-                ),
-            )
+        self._add(
+            "site_prices",
+            {
+                **_search(trip),
+                "market": trip.market,
+                "bags": trip.bags,
+                "site": site,
+                "price": price,
+                "seller": seller,
+                "same_flights": same_flights,
+                "held": held,
+                "our_price": ours.price,
+                "our_source": ours.source,
+                "our_fetched_at": _utc(ours.fetched_at),
+                "our_confirmed": confirmed,
+                "itinerary_key": ours.itinerary_key,
+                "recorded_at": _utc(recorded_at),
+            },
+        )
 
     def add_watch(
         self,
@@ -377,35 +407,21 @@ class History:
         created_day: date,
     ) -> int:
         """Keep a new watch. Returns its number, which is how the owner names it afterwards."""
-        with self._db:
-            return self._db.execute(
-                "INSERT INTO watches (origin, destination, depart_date, return_date, adults, cabin, stops, currency,"
-                " below, drop_percent, typical, every_days, created_at, created_day)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    trip.origin,
-                    trip.destination,
-                    trip.depart_date.isoformat(),
-                    trip.return_date.isoformat() if trip.return_date else None,
-                    trip.adults,
-                    trip.cabin,
-                    trip.stops,
-                    trip.currency,
-                    below,
-                    drop_percent,
-                    int(typical),
-                    every_days,
-                    _utc(created_at),
-                    created_day.isoformat(),
-                ),
-            ).lastrowid
+        return self._add(
+            "watches",
+            {
+                **_search(trip),
+                "below": below,
+                "drop_percent": drop_percent,
+                "typical": typical,
+                "every_days": every_days,
+                "created_at": _utc(created_at),
+                "created_day": created_day.isoformat(),
+            },
+        )
 
     def add_watch_event(self, watch_id: int, event: str, detail: str, at: datetime) -> None:
-        with self._db:
-            self._db.execute(
-                "INSERT INTO watch_events (watch_id, event, detail, at) VALUES (?, ?, ?, ?)",
-                (watch_id, event, detail, _utc(at)),
-            )
+        self._add("watch_events", {"watch_id": watch_id, "event": event, "detail": detail, "at": _utc(at)})
 
     def add_watch_check(
         self,
@@ -427,30 +443,27 @@ class History:
         fetched_at: datetime | None = None,
     ) -> int:
         low, high = typical_range or (None, None)
-        with self._db:
-            return self._db.execute(
-                "INSERT INTO watch_checks (watch_id, checked_at, day, finished, outcome, detail, price,"
-                " confirmed_price, itinerary_key, median, typical_low, typical_high, reasons, no_returns, searches,"
-                " fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    watch_id,
-                    _utc(checked_at),
-                    day.isoformat(),
-                    int(finished),
-                    outcome,
-                    detail,
-                    price,
-                    confirmed_price,
-                    itinerary_key,
-                    median,
-                    low,
-                    high,
-                    ",".join(reasons),
-                    json.dumps([list(pair) for pair in no_returns]),
-                    searches,
-                    _utc(fetched_at) if fetched_at else None,
-                ),
-            ).lastrowid
+        return self._add(
+            "watch_checks",
+            {
+                "watch_id": watch_id,
+                "checked_at": _utc(checked_at),
+                "day": day.isoformat(),
+                "finished": finished,
+                "outcome": outcome,
+                "detail": detail,
+                "price": price,
+                "confirmed_price": confirmed_price,
+                "itinerary_key": itinerary_key,
+                "median": median,
+                "typical_low": low,
+                "typical_high": high,
+                "reasons": ",".join(reasons),
+                "no_returns": json.dumps([list(pair) for pair in no_returns]),
+                "searches": searches,
+                "fetched_at": _utc(fetched_at),
+            },
+        )
 
     def add_watch_alert(
         self,
@@ -466,46 +479,18 @@ class History:
         fetched_at: datetime,
         at: datetime,
     ) -> None:
-        with self._db:
-            self._db.execute(
-                "INSERT INTO watch_alerts (watch_id, check_id, price, title, message, click, sent, error, fetched_at, at)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (watch_id, check_id, price, title, message, click, int(sent), error, _utc(fetched_at), _utc(at)),
-            )
-
-    def spent(self) -> float:
-        """Everything the live calls so far have cost, in the sources' own credits."""
-        return self._db.execute("SELECT COALESCE(SUM(cost), 0) FROM provider_calls WHERE live = 1").fetchone()[0]
-
-    def watches(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM watches ORDER BY id")]
-
-    def watch_events(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM watch_events ORDER BY id")]
-
-    def watch_checks(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM watch_checks ORDER BY id")]
-
-    def watch_alerts(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM watch_alerts ORDER BY id")]
-
-    def price_points(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM price_points ORDER BY id")]
-
-    def calls(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM provider_calls ORDER BY id")]
-
-    def price_history(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM google_price_history ORDER BY id")]
-
-    def bakeoff_fares(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM bakeoff_fares ORDER BY id")]
-
-    def bakeoff_lookups(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM bakeoff_lookups ORDER BY id")]
-
-    def site_prices(self) -> list[dict]:
-        return [dict(row) for row in self._db.execute("SELECT * FROM site_prices ORDER BY id")]
-
-    def close(self) -> None:
-        self._db.close()
+        self._add(
+            "watch_alerts",
+            {
+                "watch_id": watch_id,
+                "check_id": check_id,
+                "price": price,
+                "title": title,
+                "message": message,
+                "click": click,
+                "sent": sent,
+                "error": error,
+                "fetched_at": _utc(fetched_at),
+                "at": _utc(at),
+            },
+        )

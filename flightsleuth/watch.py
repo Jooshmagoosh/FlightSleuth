@@ -176,9 +176,9 @@ def _watch(row: dict) -> Watch:
 
 def standings(history: History) -> list[Standing]:
     """Every watch ever made, in the order they were made, with where each stands."""
-    events, checks, alerts = history.watch_events(), history.watch_checks(), history.watch_alerts()
+    events, checks, alerts = history.rows("watch_events"), history.rows("watch_checks"), history.rows("watch_alerts")
     found = []
-    for row in history.watches():
+    for row in history.rows("watches"):
         mine = [check for check in checks if check["watch_id"] == row["id"]]
         told = [alert for alert in alerts if alert["watch_id"] == row["id"]]
         happened = [event for event in events if event["watch_id"] == row["id"]]
@@ -343,7 +343,7 @@ def account() -> tuple[Allowance | None, int]:
 
 def used_since(history: History, start: date) -> int:
     """The searches every watch, ended or not, has spent on or after one day."""
-    return sum(check["searches"] for check in history.watch_checks() if check["day"] >= start.isoformat())
+    return sum(check["searches"] for check in history.rows("watch_checks") if check["day"] >= start.isoformat())
 
 
 def request(found: Watch) -> scan.Request:
@@ -416,8 +416,7 @@ def add(
     new = Watch(0, wanted, below, float(drop_percent), typical, every_days, today)
     if not new.rules:
         raise UserError("a watch needs at least one rule: a price to alert below, a drop under the median, or the typical range")
-    history = History(config.history_path())
-    try:
+    with History() as history:
         others = [(standing.watch, standing.due) for standing in standings(history) if not standing.ended]
         if len(others) >= MAX_WATCHES:
             raise UserError(
@@ -448,14 +447,11 @@ def add(
             created_day=today,
         )
         return Added(replace(new, id=number), sums, True)
-    finally:
-        history.close()
 
 
 def remove(number: int, *, now: datetime | None = None) -> Watch:
     """Stop checking a watch. Its rows stay, as everything in the history does."""
-    history = History(config.history_path())
-    try:
+    with History() as history:
         standing = next((standing for standing in standings(history) if standing.watch.id == number), None)
         if standing is None:
             raise UserError(f"there is no watch {number}. See them with: py -m flightsleuth watch list")
@@ -463,17 +459,12 @@ def remove(number: int, *, now: datetime | None = None) -> Watch:
             raise UserError(f"watch {number} was already {standing.ended}")
         history.add_watch_event(number, "removed", "by the owner", now or datetime.now().astimezone())
         return standing.watch
-    finally:
-        history.close()
 
 
 def listed(*, ended: bool = False) -> list[Standing]:
     """The watches being checked, or with `ended` every watch there has been."""
-    history = History(config.history_path())
-    try:
+    with History() as history:
         return [standing for standing in standings(history) if ended or not standing.ended]
-    finally:
-        history.close()
 
 
 def setup(*, new: bool = False) -> tuple[str, bool]:
@@ -557,7 +548,7 @@ def run_due(*, now: datetime | None = None, max_searches: int | None = None, dry
     now = now or datetime.now().astimezone()
     today = now.date()
     report = Report()
-    history = History(config.history_path())
+    history = History()
     try:
         active = []
         for standing in standings(history):

@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta, timezone
 
-from . import config, planner, providers
+from . import planner, providers
 from .cache import Cache
 from .errors import UserError
 from .history import History
@@ -372,15 +372,12 @@ def _check_cost(source: Provider, round_trip: bool, split_done: bool, look: str 
 def _saved(keys: dict[Call, str], max_age_hours: float, fresh: bool) -> dict[Call, Reply]:
     replies = {}
     if not fresh:
-        cache = Cache(config.cache_path())
-        try:
+        with Cache() as cache:
             for call, key in keys.items():
                 saved = cache.lookup(key, max_age_hours * 3600)
                 if saved is not None:
                     body, when = saved
                     replies[call] = Reply(body, datetime.fromtimestamp(when, timezone.utc), live=False)
-        finally:
-            cache.close()
     return replies
 
 
@@ -481,7 +478,7 @@ class _Session:
                     raise UserError(problem)
 
     def __enter__(self) -> _Session:
-        self.history = History(config.history_path())
+        self.history = History()
         for call in self.plan.replies:
             self._log_replay(call)
         return self
@@ -498,7 +495,7 @@ class _Session:
 
     def _open_cache(self) -> Cache:
         if self.cache is None:
-            self.cache = Cache(config.cache_path())
+            self.cache = Cache()
         return self.cache
 
     def _log_replay(self, call: Call) -> None:

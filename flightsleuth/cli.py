@@ -621,14 +621,11 @@ def cmd_quota(args: argparse.Namespace) -> int:
 
 
 def cmd_cache(args: argparse.Namespace) -> int:
-    cache = Cache(config.cache_path())
-    try:
+    with Cache() as cache:
         if args.clear:
             print(f"Removed {_searches(cache.clear(), 'saved')}.")
         else:
             print(f"{_searches(cache.count(), 'saved')} in {cache.path}")
-    finally:
-        cache.close()
     return 0
 
 

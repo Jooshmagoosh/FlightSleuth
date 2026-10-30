@@ -6,20 +6,26 @@ import sqlite3
 import time
 from pathlib import Path
 
+from . import config
+
 
 class Cache:
-    def __init__(self, path: Path):
-        self.path = path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(path)
+    """`cache.db`, open. Use it in a `with` block, or close it when done."""
+
+    def __init__(self, path: Path | None = None):
+        self.path = path or config.cache_path()
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._db = sqlite3.connect(self.path)
         self._db.execute(
             "CREATE TABLE IF NOT EXISTS responses ("
             "key TEXT PRIMARY KEY, fetched_at REAL NOT NULL, body TEXT NOT NULL)"
         )
 
-    def get(self, key: str, max_age_s: float, *, now: float | None = None) -> dict | None:
-        found = self.lookup(key, max_age_s, now=now)
-        return found[0] if found else None
+    def __enter__(self) -> Cache:
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
 
     def lookup(self, key: str, max_age_s: float, *, now: float | None = None) -> tuple[dict, float] | None:
         """The saved reply and when it was fetched (seconds since the epoch), if it is fresh enough."""
@@ -43,22 +49,18 @@ class Cache:
     def prune(self, max_age_s: float, *, now: float | None = None) -> int:
         """Drop replies too old to be reused, and hand the space back. Returns how many went."""
         now = time.time() if now is None else now
-        with self._db:
-            removed = self._db.execute("DELETE FROM responses WHERE fetched_at < ?", (now - max_age_s,)).rowcount
-        if removed:
-            self._shrink()
-        return removed
+        return self._delete("WHERE fetched_at < ?", (now - max_age_s,))
 
     def clear(self) -> int:
-        with self._db:
-            removed = self._db.execute("DELETE FROM responses").rowcount
-        if removed:
-            self._shrink()
-        return removed
+        return self._delete()
 
-    def _shrink(self) -> None:
-        # Deleting rows only marks their pages free, and one reply is 120 to 220 KB.
-        self._db.execute("VACUUM")
+    def _delete(self, where: str = "", values: tuple = ()) -> int:
+        with self._db:
+            removed = self._db.execute(f"DELETE FROM responses {where}", values).rowcount
+        if removed:
+            # Deleting rows only marks their pages free, and one reply is 120 to 220 KB.
+            self._db.execute("VACUUM")
+        return removed
 
     def close(self) -> None:
         self._db.close()

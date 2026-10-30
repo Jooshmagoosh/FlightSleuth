@@ -308,7 +308,7 @@ class TestAlertCommandTest(WatchCommandCase):
         self.assertEqual(([sent["title"] for sent in FakeNtfy.sent], FakeSerpApi.searches), (["FlightSleuth test alert"], []))
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual(history.calls(), [])
+        self.assertEqual(history.rows("provider_calls"), [])
 
     def test_with_a_watch_it_says_what_tapping_it_opens(self):
         self.ok("add", *ROUTE)

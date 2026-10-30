@@ -11,7 +11,7 @@ from flightsleuth import cli, config, links, providers, scan, typed
 from flightsleuth.history import History
 from flightsleuth.models import Query
 from flightsleuth.render import UNCONFIRMED, summarise
-from tests.fakes import FakeSerpApi, install, rich_reply
+from tests.fakes import FakeSerpApi, history_rows, install, rich_reply
 
 TODAY = date(2030, 1, 1)
 WHY = (
@@ -176,13 +176,6 @@ if __name__ == "__main__":
 TYPED_AT = datetime(2030, 1, 2, 12, 0, tzinfo=timezone.utc)
 
 
-def site_prices():
-    history = History(config.history_path())
-    try:
-        return history.site_prices()
-    finally:
-        history.close()
-
 
 class SitePriceTableTest(unittest.TestCase):
     """history.db keeps what was read on another site, and what it was read against."""
@@ -204,7 +197,7 @@ class SitePriceTableTest(unittest.TestCase):
     def test_a_typed_price_is_kept_beside_the_fare_it_was_checked_against(self):
         before = datetime.now(timezone.utc) - timedelta(seconds=2)
         self.keep(summary(check=True, adults=2, bags=1).next_step, 499.5, seller="Mytrip", same_flights=True, held=False)
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         fetched = datetime.fromisoformat(row.pop("our_fetched_at"))
         self.assertTrue(before <= fetched <= datetime.now(timezone.utc) + timedelta(seconds=2))
         self.assertEqual(
@@ -236,19 +229,19 @@ class SitePriceTableTest(unittest.TestCase):
 
     def test_a_price_set_against_a_fare_nobody_confirmed_says_so(self):
         self.keep(summary().next_step, 480)
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual((row["our_price"], row["our_confirmed"], row["itinerary_key"]), (520, 0, "TA1@2030-03-12T18:30"))
         self.assertEqual((row["seller"], row["same_flights"], row["held"]), ("", None, None))
 
     def test_it_adds_nothing_to_the_prices_flightsleuth_fetched_itself(self):
         step = summary().next_step
         history = History(config.history_path())
-        fetched = history.price_points()
+        fetched = history.rows("price_points")
         history.close()
         self.keep(step, 480)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual(history.price_points(), fetched)
+        self.assertEqual(history.rows("price_points"), fetched)
         self.assertEqual(len(fetched), 1)
 
     def test_its_rows_cannot_be_changed_or_deleted(self):
@@ -259,7 +252,7 @@ class SitePriceTableTest(unittest.TestCase):
             with self.assertRaisesRegex(sqlite3.DatabaseError, "append-only", msg=statement):
                 db.execute(statement)
         db.rollback()
-        self.assertEqual(site_prices()[0]["price"], 480)
+        self.assertEqual(history_rows("site_prices")[0]["price"], 480)
 
     def test_a_history_file_from_before_this_table_gains_it_and_keeps_its_rows(self):
         step = summary().next_step
@@ -267,10 +260,10 @@ class SitePriceTableTest(unittest.TestCase):
         db.executescript("DROP TRIGGER site_prices_no_update; DROP TRIGGER site_prices_no_delete; DROP TABLE site_prices;")
         db.close()
         self.keep(step, 480)
-        self.assertEqual(len(site_prices()), 1)
+        self.assertEqual(len(history_rows("site_prices")), 1)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual(len(history.price_points()), 1)
+        self.assertEqual(len(history.rows("price_points")), 1)
 
 
 def at_keyboard(test, *answers):
@@ -305,7 +298,7 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
     def test_the_price_the_seller_and_both_answers_are_kept(self):
         asked = at_keyboard(self, "abc", "$1,234.50", " Mytrip ", "y", "n")
         out = self.run_cli(*FIXED, "--check")
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual(
             (row["site"], row["price"], row["seller"], row["same_flights"], row["held"]), ("Momondo", 1234.5, "Mytrip", 1, 0)
         )
@@ -330,7 +323,7 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
     def test_a_price_found_for_a_fare_nobody_confirmed_is_kept_as_that(self):
         at_keyboard(self, "480", "", "", "")
         out = self.run_cli(*FIXED)
-        (row,) = site_prices()
+        (row,) = history_rows("site_prices")
         self.assertEqual(
             (row["price"], row["seller"], row["same_flights"], row["held"], row["our_confirmed"]), (480, "", None, None, 0)
         )
@@ -351,7 +344,7 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
         asked = at_keyboard(self, "")
         out = self.run_cli(*FIXED)
         self.assertEqual(asked.call_count, 1)
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
         self.assertNotIn("Saved", out)
 
     def test_a_keyboard_that_goes_away_is_an_empty_answer(self):
@@ -359,13 +352,13 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
         asked.side_effect = EOFError
         self.run_cli(*FIXED)
         self.assertEqual(asked.call_count, 1)
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
 
     def test_nobody_is_asked_when_no_one_is_at_the_keyboard(self):
         with mock.patch("builtins.input") as asked:
             self.run_cli(*FIXED)
         asked.assert_not_called()
-        self.assertEqual(site_prices(), [])
+        self.assertEqual(history_rows("site_prices"), [])
 
     def test_no_record_turns_the_question_off(self):
         asked = at_keyboard(self)
@@ -386,7 +379,7 @@ class RecordAtTheKeyboardTest(unittest.TestCase):
         self.assertEqual(len(FakeSerpApi.searches), 1)
         history = History(config.history_path())
         self.addCleanup(history.close)
-        self.assertEqual((len(history.calls()), len(history.price_points()), len(history.site_prices())), (1, 1, 1))
+        self.assertEqual((len(history.rows("provider_calls")), len(history.rows("price_points")), len(history.rows("site_prices"))), (1, 1, 1))
 
 
 class GateTest(unittest.TestCase):

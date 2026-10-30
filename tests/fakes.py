@@ -7,6 +7,7 @@ import tempfile
 from unittest import mock
 
 from flightsleuth import config, notify, providers, scan
+from flightsleuth.history import History
 from flightsleuth.models import Explore
 from flightsleuth.providers import SerpApiProvider
 from flightsleuth.serpapi import RateLimited
@@ -172,6 +173,12 @@ class FakeSerpApi:
             raise RateLimited("Your account has run out of searches.")
         FakeSerpApi.searches.append(query)
         return reply(query)
+
+
+def history_rows(table):
+    """Every row of one table in the test's own history.db, oldest first."""
+    with History() as history:
+        return history.rows(table)
 
 
 class FakeNtfy:

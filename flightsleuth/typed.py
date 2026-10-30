@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 from datetime import datetime, timezone
 
-from . import config, render
+from . import render
 from .history import History
 
 
@@ -40,8 +40,7 @@ def record(
     """Keep a price found on the step's site, beside the fare it was checked against. Returns what to say about it."""
     seller = seller.strip()
     now = datetime.now(timezone.utc)
-    history = History(config.history_path())
-    try:
+    with History() as history:
         history.add_site_price(
             step.trip,
             step.site,
@@ -53,8 +52,6 @@ def record(
             confirmed=step.confirmed,
             recorded_at=now,
         )
-    finally:
-        history.close()
     return render.recorded(step, amount, seller, now)
 
 
